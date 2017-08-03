@@ -1,0 +1,82 @@
+{% extends "chembase/base.html" %}
+
+{% block content %}
+
+<div class='main_part'>
+<div class='main'>
+<div class='title'>
+
+<div class='names'>
+<h1>{{compound.name}}</h1>
+<p class='subtitle'>{{compound.subtitle}} </p>
+
+<p class='other'>Other names: {{compound.all_names}}</p>
+<p class='other'>PL: {{compound.pl_name}}{% if compound.pl_subtitle != "" %}, {{compound.pl_subtitle}}{% endif %}</p>
+
+</div>
+<div class='image'>
+{% load static %}
+<img class='structure' src='{% static "/chembase/" %}{{compound.image }}' alt='structure'/>
+</div>
+
+</div>
+
+
+<hr>
+<h2>Identification:</h2>
+<div class='one-col'>
+
+<div class='label'>Formula: </div><div class='value'>{{compound.formulaHTML|safe}}</div>
+<div class='label'>Molecular weight: </div><div class='value'>{{compound.weight}}</div>
+<div class='label'>CAS: </div><div class='value'>{{compound.cas}}</div>
+<div lass='label'>CSID: </div><div class='value'>{{compound.csid}}</div>
+<div lass='label'>SMILES: </div><div class='value'>{{compound.smiles}}</div>
+<div lass='label'>InChI: </div><div class='value'>{{compound.inchi}}</div>
+
+</div>
+<hr>
+<h2>Available items</h2>
+<div class='items'>
+{% for item in compound.item_set.all %}
+<p>{{item.localize}}</p>
+{% endfor %}
+
+
+</div>
+
+<hr>
+<h2>Safety</h2>
+<div class='picts'>
+{% for pict in compound.pictograms.all %}
+<img class='pictogram' src='{% static "/chembase/" %}{{pict.path}}' alt='pictograms'/>
+{% endfor %}
+</div>
+
+<div class='one-col'>
+<p>{{compound.warning}}</p>
+<p>{{compound.h_numbers}}</p>
+<p>{{compound.h_text}}</p>
+
+<p>{{compound.p_numbers}}</p>
+<p>{{compound.p_text}}</p>
+
+
+</div>
+
+<h2>Ocena ryzyka zawodowego</h2>
+<div class='two_part'>
+<div class='two-cols'>
+<p>{{compound.classification}}</p>
+</div>
+<div class='listing'>
+{% for class in compound.cmpd_class_set.all %}
+<p>{{class.ghs_class}} - {{class.number}}</p>
+{% endfor %}
+</div>
+</div>
+
+
+
+
+</div>
+{% endblock %}
