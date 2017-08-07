@@ -9,78 +9,148 @@
   padding: 20px;
 }
 
+
+
 .field input {
   padding: 5px;
-  width: 70%;
+  width: 85%;
+}
+
+.field_check {
+  display: inline-block;
+}
+
+.field_check label {
+  color: var(--text-extra-col);
+  padding-left: 20px;
+  padding-right: 5px;
+}
+
+.field_check input {
+  margin-top: 5px;
+}
+
+#ketcher_div {
+  width: 80%;
+  height: 500px;
+  overflow: hidden;
+  padding: 10px;
+  margin: auto;
+}
+
+#ketcher-frame {
+  width: 100%;
+  height: 100%;
 }
 
 
 div.hit, div.empty_hit{
   width: 100%;
-  display: inline-block;
-  background-color: var(--search-box-col);
+  display: block;
+  b#ackground-color: var(--search-box-col);
   padding: 0px;
-  border: 1px solid;
-  margin: 2px;
-  border-radius: var(--box-border-radius);
+  #border-bottom: 1px solid;
+  #border-top: 1px solid;
+  margin: 0px;
+  padding: 0px 0px;
+  #border-radius: var(--box-border-radius);
+  overflow: hidden;
 }
 
 div.empty_hit {
-  opacity: 0.4;
+  opacity: 0.3;
+}
+
+div.hit:hover, div.empty_hit:hover {
+  cursor: pointer;
+  background-color: var(--search-box-col);
+}
+
+hr.sep {
+  margin: 0px;
+  width: 100%;
 }
 
 div.top {
-  display: inline;
   width: 100%;
-  height: 100%;
+  padding: 0px 0px;
   overflow: hidden;
+}
+
+div.bottom {
+  overflow: hidden;
+  padding-left: 95px;
+  display: block;
 }
 
 div.image {
   float: left;
   width: 80px;
-  padding: 2px;
+  padding: 6px 2px;
   background-color: white;
-  border-bottom-left-radius: var(--box-border-radius);
-  border-top-left-radius: var(--box-border-radius);
 }
 
 img.structure {
   width: 80px;
 }
 
-div.name_top {
+/*div.name_top {
   display:table;
   height:80px;
   width: 40%;
   float:left;
   padding-left: 10px;
 }
-
-div.name {
-  display: table-cell;
-  vertical-align: middle;
-}
+*/
 
 div.res_field {
   float: left;
-  width: 15%;
-  height: 80px;
-  display: table;
+  width: 80%;
+  margin: 0px;
+  padding: 2px 10px;
 }
 
-div.cas {
+div.other_names {
+  width: 30%;
   float: left;
-  width: 20%;
-  height: 80px;
-  display: table;
+  overflow: hidden;
 }
 
-p.name {
+div.items {
+  width: 40%;
+  float: left;
+  overflow: hidden;
+}
+
+div.picts {
+  width: 30%;
+  float: right;
+  overflow: hidden;
+}
+
+img.pictogram {
+  width: 64px;
+}
+
+#formula {
+  width: 40%;
+}
+
+#cas {
+  width: 15%;
+}
+
+.name, .name:visited {
   padding: 0px;
   margin: 0px;
   font-family: Cabin;
-  color: var(--text-highlight-col)
+  color: var(--text-highlight-col);
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.name:hover {
+  text-decoration: underline;
 }
 
 p.subtitle {
@@ -90,9 +160,8 @@ p.subtitle {
 }
 
 p.res_field, p.value {
-  display: table-cell;
-  vertical-align: middle;
   font-weight: unset;
+  margin: 0px;
 }
 
 p.res_field {

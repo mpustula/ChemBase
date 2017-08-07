@@ -29,10 +29,12 @@ $('#str_open').on('click', function() {
 $('#ketcher-frame').on('load', function () {
           var ketcher = this.contentWindow.ketcher,
               source = $('#id_smiles');
+              mol=$('#id_molecule');
+
 
 			ketcher.onStructChange(function() {
             source.val(ketcher.getSmiles());
-          });
+            });
 
 });
 

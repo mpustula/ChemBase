@@ -26,26 +26,72 @@
 <h2>Identification:</h2>
 <div class='one-col'>
 
-<div class='label'>Formula: </div><div class='value'>{{compound.formulaHTML|safe}}</div>
-<div class='label'>Molecular weight: </div><div class='value'>{{compound.weight}}</div>
-<div class='label'>CAS: </div><div class='value'>{{compound.cas}}</div>
-<div class='label'>CSID: </div><div class='value'>{{compound.csid}}</div>
-<div class='label'>SMILES: </div><div class='value'>{{compound.smiles}}</div>
-<div class='label'>InChI: </div><div class='value'>{{compound.inchi}}</div>
+<div class='label'>Formula: </div><div class='value'>{{compound.formulaHTML|safe}} </div>
+<div class='label'>Molecular weight: </div><div class='value'>{{compound.weight}} </div>
+<div class='label'>CAS: </div><div class='value'>{{compound.cas}} </div>
+<div class='label'>CSID: </div><div class='value'>{{compound.csid}} </div>
+<div class='label'>SMILES: </div><div class='value'>{{compound.smiles}} </div>
+<div class='label'>InChI: </div><div class='value'>{{compound.inchi}} </div>
+<div class='label'>Compound Id: </div><div class='value'>{{compound.id}} </div>
 
 </div>
 <hr>
-<h2>Available items</h2>
-<div class='items'>
-{% for item in compound.item_set.all %}
-<p>{{item.localize}}</p>
+<h2>Items</h2>
+
+<div class='block_head'>Available</div>
+<div class='block'>
+<table>
+{% for item in exist %}
+<tr>
+<td class='value'>
+	{{item.localize}} 
+</td>
+<td class='label'>
+	{% if item.amount %}
+		{% if item.quantity %}
+			{{item.quantity}}
+		{% else %}
+			1
+		{% endif %}
+		x {{item.amount}} g (ml)
+	{% endif %}
+</td>
+<td class='label'>
+	{% if item.annotation_set.all %}
+		{% for ann in item.annotation_set.all %}
+			{{ann.annotation}}
+		{% endfor %}
+	{% endif %}
+
+</td>
+</tr>
+
 {% endfor %}
-
-
+</table>
+{% if not exist %}
+<div>No items available</div>
+{% endif %}
 </div>
+
+
+{% if del %}
+<div class='block_head' id='deleted_block_head'>Deleted</div>
+<div class='block' id='deleted_block'>
+{% for item in del %}
+<div class='item'>{{item.localize}} - {{item.is_deleted}}</div>
+{% endfor %}
+</div>
+{% endif %}
 
 <hr>
 <h2>Safety</h2>
+
+<div class='label'>SDS: </div><div class='value'>
+	<a target='_blank' href='{% static "/chembase/" %}{{compound.sds }}'>{{compound.sds}}</a></div>
+<div class='label'>SDS name: </div><div class='value'>{{compound.sds_name}}</div>
+<div class='label'>SDS CAS: </div><div class='value'>{{compound.sds_cas}}</div>
+<div class='label'>Signal word: </div><div class='value'>{{compound.warning}}</div>
+
 <div class='picts'>
 {% for pict in compound.pictograms.all %}
 <img class='pictogram' src='{% static "/chembase/" %}{{pict.path}}' alt='pictograms'/>
@@ -53,24 +99,51 @@
 </div>
 
 <div class='one-col'>
-<p>{{compound.warning}}</p>
-<p>{{compound.h_numbers}}</p>
-<p>{{compound.h_text}}</p>
 
-<p>{{compound.p_numbers}}</p>
-<p>{{compound.p_text}}</p>
+
+<p class='block_head'>{{compound.h_numbers}}</p>
+<p class='block'>{{compound.h_text}}</p>
+
+<p class='block_head'>{{compound.p_numbers}}</p>
+<p class='block'>{{compound.p_text}}</p>
+
+<div class='label'>ADR number: </div><div class='value'>{{compound.adr_num}}</div>
+<div class='label'>ADR Class: </div><div class='value'>{{compound.adr_class}}</div>
+<div class='label'>Packing group: </div><div class='value'>{{compound.adr_group}}</div>
 
 
 </div>
+
+<hr>
 
 <h2>Ocena ryzyka zawodowego</h2>
+
+<div class='label'>Zużycie dzienne: </div><div class='value'>{{compound.dailyused}}</div>
+<div class='label'>Ewidencja zużycia: </div>
+	<div class='value'>
+	{% if compound.ewidencja_set.all %}
+		{% for entry in compound.ewidencja_set.all %}
+			{% if entry.text == 'ewidencja'  %}
+				TAK
+			{% else %}
+				NIE
+			{% endif %}
+		{% endfor %}
+	{% else %}
+		NIE
+	{% endif %}
+	</div>
+
+
 <div class='two_part'>
 <div class='two-cols'>
-<p>{{compound.classification}}</p>
+<p class='block_head'>Klasyfikacja</p>
+<p class='block'>{{compound.classification}}</p>
 </div>
-<div class='listing'>
+<p class='block_head'  id='listing_head'>Klasyfikacja - skrót</p>
+<div class='block' id='listing'>
 {% for class in compound.cmpd_class_set.all %}
-<p>{{class.ghs_class}} - {{class.number}}</p>
+<p class='list_item'>{{class.ghs_class}} - {{class.number}}</p>
 {% endfor %}
 </div>
 </div>

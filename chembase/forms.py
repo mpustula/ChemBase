@@ -10,3 +10,5 @@ from django import forms
 
 class SearchForm(forms.Form):
     text=forms.CharField(label='Text to find',required=False)
+    smiles=forms.CharField(label='smiles',required=False)
+    deleted=forms.BooleanField(required=False)

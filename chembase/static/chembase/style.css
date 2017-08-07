@@ -4,6 +4,12 @@
   --main-col: white;
   --text-highlight-col: firebrick;
   --text-extra-col: darkslategray;
+  --box-col: white;
+  --search-box-col: whitesmoke;
+  --box-font-color: black;
+  --box-head-col: lightslategrey;
+  --box-head-font-col: white;
+  --box-border-radius: 6px;
 }
 
 body {
@@ -24,6 +30,7 @@ hr {
 
 div.topband {
   background-color: var(--grey-back-col);
+  overflow: hidden;
 }
 
 div.main {
@@ -56,7 +63,7 @@ div.logo {
 	display: inline-block;
 	font-weight: bold;
 	font-size: 15px;
-  padding-top: 12px;
+  padding-top: 22px;
   width: 120px;
   color: var(--text-highlight-col)
 
@@ -65,7 +72,7 @@ div.logo {
 img.logo {
 	display: inline-block;
 	float:left;
-	padding: 14px 16px;
+	padding: 22px 16px;
 }
 
 
@@ -73,7 +80,8 @@ img.logo {
     float: right;
     list-style-type: none;
     margin:0px;
-    padding-top: 58px
+    padding-top: 58px;
+    overflow: hidden;
   
 }
 
@@ -115,13 +123,20 @@ h1 {
   font-size:32px;
 }
 
-h2 {
+h2, h3 {
   color: var(--text-highlight-col);
   font-family: Cabin;
   margin-bottom: 5px;
   padding-bottom: 5px;
   font-size:20px;
   
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: normal;
+  padding: 5px 20px;
+  font-family: unset;
 }
 
 p.subtitle {
@@ -138,18 +153,67 @@ p.other {
   padding: 0px;
 }
 
+.label {
+  color: var(--text-extra-col);
+  font-weight: lighter;
+}
+
+.value {
+    font-weight: bold;
+}
+
 div.label {
   float:left;
   width: 12%;
   margin-right: 10px;
-  color: var(--text-extra-col);
+  font-weight: unset;
 }
 
 div.value {
   font-size: 16px;
-  font-weight: bold;
   margin-bottom: 5px;
 }
+
+a {
+  color:  var(--text-extra-col);
+}
+
+a:visited {
+  color:  var(--text-extra-col);
+}
+
+.block {
+  background-color: var(--box-col);
+  color: var(--box-font-col);
+  padding: 10px;
+  padding-top: 5px;
+  margin-top: 0px;
+  border-bottom-left-radius: var(--box-border-radius);
+  border-bottom-right-radius: var(--box-border-radius);
+  border: 1px solid;
+  border-color: var(--box-head-col);
+}
+
+.block_head {
+  background-color: var(--box-head-col);
+  color: var(--box-head-font-col);
+  font-weight: bold;
+  border: 1px solid;
+  padding: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 0px;
+  margin-top: 15px;
+  border-top-left-radius: var(--box-border-radius);
+  border-top-right-radius: var(--box-border-radius);
+  border-color: var(--box-head-col);
+}
+
+#deleted_block, #deleted_block_head {
+  opacity: 0.6;
+}
+
+
+
 
 div.image {
   width: 30%;
@@ -174,16 +238,29 @@ img.pictogram {
 
 div.two_part {
   display:inline-block;
+  width: 100%;
 }
 
 div.two-cols {
-  width: 45%;
+  width: 65%;
   float: left;
  
 }
 
-div.listing {
-  width: 40%;
+#listing,#listing_head {
+  width: 30%;
   float:right;
-  font-size: 14px;
+  font-size: 15px;
+}
+
+p.list_item {
+  width: 50%;
+  color: var(--text-extra-col);
+  float: left;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.control:hover {
+  cursor: pointer;
 }

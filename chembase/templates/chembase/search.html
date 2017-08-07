@@ -18,6 +18,15 @@
 	<label for="{{form.text.id_for_label}}">Search text:</label>
 	{{form.text}}
 	</div> 
+	<h3 class='control'>Options</h3>
+	<div class='options'>
+	<div class='field_check'>
+	{{form.deleted.errors}}
+	<label for="{{form.deleted.id_for_label}}">Include deleted items:</label>
+	{{form.deleted}}
+	</div> 
+	
+	</div>
 	<h3 class='control' id='str_open'>Structure edit</h3>
 	<div style='display:none' id='ketcher_div'>
 	<iframe id='ketcher-frame' src="{% static 'chembase/ketcher/ketcher.html' %}" scrolling='no'></iframe>
