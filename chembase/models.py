@@ -49,6 +49,19 @@ class ExtraCompoundsManager(models.Manager):
         
     def sort_by_str_simil(self,qset,smiles):
         return sorted(qset,key=lambda s: s.smiles_similarity(smiles),reverse=True)
+        
+    def substr_match(self,qset,smiles):
+        final_set=[]
+        for compound in qset:
+            match=compound.is_substructure(smiles)
+            if match:
+                final_set.append((compound,match))
+
+        final_list=sorted(final_set,key=lambda s: s[1],reverse=True)
+        
+        return [x[0] for x in final_list if x[1]>0.3]
+        
+        
     
 
 class Compound(models.Model):
@@ -115,14 +128,13 @@ class Compound(models.Model):
     
     def smiles_similarity(self,smiles):
 
-        #smiles=smiles_.replace('[*]','*')
-
         indigo=Indigo()
 
         query_mol=indigo.loadQueryMolecule(smiles)
+        query_mol.aromatize()
 
         mol=indigo.loadMolecule(self.smiles)
-        
+        mol.aromatize()
         query_fp=query_mol.fingerprint('sim')
         mol_fp=mol.fingerprint('sim')
         
@@ -130,87 +142,25 @@ class Compound(models.Model):
         
         return similarity
     
-#        #query_mol=Chem.MolFromSmiles(smiles)
-#        
-#        qm=self.adjustQuery(query_mol)
-#        sma = Chem.MolToSmarts(qm)
-#        #print sma
-#        query=FingerprintMols.FingerprintMol(query_mol)
-#
-#        cutoff=float(self.Cutoff.value())
-#
-#        if self.smiles!="":
-#            mol=Chem.MolFromSmiles(self.smiles)
-#            if mol:
-#                fp=FingerprintMols.FingerprintMol(mol)
-#                similarity=DataStructs.FingerprintSimilarity(query,fp)
-#            else:
-#                similarity=0
-#        else:
-#            similarity=0
-#        
-#        return similarity
+    def is_substructure(self,smiles):
+        indigo=Indigo()
+        mol=indigo.loadMolecule(self.smiles)
+        mol.aromatize()
+        
+        matcher=indigo.substructureMatcher(mol)
+        
+        query_mol=indigo.loadQueryMolecule(smiles)
+        query_mol.aromatize()
+        
+        match=matcher.match(query_mol)
+        #print(match)
+        if match:
+            return self.smiles_similarity(smiles)
+        else:
+            return 0
+        
+    
 
-#        for item in self.df_result.index.tolist():
-#            smiles0=self.df_result.loc[item,'smiles']
-#            if smiles0<>"":
-#                mol=Chem.MolFromSmiles(smiles0)
-#                if mol:
-#                    fp=FingerprintMols.FingerprintMol(mol)
-#                    sim=DataStructs.FingerprintSimilarity(querry,fp)
-#                    self.df_result.loc[item,'similarity']=sim
-#                    
-#                    
-#                    if self.radioSub.isChecked():
-#                        if '*' in smiles:
-#                            sub=mol.HasSubstructMatch(Chem.MolFromSmarts(sma))
-#                        else:
-#                            sub=mol.HasSubstructMatch(querry_mol)
-#                        self.df_result.loc[item,'substr']=sub
-#                else:
-#                    print item, self.df_result.loc[item,'Name']
-#            else:
-#                self.df_result.loc[item,'similarity']=0
-#                self.df_result.loc[item,'substr']=0
-#        if self.radioSim.isChecked():
-#            self.df_result=self.df_result[self.df_result['similarity']>=cutoff]
-#        if self.radioSub.isChecked():
-#            self.df_result=self.df_result[self.df_result['substr']==True]
-#        
-#        self.df_result=self.df_result.sort_values(['similarity'],ascending=0)
-#        self.parent.show_result(self.df_result)
-    
-    def adjustQuery(self,m,ringsOnly=True,ignoreDummies=True):
-        qm =Chem.RWMol(m)
-        if ringsOnly:           
-            ri = qm.GetRingInfo()
-            try:
-                ri.NumRings()
-            except RuntimeError:
-                ri=None
-                Chem.FastFindRings(qm)
-                ri = qm.GetRingInfo()
-        for atom in qm.GetAtoms():
-            if ignoreDummies and not atom.GetAtomicNum():
-                continue
-            if ringsOnly and not ri.NumAtomRings(atom.GetIdx()):
-                continue
-    
-            oa = atom
-            if not atom.HasQuery():
-                needsReplacement=True
-                atom = rdqueries.AtomNumEqualsQueryAtom(oa.GetAtomicNum())
-                atom.ExpandQuery(rdqueries.IsAromaticQueryAtom(oa.GetIsAromatic()))
-                if(oa.GetIsotope()):
-                    atom.ExpandQuery(rdqueries.IsotopeEqualsQueryAtom(oa.GetIsotope()))
-                if(oa.GetFormalCharge()):
-                    atom.ExpandQuery(rdqueries.FormalChargeEqualsQueryAtom(oa.GetFormalCharge()))
-            else:
-                needsReplacement=False
-            atom.ExpandQuery(rdqueries.ExplicitDegreeEqualsQueryAtom(oa.GetDegree()))
-            if needsReplacement:
-                qm.ReplaceAtom(oa.GetIdx(),atom)            
-        return qm    
         
     def how_many_items(self):
         return len(self.item_set(manager='citems').existing())

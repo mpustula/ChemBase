@@ -53,6 +53,7 @@
               source = $('#id_smiles'),
               molecule=localStorage.getItem('molecule');
               
+			 console.log(molecule);
 			 ketcher.setMolecule(molecule);
 			 source.val(ketcher.getSmiles());
 			 

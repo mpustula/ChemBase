@@ -32,6 +32,8 @@ def search(request):
             query=form.cleaned_data['text']
             smiles=form.cleaned_data['smiles']
             dele=form.cleaned_data['deleted']
+            stype=form.cleaned_data['stype']
+            cut=form.cleaned_data['cutoff']
             
             #smiles=''
             q=Q(name__icontains=query) | Q(all_names__icontains=query) | \
@@ -44,8 +46,13 @@ def search(request):
                 found_cmpds=Compound.extra_methods.existing(found_cmpds)
             if smiles=='':
                 sorted_cmpds=Compound.extra_methods.sort_by_name_simil(found_cmpds,query)
+                structure=False
             else:
-                sorted_cmpds=Compound.extra_methods.sort_by_str_simil(found_cmpds,smiles)
+                structure=True
+                if stype=='sim':
+                    sorted_cmpds=Compound.extra_methods.sort_by_str_simil(found_cmpds,smiles)
+                else:
+                    sorted_cmpds=Compound.extra_methods.substr_match(found_cmpds,smiles)
             #existing_cmpds=found_cmpds
             
             paginator=Paginator(sorted_cmpds,20)
@@ -68,6 +75,6 @@ def search(request):
         form=SearchForm()
         cmpds_list=None
     
-    return render(request,'chembase/search.html',{'form':form,'results':cmpds_list})
+    return render(request,'chembase/search.html',{'form':form,'results':cmpds_list,'str':structure})
 
 

@@ -9,7 +9,6 @@
 <link rel='stylesheet' type="text/css" href="{% static 'chembase/style.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="{% static 'chembase/script.js' %}"></script>
 </head>
 
 <body>
@@ -23,7 +22,7 @@
 	<div class='main'>
     <div class="navigation">
     <img class='logo' src='{% static "/chembase/icons/flask.png" %}' alt="icon">
-    <div class='logo'>Reagents database</div>
+    <div class='logo'>ChemBase 3.0 Reagents database</div>
       <ul class='navigation'>
       
         <li>
