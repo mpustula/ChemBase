@@ -7,9 +7,10 @@ $('div.hit').each(function () {
 	$(this).on('click', function() {	
 		$(this).children('div.bottom').slideToggle(500);
 		console.log($(this).children('div.bottom'))
-		}
-	)
-});
+		})
+	
+	})
+
 
 $('div.empty_hit').each(function () {
 
@@ -22,6 +23,11 @@ $('div.empty_hit').each(function () {
 
 $('#str_open').on('click', function() {
 	$('#ketcher_div').toggle(500);
+
+});
+
+$('#op_open').on('click', function() {
+	$('#options_block').toggle(500);
 
 });
 

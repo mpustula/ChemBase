@@ -1,0 +1,109 @@
+div.add_box {
+  width: 80%;
+  height: 700px;
+  margin: auto;
+  margin-top: 30px;
+  padding: 15px;
+  box-shadow: 3px 3px 25px grey;
+  position: relative;
+  border-radius: 2px;
+
+}
+
+
+#hide {
+  box-shadow: none;
+  }
+
+#wait_box {
+  width: 35%;
+  height: 120px;
+  margin-top: 200px;
+  border-radius: 10px;
+}
+
+#wait_box p {
+  margin: auto;
+  padding: 15px;
+  width: 85%;
+}
+
+#wait_box i {
+  margin: auto;
+  display: block;
+}
+
+div.res_tab {
+  overflow-y: scroll;
+  height: 65%;
+}
+
+#results, #results_spider {
+  margin: auto;
+  margin-top:20px;
+  width: 90%;
+  border-collapse: collapse;
+   
+}
+
+#results th, td, #results_spider th, td {
+  text-align: left;
+  padding: 0px;
+  border-bottom: 1px solid #ddd;
+  margin: 0px;
+}
+
+#results th,#results_spider th {
+  padding: 5px;
+}
+
+th.tab_im {
+  width: 10%;
+}
+
+th.tab_button {
+  width: 10%
+}
+
+  
+
+img.structure {
+  padding: 0px;
+  width: 65px;
+}
+
+p.intro {
+  width: 90%;
+  padding: 10px;
+  margin-left: 15px;
+  color: var(--text-extra-col);
+  font-family: var(--aux-font-fam);
+}
+
+div.ctrl {
+  position: absolute;
+  bottom: 30px;
+  width: 95%;
+}
+
+
+.ctrl input {
+  text-align: right;
+  float: right;
+  margin: 5px;
+  }
+
+.ctrl input.back {
+  float: left;
+  margin: 5px;
+  background-color: var(--grey-back-col);
+  border-color: var(--grey-back-col);
+}
+
+.ctrl input.back:hover {
+  background-color: unset;
+  color: unset;
+}
+
+
+

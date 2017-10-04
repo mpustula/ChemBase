@@ -1,0 +1,299 @@
+#main_form {
+  width: 100%;
+  margin: auto;
+}
+
+div.cmpd_form {
+  overflow: hidden;
+  padding: 15px 20px
+}
+
+p.control {
+  margin: 0px;
+  margin-top: 10px;
+  font-family: var(--aux-font-fam);
+  color: var(--text-highlight-col);
+  font-size: 15px;
+  font-weight: bold;
+}
+
+hr.block_sep {
+  margin-top: 2px;
+  color: var(--text-highlight-col);
+  background-color:var(--text-highlight-col);
+  border-width: 0px;
+  height: 2px;
+}
+
+div.names {
+  width: 100%;
+  margin: 0px;
+  margin-bottom: 15px;
+  padding: 0px;
+}
+
+div.structure {
+  overflow: hidden;
+}
+
+div.left {
+  width: 40%;
+  padding-top: 20px;
+  float: left;
+}
+
+div.right {
+  width: 55.5%;
+  padding-top: 20px;
+  overflow: hidden;
+}
+
+div.field {
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+}
+
+div.field label {
+  width: 20%;
+  vertical-align: top;
+}
+
+div.left label {
+  width: 15%
+}
+
+div.field input {
+  width: 70%
+}
+
+#ketcher_div {
+  width: 70%;
+}
+
+#image_div {
+  overflow: hidden;
+  width: 20%;
+  margin: auto;
+  float: left;
+}
+
+#image_div_str {
+  border: 2px solid;
+  margin: 25px 15px;
+  height: 160px;
+}
+
+#new_str_id {
+  max-width: 220px;
+  max-height: 160px;
+  vertical-align: middle;
+  display: block;
+  margin: auto;
+  
+  
+}
+
+#chemspider, #editor {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+#str_chemspider, #mol_editor {
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 0px;
+}
+
+
+#image_div p {
+  margin: 2px 0px;
+}
+
+#molfile_buttons {
+  width: 20%;
+  float: left;
+}
+
+#field_molfile {
+  width: 70%;
+  overflow: hidden;
+  margin: auto;
+
+}
+
+#field_molfile textarea {
+  width: 95%;
+  margin: 0px;
+}
+
+#prop_block {
+  display: inline-block;
+}
+
+#prop_block .field {
+  width: 33%;
+  float: left;
+}
+#prop_block .field label {
+  width: 28%;
+  max-width: 125px;
+  text-align: right;
+  vertical-align: text-top;
+  float: left;
+}
+
+#prop_block .field input {
+  max-width: 230px;
+  width: auto;
+  display: inline-block;
+}
+
+
+#formula_clean {
+  display: inline-block;
+  padding: 8px 8px;
+  text-align: center;
+  text-decoration: none;
+  font-family: var(--aux-font-fam);
+  font-weight: bold;
+  color: white;
+  background-color: var(--text-highlight-col);
+  border:2px solid;
+  border-color: var(--text-highlight-col);
+  border-radius: var(--box-border-radius);
+  transition-duration: 0.4s;
+  opacity: 0.9;
+}
+
+#formula_clean:hover {
+  color: var(--text-highlight-col);
+  background-color: white;
+  cursor: pointer;
+}
+
+div.sds_field {
+  width: 100%;
+  padding: 0px;
+  margin-bottom: 5px;
+}
+
+#sds_label {
+  width: 20%;
+  display: inline-block;
+  color: var(--text-extra-col);
+  padding: 10px;
+}
+
+label.choose_file_label, #sds_extr {
+  width:100px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-family: var(--aux-font-fam);
+  padding: 5px 5px;
+  margin-left: 5px;
+  font-weight: bolder;
+  font-size: 14px;
+  color: white;
+  background-color: var(--text-highlight-col);
+  border:2px solid;
+  border-color: var(--text-highlight-col);
+  border-radius: var(--box-border-radius);
+  transition-duration: 0.4s;
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+label.choose_file_label:hover, #sds_extr:hover {
+  color: var(--text-highlight-col);
+  background-color: white;
+}
+  
+#id_sds_file {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+#sds_path_field {
+  display: inline-block;
+  width:49.5%;
+}
+
+
+
+
+.field textarea {
+  width: 72%;
+  margin: 7px 0px;
+}
+
+.field select {
+  width: 72%;
+  margin: 7px 0px;
+}
+
+div.inline {
+  display: inline-block;
+  width: 80%;
+  float: right;
+}
+
+div.inline .field {
+  width: 32.2%;
+  float: left;
+}
+
+div.inline input {
+  width: 35%;
+}
+
+div.inline label {
+  width: 35%
+}
+
+#id_ewid {
+  width: 10px;
+  margin-top: 10px;
+}
+
+img.pictograms {
+  width: 5%;
+}
+
+div.pictograms {
+  width: 100%;
+  float: left;
+  padding: 10px;
+  padding-left: 300px;
+}
+
+#risk_classes_categories {
+  width: 100%;
+  overflow: hidden;
+  margin: 10px 0px;
+}
+
+#risk_classes_categories span {
+  width: 55%;
+  overflow: hidden;
+  display: block;
+  margin: 2px 3px;
+  margin-left: 24%;
+  color: var(--text-extra-col);
+  font-weight: lighter;
+}
+
+#risk_classes_categories input {
+  width: 70px;
+  margin: 0px 30px;
+  margin-right: 30%;
+  float: right;
+
+}
+
+

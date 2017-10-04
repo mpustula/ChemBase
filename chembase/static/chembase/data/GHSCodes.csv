@@ -1,0 +1,73 @@
+Code;GHS Hazardous Codes and Statements;;;Pict;Class;Pict_short;Class_num
+H200;Unstable explosive;Explosives (chapter 2.1);Unstable explosive;GHS01;UnstableExplosives;1;23
+H201;"Explosive; mass explosive hazard";Explosives (chapter 2.1);Division 1.1;GHS01;Explosives;1;5
+H202;"Explosive; severe projection hazard";Explosives (chapter 2.1);Division 1.2;GHS01;Explosives;1;5
+H203;"Explosive; fire, blast or projection hazard";Explosives (chapter 2.1);Division 1.3;GHS01;Explosives;1;5
+H204;Fire or projection hazard;Explosives (chapter 2.1);Division 1.4;GHS01;Explosives;1;5
+H205;May mass explode in fire;Explosives (chapter 2.1);Division 1.5;;;;
+H220;Extremely flammable gas;Flammable gases (chapter 2.2);1;GHS02;Flammable;2;7
+H221;Flammable gas;Flammable gases (chapter 2.2);2;;Flammable;;7
+H222;Extremely flammable aerosol;Flammable aerosols (chapter 2.3);1;GHS02;Flammable;2;7
+H223;Flammable aerosol;Flammable aerosols (chapter 2.3);2;GHS02;Flammable;2;7
+H224;Extremely flammable liquid and vapour;Flammable liquids (chapter 2.6);1;GHS02;Flammable;2;7
+H225;Highly flammable liquid and vapour;Flammable liquids (chapter 2.6);2;GHS02;Flammable;2;7
+H226;Flammable liquid and vapour;Flammable liquids (chapter 2.6);3;GHS02;Flammable;2;7
+H227;Combustible liquid;Flammable liquids (chapter 2.6);4;GHS02;;2;
+H228;Flammable solid;Flammable solids (chapter 2.7);1, 2;GHS02;Flammable;2;7
+H240;Heating may cause an explosion;"Self-reactive substances and mixtures (chapter 2.8); and Organic peroxides (chapter 2.15)";Type A;GHS01;Peroxides;1;12
+H241;Heating may cause a fire or explosion;"Self-reactive substances and mixtures (chapter 2.8); and Organic peroxides (chapter 2.15)";Type B;GHS01 GHS02;Peroxides;1;12
+H242;Heating may cause a fire;"Self-reactive substances and mixtures (chapter 2.8); and Organic peroxides (chapter 2.15)";Types C, D, E, F;GHS02;Peroxides;2;12
+H250;Catches fire spontaneously if exposed to air;"Pyrophoric liquids (chapter 2.9); Pyrophoric solids (chapter 2.10)";1;GHS02;Pyrophoric;2;13
+H251;"Self-heating; may catch fire";"Self-heating; substances and mixtures (chapter 2.11)";1;GHS02;Self-heating;2;17
+H252;"Self-heating; in large quantities; may catch fire";"Self-heating; substances and mixtures (chapter 2.11)";2;GHS02;Self-heating;2;17
+H260;In contact with water releases flammable gases which may ignite spontaneously;Substances and mixtures which, in contact with water, emit flammable gases (chapter 2.12);1;GHS02;Water-emission;2;24
+H261;In contact with water releases flammable gas;Substances and mixtures which, in contact with water, emit flammable gases (chapter 2.12);2, 3;GHS02;Water-emission;2;24
+H270;"May cause or intensify fire; oxidizer";Oxidizing gases (chapter 2.4);1;GHS03;Oxidizers;3;11
+H271;"May cause fire or explosion; strong oxidizer";"Oxidizing liquids (chapter 2.13); Oxidizing solids (chapter 2.14)";1;GHS03;Oxidizers;3;11
+H272;"May intensify fire; oxidizer";"Oxidizing liquids (chapter 2.13); Oxidizing solids (chapter 2.14)";2, 3;GHS03;Oxidizers;3;11
+H280;"Contains gas under pressure; may explode if heated";Gases under pressure (chapter 2.5);Compressed gas;GHS04;Gas_pressure;4;8
+H281;"Contains refrigerated gas; may cause cryogenic burns or injury";Gases under pressure (chapter 2.5);Refrigerated liquefied gas;GHS04;Gas_pressure;4;8
+H290;May be corrosive to metals;Corrosive to metals (chapter 2.16);1;GHS05;Metal_corrosion;5;9
+H300;Fatal if swallowed;Acute toxicity, oral (chapter 3.1);1, 2;GHS06;AcuteTox123;6;1
+H301;Toxic if swallowed;Acute toxicity, oral (chapter 3.1);3;GHS06;AcuteTox123;6;1
+H302;Harmful if swallowed;Acute toxicity, oral (chapter 3.1);4;GHS07;AcuteTox4;7;2
+H303;May be harmful if swallowed;Acute toxicity, oral (chapter 3.1);5;;;;
+H304;May be fatal if swallowed and enters airways;Aspiration hazard (chapter 3.10);1;GHS08;AspirationHazard;8;3
+H305;May be harmful if swallowed and enters airways;Aspiration hazard (chapter 3.10);2;;;;
+H310;Fatal in contact with skin;Acute toxicity, dermal (chapter 3.1);1, 2;GHS06;AcuteTox123;6;1
+H311;Toxic in contact with skin;Acute toxicity, dermal (chapter 3.1);3;GHS06;AcuteTox123;6;1
+H312;Harmful in contact with skin;Acute toxicity, dermal (chapter 3.1);4;GHS07;AcuteTox4;7;2
+H313;May be harmful in contact with skin;Acute toxicity, dermal (chapter 3.1);5;;;;
+H314;Causes severe skin burns and eye damage;Skin corrosion/irritation (chapter 3.2);1A, 1B, 1C;GHS05;Skin corrosion;5;18
+H315;Causes skin irritation;Skin corrosion/irritation (chapter 3.2);2;GHS07;Skin/eye irritation;7;20
+H316;Causes mild skin irritation;Skin corrosion/irritation (chapter 3.2);3;;;;
+H317;May cause an allergic skin reaction;Sensitization, skin (chapter 3.4);1;GHS07;Skin_allergy;7;19
+H318;Causes serious eye damage;Serious eye damage/eye irritation (chapter 3.3);1;GHS05;Eye damage;5;6
+H319;Causes serious eye irritation;Serious eye damage/eye irritation (chapter 3.3);2A;GHS07;Skin/eye irritation;7;20
+H320;Causes eye irritation;Serious eye damage/eye irritation (chapter 3.3);2B;GHS07;Skin/eye irritation;7;20
+H330;Fatal if inhaled;Acute toxicity, inhalation (chapter 3.1);1, 2;GHS06;AcuteTox123;6;1
+H331;Toxic if inhaled;Acute toxicity, inhalation (chapter 3.1);3;GHS06;AcuteTox123;6;1
+H332;Harmful if inhaled;Acute toxicity, inhalation (chapter 3.1);4;GHS07;AcuteTox4;7;2
+H333;May be harmful if inhaled;Acute toxicity, inhalation (chapter 3.1);5;;;;
+H334;May cause allergy or asthma symptoms or breathing difficulties if inhaled;Sensitization, respiratory (chapter 3.4);1;GHS08;Resp_allergy;8;16
+H335;May cause respiratory irritation;"Specific target organ toxicity, single exposure; Respiratory tract irritation (chapter 3.8)";3;GHS07;SpecTargetOrgan3;7;22
+H336;May cause drowsiness or dizziness;"Specific target organ toxicity, single exposure; Narcotic effects (chapter 3.8)";3;GHS07;SpecTargetOrgan3;7;22
+H340;May cause genetic defects (state route of exposure if it is conclusively proven that no other routes of exposure cause the hazard);Germ cell mutagenicity (chapter 3.5);1A, 1B;GHS08;Mutag;8;10
+H341;Suspected of causing genetic defects (state route of exposure if it is conclusively proven that no other routes of exposure cause the hazard);Germ cell mutagenicity (chapter 3.5);2;GHS08;Mutag;8;10
+H350;May cause cancer (state route of exposure if it is conclusively proven that no other routes of exposure cause the hazard);Carcinogenicity (chapter 3.6);1A, 1B;GHS08;Cancer;8;4
+H351;Suspected of causing cancer (state route of exposure if it is conclusively proven that no other routes of exposure cause the hazard);Carcinogenicity (chapter 3.6);2;GHS08;Cancer;8;4
+H360;May damage fertility or the unborn child (state specific effect if known)(state route of exposure if it is conclusively proven that no other routes of exposure cause the hazard);Reproductive toxicity (chapter 3.7);1A, 1B;GHS08;ReproductiveTox;8;15
+H361;Suspected of damaging fertility or the unborn child (state specific effect if known)(state route of exposure if it is conclusively proven that no other routes of exposure cause the hazard);Reproductive toxicity (chapter 3.7);2;GHS08;ReproductiveTox;8;15
+H362;May cause harm to breast-fed children;Reproductive toxicity, effects on or via lactation (chapter 3.7);Additional category;;ReprLact;;14
+H370;Causes damage to organs (or state all organs affected, if known) (state route of exposure if it is conclusively proven that no other routes of exposure cause the hazard);Specific target organ toxicity, single exposure (chapter 3.8);1;GHS08;SpecTargetOrgan12;8;21
+H371;May cause damage to organs (or state all organs affected, if known)(state route of exposure if it is conclusively proven that no other routes of exposure cause the hazard);Specific target organ toxicity, single exposure (chapter 3.8);2;GHS08;SpecTargetOrgan12;8;21
+H372;Causes damage to organs (state all organs affected, if known) through prolonged or repeated exposure (state route of exposure if it is conclusively proven that no other routes of exposure cause the hazard);Specific target organ toxicity, repeated exposure (chapter 3.9);1;GHS08;SpecTargetOrgan12;8;21
+H373;May cause damage to organs (state all organs affected, if known) through prolonged or repeated exposure (state route of exposure if it is conclusively proven that no other routes of exposure cause the hazard);Specific target organ toxicity, repeated exposure (chapter 3.9);2;GHS08;SpecTargetOrgan12;8;21
+H400;Very toxic to aquatic life;Hazardous to the aquatic environment, acute toxicity (chapter 4.1);1;GHS09;;9;
+H401;Toxic to aquatic life;Hazardous to the aquatic environment, acute toxicity (chapter 4.1);2;GHS09;;9;
+H402;Harmful to aquatic life;Hazardous to the aquatic environment, acute toxicity (chapter 4.1);3;GHS09;;9;
+H410;Very toxic to aquatic life with long lasting effects;Hazardous to the aquatic environment, chronic toxicity (chapter 4.1);1;GHS09;;9;
+H411;Toxic to aquatic life with long lasting effects;Hazardous to the aquatic environment, chronic toxicity (chapter 4.1);2;GHS09;;9;
+H412;Harmful to aquatic life with long lasting effects;Hazardous to the aquatic environment, chronic toxicity (chapter 4.1);3;;;;
+H413;May cause long lasting harmful effects to aquatic life;Hazardous to the aquatic environment, chronic toxicity (chapter 4.1);4;;;;
+H420;;;;GHS07;;7;

@@ -2,13 +2,19 @@
 
 <html>
 <head>
-
+{{ form.media.css }}
 {% load static %}
 
 <title> ChemBase </title>
 <link rel='stylesheet' type="text/css" href="{% static 'chembase/style.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<style type="text/css">
+    select {
+      width: 200px;
+    }
+  </style>
 </head>
 
 <body>
@@ -61,6 +67,6 @@ Info
 </footer>
 
 
-
+{{form.media.js}}
 </body>
 </html>

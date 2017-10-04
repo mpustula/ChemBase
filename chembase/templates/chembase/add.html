@@ -1,0 +1,123 @@
+{% extends "chembase/base.html" %}
+
+{% block content %}
+{% load static %}
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_search.css' %}">
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_add.css' %}">
+<script src="{% static 'chembase/script_add.js' %}"></script>
+
+<div class='main'>
+<h2>Add new item</h1>
+
+<div class='add_box' id='first_box'>
+<p class='intro'>Type in a name or CAS number of compound you want to add</p>
+<form action="{% url 'chembase:add' %}" method="post" id='cas_form'>
+	{% csrf_token %}
+	<div class='field'>
+	<label>Find:</label>
+	<input type='text' name='query' id='id_query'/>
+	</div>
+	
+	<div class='ctrl'>
+	<input type="submit" value="Next" id='form_input' />
+	</div>
+	
+</form>
+</div>
+
+
+<div class='add_box' id='second_box' style='display:none'>
+<p class='intro'>The following compounds already included in the database have been found: </p>
+<div class='res_tab'>
+<table id='results'>
+	<thead>
+		<tr>
+		<th class='tab_im'>Structure</th>
+		<th class='tab_name'>Name</th>
+		<th class='tab_subt'>Subtitle</th>
+		<th class='tab_cas'>CAS</th>
+		<th class='tab_button'></th>
+		</tr>
+	</thead>
+	<tbody>
+	
+	</tbody>
+
+</table>
+</div>
+
+
+<p class='intro'>If any of the compounds listed above do not match your query, 
+you can perform a ChemSpider database lookup, or add the compound by yourself. </p>
+
+
+<div class='ctrl'>
+	<input type="button" class='back' value="Back" id='back_input' />
+	<input type="button" value="Search ChemSpider" id='chemspider_input' />
+	
+	<form action="{% url 'chembase:add_cmpd' %}" method="post" id='new_cmpd_form'>
+	{% csrf_token %}
+	<input type='hidden' name='type' value='new_cmpd' id='type_field'/>
+	<input type="submit" value="Add new compound" id='new_input' />
+	</form>
+	</div>
+
+</div>
+
+<div class='add_box' id='hide' style='display:none'>
+<div class='add_box' id='wait_box'>
+<p class='intro'>The ChemSpider database query is performed. Please wait. </p>
+<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+</div>
+</div>
+
+
+<div class='add_box' id='third_box' style='display:none'>
+<p class='intro'>The following compounds have been found in ChemSpider Database: </p>
+<div class='res_tab'>
+<table id='results_spider'>
+	<thead>
+		<tr>
+		<th class='tab_im'>Structure</th>
+		<th class='tab_name'>Name</th>
+		<th class='tab_name_iu'>IUPAC Name</th>
+		<th class='tab_cas'>CAS</th>
+		<th class='tab_csid'>CSID</th>
+		<th class='tab_formula'>Formula</th>
+		<th class='tab_button'></th>
+		</tr>
+	</thead>
+	<tbody>
+	
+	</tbody>
+
+</table>
+</div>
+
+
+<p class='intro'>If any of the compounds listed above do not match your query, 
+you can add the compound by yourself. </p>
+
+<div class='ctrl'>
+	<input type="button" class='back' value="Back" id='back_chemspi' />
+	<form action="{% url 'chembase:add_cmpd' %}" method="post" id='new_cmpd_form_2'>
+	{% csrf_token %}
+	<input type='hidden' name='type' value='new_cmpd' id='type_field_2'/>
+	<input type="submit" value="Add new compound" id='new_input_2' />
+	</form>
+</div>
+
+</div>
+
+<form action="{% url 'chembase:add_cmpd' %}" method="post" id='hidden_form' />
+{% csrf_token %}
+<input type='hidden' name='type' value='new_cmpd' id='type_field_3' />
+<input type="hidden" name='cmpd_id' value='0' id='id_field' />
+<input type="hidden" name='cas' value='' id='cas_field' />
+</form>
+
+</div>
+
+{% endblock %}
+
+

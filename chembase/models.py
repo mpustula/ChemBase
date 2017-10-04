@@ -1,13 +1,19 @@
 from django.db import models
+from django.utils import timezone
 import re
-import sys
+import sys, os
+from subprocess import call
+import pandas as pd
 from difflib import SequenceMatcher
-sys.path.append('/home/marcin/Dokumenty/programy/indigo-python-1.2.3.r0-linux')
+sys.path.append('/home/marcin/Dokumenty/programy/indigo-python-1.2.3.r0-linux/')
 
+#import indigo
 from indigo import *
 from indigo_inchi import *
 from indigo_renderer import *
 from bingo import *
+
+from .functions import transform_sds
 
 #from rdkit import Chem
 #from rdkit import DataStructs
@@ -26,6 +32,8 @@ class Pictogram(models.Model):
     
 class GHSClass(models.Model):
     class_text=models.CharField(max_length=100)
+    class_full_en=models.CharField(max_length=300,blank=True)
+    class_full_pl=models.CharField(max_length=300,blank=True)
     
     def __str__(self):
         return self.class_text
@@ -44,13 +52,24 @@ class ExtraCompoundsManager(models.Manager):
                 final_set.append(compound)
         return final_set
         
-    def sort_by_name_simil(self,qset,text):
-        return sorted(qset,key=lambda s: s.name_similarity(text),reverse=True)
+    def sort_by_name_simil(self,qset,text,cutoff):
+        final_list=[[s,s.name_similarity(text)] for s in qset]
         
-    def sort_by_str_simil(self,qset,smiles):
-        return sorted(qset,key=lambda s: s.smiles_similarity(smiles),reverse=True)
+        fin_list=[[s[0],s[1]] for s in final_list if s[1]>cutoff]
+        fin_list2=sorted(fin_list,key=lambda s: s[1],reverse=True)
         
-    def substr_match(self,qset,smiles):
+        return [s[0] for s in fin_list2]
+        
+    def sort_by_str_simil(self,qset,smiles,cutoff):
+        final_list=[[s,s.smiles_similarity(smiles)] for s in qset]
+        
+        fin_list=[[s[0],s[1]] for s in final_list if s[1]>cutoff]
+        
+        fin_list2=sorted(fin_list,key=lambda s: s[1],reverse=True)
+        
+        return [s[0] for s in fin_list2]
+        
+    def substr_match(self,qset,smiles,cutoff):
         final_set=[]
         for compound in qset:
             match=compound.is_substructure(smiles)
@@ -59,7 +78,7 @@ class ExtraCompoundsManager(models.Manager):
 
         final_list=sorted(final_set,key=lambda s: s[1],reverse=True)
         
-        return [x[0] for x in final_list if x[1]>0.3]
+        return [x[0] for x in final_list if x[1]>cutoff]
         
         
     
@@ -81,6 +100,7 @@ class Compound(models.Model):
     
     inchi=models.CharField('InChi',max_length=1000,blank=True)
     smiles=models.CharField('SMILES',max_length=1000,blank=True)
+    molfile=models.TextField(blank=True)
     
     sds=models.FilePathField('SDS',max_length=200,blank=True)
     sds_name=models.CharField(max_length=2000,blank=True)
@@ -123,8 +143,9 @@ class Compound(models.Model):
         main=SequenceMatcher(None, text, self.name).ratio()
         pl=SequenceMatcher(None, text, self.pl_name).ratio()
         all_n=SequenceMatcher(None, text, self.all_names).ratio()
+        cas_n=SequenceMatcher(None, text, self.cas).ratio()
         
-        return max([main,pl,all_n])
+        return max([main,pl,all_n,cas_n])
     
     def smiles_similarity(self,smiles):
 
@@ -158,15 +179,84 @@ class Compound(models.Model):
             return self.smiles_similarity(smiles)
         else:
             return 0
-        
-    
-
-        
+            
     def how_many_items(self):
         return len(self.item_set(manager='citems').existing())
         
+    def render_image(molfile):
+        indigo=Indigo()
+        mol=indigo.loadMolecule(molfile)
+        #mol.aromatize()
+        renderer = IndigoRenderer(indigo)
         
-    
+        indigo.setOption("render-output-format", "png");
+        indigo.setOption("render-margins", 50, 50)
+        indigo.setOption("render-coloring", True)
+        indigo.setOption("render-relative-thickness", 1.2)
+        indigo.setOption("render-bond-line-width", 1.5)
+        
+        file_name='chembase/static/chembase/images/temp_images/temp.png'
+        #file_name='temp.png'
+        renderer.renderToFile(mol, file_name)
+
+        return '/static/chembase/images/temp_images/temp.png'+'?timestamp=' + str(timezone.now())
+        
+    def save_sds(sdsfile):
+        file_base='chembase/static/chembase/sds/temp_sds/temp'
+        file_name=file_base+'.pdf'
+        file_txt=file_base+'.txt'
+        with open(file_name, 'wb+') as destination:
+            for chunk in sdsfile.chunks():
+                destination.write(chunk)
+        command='pdftotext -layout '+file_name+' '+file_txt
+                #print command
+        call(command,shell=True)
+        output=transform_sds(file_txt)
+        
+        return output
+        
+
+
+    def clean_formula(formula):
+        i=0
+        j=0
+        el_data=pd.read_csv("chembase/static/chembase/data/elementlist.csv")
+        new_df=pd.DataFrame(columns=['Sym','Num','Order'])
+        
+        par=True
+        while par==True:
+        	try:
+        		char=formula[i]
+        	except:
+        		par=False
+        		break
+        	if char.isupper():
+        		j=j+1
+        		new_df.loc[j,'Sym']=char
+        		new_df.loc[j,'Num']=''
+        	if char.islower():
+        		new_df.loc[j,'Sym']=new_df.loc[j,'Sym']+char
+        	if char.isdigit():
+        		new_df.loc[j,'Num']=new_df.loc[j,'Num']+char
+        	i=i+1
+        
+        for item in new_df.index.tolist():
+            symb=new_df.loc[item,'Sym']
+            order=el_data.loc[el_data['Sym']==symb]['Order']
+            order=order.iloc[0]
+            new_df.loc[item,'Order']=order
+        	
+        new_df=new_df.sort_values(['Order'])
+        
+        new_formula=''
+        for item in new_df.index.tolist():
+            symb=new_df.loc[item,'Sym']
+            num=new_df.loc[item,'Num']
+            new_formula=new_formula+symb
+            if num!="":
+                new_formula=new_formula+'_{'+num+'}'
+                
+        return new_formula        
     
 class Cmpd_Class(models.Model):
     compound=models.ForeignKey(Compound,on_delete=models.PROTECT)
@@ -175,6 +265,9 @@ class Cmpd_Class(models.Model):
 
 class Group(models.Model):
     group_name=models.CharField(max_length=150)
+    
+    def __str__(self):
+        return self.group_name
     
     
 
@@ -202,6 +295,8 @@ class Item(models.Model):
     room=models.CharField(max_length=20)
     place=models.CharField(max_length=20)
     place_num=models.CharField(max_length=20)
+            
+    local=models.CharField(max_length=65,blank=True)
     quantity=models.IntegerField(blank=True)
     amount=models.DecimalField(max_digits=10,decimal_places=3,blank=True)
     storage_temp=models.CharField(max_length=10,blank=True)
@@ -213,7 +308,8 @@ class Item(models.Model):
     
     class Meta:
         ordering = ['group']
-        
+          
+    
     def localize(self):
         return self.room+'-'+self.place+'-'+self.place_num
     

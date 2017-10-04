@@ -15,29 +15,22 @@
    {{form.non_field_errors}}
 	<div class='field'>
 	{{form.text.errors}}
-	<label for="{{form.text.id_for_label}}">Search text:</label>
+	<label for="{{form.text.id_for_label}}">Name:</label>
 	{{form.text}}
 	</div> 
-	<h3 class='control'>Options</h3>
-	<div class='options'>
-	<div class='field_check'>
-	{{form.deleted.errors}}
-	<label for="{{form.deleted.id_for_label}}">Include deleted items:</label>
-	{{form.deleted}}
-	</div>
+	
 	<div class='field'>
-	{{form.stype.errors}}
-	<label for="{{form.stype.id_for_label}}">Find:</label>
-	{{form.stype}}
+	{{form.cas.errors}}
+	<label for="{{form.cas.id_for_label}}">CAS:</label>
+	{{form.cas}}
+	</div> 
+	
+	<div class='field'>
+	{{form.place.errors}}
+	<label for="{{form.place.id_for_label}}">Place:</label>
+	{{form.place}}
 	</div> 
 
-	<div class='field'>
-	{{form.cutoff.errors}}
-	<label for="{{form.cutoff.id_for_label}}">Similarity cutoff:</label>
-	{{form.cutoff}}
-	</div> 
-
-	</div>
 	<h3 class='control' id='str_open'>Structure edit</h3>
 	{% if str %}
 	<div id='ketcher_div'>
@@ -56,17 +49,61 @@
 			 ketcher.setMolecule(molecule);
 			 source.val(ketcher.getSmiles());
 			 
+			 
+			 
 			 });
 	</script>
 	{% endif %}
+	
+	
+	<h3 class='control' id='op_open'>Options</h3>
+	<div class='options' style='display:none' id='options_block'>
+	
+	<div class='general'>
+		<h4>General:</h4>
+		<div class='field'>
+		{{form.deleted.errors}}
+		<label for="{{form.deleted.id_for_label}}">Include deleted items:</label>
+		{{form.deleted}}
+		</div>
+		<div class='field'>
+		{{form.group.errors}}
+		<label for="{{form.group.id_for_label}}">Filter by group:</label>
+		{{form.group}}
+		</div>
+	</div>
+	<style type="text/css">
+    	select {
+    		  width: 400px;
+    		}
+ 	 </style>
+	
+	<div class='str_op'>
+		<h4>Structure:</h4>
+		<div class='field'>
+		{{form.stype.errors}}
+		<label for="{{form.stype.id_for_label}}">Find:</label>
+		{{form.stype}}
+		</div> 
+	
+		<div class='field'>
+		{{form.cutoff.errors}}
+		<label for="{{form.cutoff.id_for_label}}">Similarity cutoff:</label>
+		{{form.cutoff}}
+		</div> 
+	</div>
+	
+	</div>
 	<input type='hidden' name='smiles' id='id_smiles' />
 	<input type="submit" value="Search" id='form_input' />
 </form>
 
-
+<hr class='block_sep'>
 </div>
+<div id='results'>
 {% if results %}
 <h2>Search results:</h2>
+<p class='other'>{{found}} compounds found </p>
 <hr class='sep'>
 {% for compound in results %}
 	{% if compound.how_many_items %}
@@ -139,12 +176,13 @@
 	
 {% endfor %}
 
+{% if results.paginator.num_pages > 1 %}
 <div class="pagination">
     <div class="step-links">
         {% if results.has_previous %}
             <a href="?{% url_replace page=results.previous_page_number %}">Previous</a>
         {% endif %}
-
+			
         <span class="current">
             Page {{ results.number }} of {{ results.paginator.num_pages }}
         </span>
@@ -154,8 +192,12 @@
         {% endif %}
     </div>
 </div>
-
+{% endif %}
 
 {% endif %}
 </div>
+</div>
 {% endblock %}
+
+
+

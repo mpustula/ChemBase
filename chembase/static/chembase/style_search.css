@@ -1,19 +1,23 @@
 .field {
-  width: 100%;
-  display: inline-block;
+  width: 90%;
+  margin: auto;
+  margin-top: 5px;
+  margin-bottom: 5px;
   
 }
 
 .field label {
   color: var(--text-extra-col);
-  padding: 20px;
+  display: inline-block;
+  width: 10%;
+  padding: 10px;
 }
 
 
 
 .field input {
   padding: 5px;
-  width: 85%;
+  width: 80%;
 }
 
 .field_check {
@@ -30,6 +34,43 @@
   margin-top: 5px;
 }
 
+div.options {
+  padding-left: 20px;
+  padding-right: 20px;
+  width: 80%;
+  margin: auto;
+  margin-top: 0px;
+}
+
+.options .field {
+  width: 95%;
+
+}
+
+span.select2-container--default {
+  width: 150px;
+}
+
+.options label {
+  width: 20%;
+}
+
+.options input {
+  width: unset;
+}
+
+h4 {
+  margin: 0px;
+  font-family: var(--aux-font-fam);
+}
+
+div.general, div.str_op {
+  background-color: var(--grey-back-col);
+  padding: 3px 10px;
+  border-radius: var(--box-border-radius);
+  margin: 5px 0px;
+}
+
 #ketcher_div {
   width: 80%;
   height: 500px;
@@ -43,11 +84,20 @@
   height: 100%;
 }
 
+#results {
+  min-height: 1000px;
+}
+
+#results .other {
+  font-size: 16px;
+  padding: 0px 20px;
+  padding-bottom: 15px;
+}
 
 div.hit, div.empty_hit{
   width: 100%;
   display: block;
-  b#ackground-color: var(--search-box-col);
+  background-color: var(--search-box-col);
   padding: 0px;
   #border-bottom: 1px solid;
   #border-top: 1px solid;
@@ -143,7 +193,7 @@ img.pictogram {
 .name, .name:visited {
   padding: 0px;
   margin: 0px;
-  font-family: Cabin;
+  font-family: var(--aux-font-fam);
   color: var(--text-highlight-col);
   font-weight: bold;
   text-decoration: none;
@@ -169,4 +219,11 @@ p.res_field {
   color: var(--text-extra-col)
 }
 
+div.step-links {
+  font-family: var(--aux-font-fam);
+  width: 60%;
+  margin: auto;
+  text-align: center;
+  padding: 15px;
+}
 

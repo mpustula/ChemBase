@@ -1,4 +1,7 @@
 :root {
+  --main-font-fam:Roboto,Verdana,Arial,Sans-serif;
+  --main-font-fam-cond:Roboto Condensed,Verdana,Arial,Sans-serif;
+  --aux-font-fam:Cabin;
   --grey-back-col:gainsboro;
   --footer-col:darkgrey;
   --main-col: white;
@@ -13,7 +16,7 @@
 }
 
 body {
-  font-family: Roboto,Verdana;
+  font-family: var(--main-font-fam);
   margin: 0px;
   background-color: var(--main-col);
     
@@ -26,6 +29,36 @@ hr {
   height: 1px;
   margin-top: 20px;
   margin-bottom: 10px;
+}
+
+hr.block_sep {
+  color: var(--text-extra-col);
+  background-color:var(--text-extra-col);
+  height: 1px;
+  margin-bottom: 30px;
+}
+
+input[type=submit], input[type=button]{
+  margin: auto;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  font-family: var(--aux-font-fam);
+  padding: 10px 20px;
+  font-weight: bold;
+  color: white;
+  background-color: var(--text-highlight-col);
+  border:2px solid;
+  border-color: var(--text-highlight-col);
+  border-radius: var(--box-border-radius);
+  transition-duration: 0.4s;
+  opacity: 0.9;
+}
+
+input[type=submit]:hover, input[type=button]:hover {
+  color: var(--text-highlight-col);
+  background-color: white;
+  cursor: pointer;
 }
 
 div.topband {
@@ -117,7 +150,7 @@ div.names {
 
 h1 {
   color: var(--text-highlight-col);
-  font-family: Roboto Condensed;
+  font-family: var(--main-font-fam-cond);
   margin-bottom: 0px;
   padding-bottom: 0px;
   font-size:32px;
@@ -125,7 +158,7 @@ h1 {
 
 h2, h3 {
   color: var(--text-highlight-col);
-  font-family: Cabin;
+  font-family: var(--aux-font-fam);
   margin-bottom: 5px;
   padding-bottom: 5px;
   font-size:20px;
