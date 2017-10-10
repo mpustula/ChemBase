@@ -4,18 +4,20 @@ from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.decorators.csrf import ensure_csrf_cookie
 import json
+from django.utils import timezone
 
 from chemspipy import ChemSpider
 import cirpy
 import difflib
+import re
 
 # Create your views here.
 from .models import Compound, GHSClass, Cmpd_Class
-from .forms import SearchForm, CompoundForm, FileUploadForm
+from .forms import SearchForm, CompoundForm
 from .functions import transform_sds
 
 def index(request):
-    return HttpResponse('Start: ChemnBase')
+    return HttpResponse('Start: ChemBase')
     
     
 def detail(request,cmpd_id):
@@ -31,9 +33,83 @@ def add(request):
     #form=CompoundForm()
     return render(request,'chembase/add.html')
     
-@ensure_csrf_cookie
+    
+def cmpd_save(request):
+    
+    if request.method=='POST':
+        c=CompoundForm(request.POST,request.FILES)
+        print(request.POST)
+        if c.is_valid():
+            new_cmpd=c.save(commit=False)           
+            new_cmpd.save()
+            
+            #####class_extr field
+            for item in request.POST:
+                matchObj=re.match(r'id_class_(\d+$)',item)
+                if matchObj:
+                    ghs_class_id=matchObj.group(1)
+                    ghs_class=GHSClass.objects.get(pk=ghs_class_id)
+                    
+                    ghs_class_num=request.POST[item]
+                    
+                    cc=Cmpd_Class(compound=new_cmpd,ghs_class=ghs_class,number=ghs_class_num)
+                    
+                    cc.save()
+            #####pictograms field and other many-to-many
+            c.save_m2m()
+            
+            ####sds_file
+            if request.FILES:
+                sds=request.FILES['sds_file']
+        
+                new_sds_name=(sds.name).split('.')[0]+str(new_cmpd.id)+'.pdf'
+                print(new_sds_name)
+                file_base='chembase/static/chembase/data/sds/'
+                file_name=file_base+new_sds_name
+                print(file_name)
+                file_path='/data/sds/'+new_sds_name
+                with open(file_name, 'wb+') as destination:
+                    for chunk in sds.chunks():
+                        destination.write(chunk)
+                new_cmpd.sds=file_path
+                
+                
+            ###image file
+            csid=request.POST['csid']
+            ##remove <<?timestamp=>> ending
+            image_name=(request.POST['image']).split('?')[0]
+            if image_name:
+                if csid!='':
+                    final_image_name=csid+'.png'
+                else:
+                    final_image_name='cmpd_num_'+str(new_cmpd.id)+'.png'
+                file_base='chembase/static/chembase/images/'
+                image_name_out=file_base+final_image_name
+                with open(image_name_out, 'wb+') as destination:
+                    destination.write(open('chembase'+image_name,'rb+').read())
+                new_cmpd.image='images/'+final_image_name
+                
+                
+                
+            ###ewidencja
+                
+                
+            ###log
+                
+                
+            #new_cmpd=c
+            #existing_items=new_cmpd.item_set(manager='citems').existing()
+            #deleted_items=new_cmpd.item_set(manager='citems').deleted()
+        
+            return render(request,'chembase/detail.html',{'compound':new_cmpd})#,'exist':existing_items,'del':deleted_items})
+            
+        else:
+            return HttpResponse(c.errors.as_data())
+    
+
 def add_cmpd(request):
     if request.method=='POST':
+        print(request)
         rtype=request.POST.get('type')
         if rtype=='new_cmpd':
             form=CompoundForm()
@@ -41,13 +117,17 @@ def add_cmpd(request):
             molfile=''
             classes_dict={}
             classes_names_dict={}
+            sds_name=''
         elif rtype=='base':
             cmpd_id=request.POST.get('cmpd_id')
             
             compound = Compound.objects.get(pk=cmpd_id)
             str_image='/static/chembase/'+compound.image
             form = CompoundForm(instance=compound)
-            
+            sds_name=compound.sds
+            ewid=Compound.is_registered(compound)
+            if ewid:
+                form.fields['ewid'].initial=True
             ##risk classes:
             classes_list=Cmpd_Class.objects.filter(compound=compound)
             classes_dict={}
@@ -55,8 +135,7 @@ def add_cmpd(request):
             for item in classes_list:
                 classes_names_dict[item.ghs_class.id]=item.ghs_class.class_full_en
                 classes_dict["id_class_"+str(item.ghs_class.id)]=item.number
-            print(classes_dict)
-            print(classes_names_dict)
+
             
         elif rtype=='spider':
             cmpd_id=request.POST.get('cmpd_id')
@@ -69,11 +148,12 @@ def add_cmpd(request):
             inchi=compound.inchi
             smiles=compound.smiles
             molfile=compound.mol_2d
-            str_image=compound.image_url
+            #str_image=compound.image_url
+            str_image=Compound.render_image('',compound.image)
             name=compound.common_name
             mw=compound.molecular_weight
             iupac_name=cirpy.resolve(inchi,'iupac_name')
-            
+            sds_name=''
             if iupac_name!=name:
                 other_name=iupac_name
             else:
@@ -90,16 +170,23 @@ def add_cmpd(request):
                                          'smiles':smiles,
                                          'weight':mw,
                                          'molfile':molfile})
+        else:
+            form=CompoundForm()
+            str_image=''
+            classes_dict={}
+            classes_names_dict={}
+            sds_name=''
             
     else:
         form=CompoundForm()
         str_image=''
         classes_dict={}
         classes_names_dict={}
-    file_form=FileUploadForm()
+        sds_name=''
     return render(request,'chembase/add_cmpd.html',{'form':form,'structure_im':str_image,
-                                                    'file_form':file_form, 'classes_dict':json.dumps(classes_dict),
-                                                    'classes_names_dict':json.dumps(classes_names_dict)})
+                                                    'classes_dict':json.dumps(classes_dict),
+                                                    'classes_names_dict':json.dumps(classes_names_dict),
+                                                    'sds_name':sds_name})
 
 
 
@@ -205,9 +292,7 @@ def chemspy_ajax(request):
         
         return JsonResponse({item['csid']:item for item in search_chemspy(query)})
         
-
-        
-
+      
     
 def search_chemspy(query=''):
     cs=ChemSpider('c36756c7-401d-4097-9496-32ccbe7d876d')
@@ -263,9 +348,11 @@ def image_ajax(request):
         if query_csid:
             cs=ChemSpider('c36756c7-401d-4097-9496-32ccbe7d876d')
             compound=cs.get_compound(query_csid)
-            image_path=compound.image_url         
+            #image_path=compound.image_url
+            image_path=Compound.render_image('',compound.image)
+
         elif mol_file:
-            image_path=Compound.render_image(mol_file)
+            image_path=Compound.render_image(mol_file,'')
         else:
             image_path=''
                 

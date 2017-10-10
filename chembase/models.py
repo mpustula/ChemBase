@@ -93,7 +93,7 @@ class Compound(models.Model):
     csid=models.CharField('ChemSpider Id',max_length=15,blank=True)
     
     formula=models.CharField(max_length=100,blank=True)
-    weight=models.DecimalField("Molecular weight",max_digits=10,decimal_places=3,blank=True)
+    weight=models.DecimalField("Molecular weight",max_digits=10,decimal_places=4,null=True,blank=True)
     density=models.CharField(max_length=100,blank=True)
     
     image=models.FilePathField(max_length=200,blank=True)
@@ -106,7 +106,7 @@ class Compound(models.Model):
     sds_name=models.CharField(max_length=2000,blank=True)
     sds_cas=models.CharField(max_length=100,blank=True)
     
-    pictograms=models.ManyToManyField(Pictogram)
+    pictograms=models.ManyToManyField(Pictogram,blank=True)
     
     warning=models.CharField(max_length=200,blank=True)
     
@@ -183,23 +183,45 @@ class Compound(models.Model):
     def how_many_items(self):
         return len(self.item_set(manager='citems').existing())
         
-    def render_image(molfile):
-        indigo=Indigo()
-        mol=indigo.loadMolecule(molfile)
-        #mol.aromatize()
-        renderer = IndigoRenderer(indigo)
+    def set_registered(self,true_or_false):
+        query_set=Ewidencja.objects.filter(compound=self)
         
-        indigo.setOption("render-output-format", "png");
-        indigo.setOption("render-margins", 50, 50)
-        indigo.setOption("render-coloring", True)
-        indigo.setOption("render-relative-thickness", 1.2)
-        indigo.setOption("render-bond-line-width", 1.5)
+    def is_registered(self):
+        query_set=Ewidencja.objects.filter(compound=self)
+        if query_set:
+            ans=True
+        else:
+            ans=False
+            
+        return ans
         
-        file_name='chembase/static/chembase/images/temp_images/temp.png'
-        #file_name='temp.png'
-        renderer.renderToFile(mol, file_name)
+    def render_image(molfile,png_data):
+        
+        if png_data:
+            image_png=png_data
+            temp_image='chembase/static/chembase/images/temp_images/temp.png'
+            with open(temp_image, 'wb+') as destination:
+                destination.write(image_png)
+                #for chunk in image_png.chunks():
+                #   destination.write(chunk)
+        elif molfile:
+            indigo=Indigo()
+            mol=indigo.loadMolecule(molfile)
+            #mol.aromatize()
+            renderer = IndigoRenderer(indigo)
+            
+            indigo.setOption("render-output-format", "png");
+            indigo.setOption("render-margins", 50, 50)
+            indigo.setOption("render-coloring", True)
+            indigo.setOption("render-relative-thickness", 1.2)
+            indigo.setOption("render-bond-line-width", 1.5)
+            
+            file_name='chembase/static/chembase/images/temp_images/temp.png'
+            #file_name='temp.png'
+            renderer.renderToFile(mol, file_name)
 
-        return '/static/chembase/images/temp_images/temp.png'+'?timestamp=' + str(timezone.now())
+        image_path='/static/chembase/images/temp_images/temp.png?timestamp=' + str(timezone.now())
+        return image_path
         
     def save_sds(sdsfile):
         file_base='chembase/static/chembase/sds/temp_sds/temp'
@@ -259,8 +281,8 @@ class Compound(models.Model):
         return new_formula        
     
 class Cmpd_Class(models.Model):
-    compound=models.ForeignKey(Compound,on_delete=models.PROTECT)
-    ghs_class=models.ForeignKey(GHSClass,on_delete=models.PROTECT)
+    compound=models.ForeignKey(Compound,on_delete=models.CASCADE)
+    ghs_class=models.ForeignKey(GHSClass,on_delete=models.CASCADE)
     number=models.CharField(max_length=10)
 
 class Group(models.Model):

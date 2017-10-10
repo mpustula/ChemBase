@@ -15,7 +15,8 @@ urlpatterns= [
     url(r'^formula_ajax/$',views.formula_ajax,name='formula_ajax'),
     url(r'^sds_ajax/$',views.sds_ajax,name='sds_ajax'),
     url(r'^ghs_class_ajax/$',views.ghs_classes_transl,name='ghs_class_ajax'),
-    url(r'^add/cmpd/$',views.add_cmpd,name='add_cmpd'),    
+    url(r'^add/cmpd/$',views.add_cmpd,name='add_cmpd'), 
+    url(r'^add/cmpd/done/$',views.cmpd_save,name='cmpd_save'), 
     url(r'^add/$',views.add,name='add'),
     
 

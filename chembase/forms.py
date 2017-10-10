@@ -7,7 +7,7 @@ Created on Thu Aug  3 14:31:32 2017
 
 from django import forms
 from django_select2.forms import (Select2Widget,ModelSelect2Widget,Select2MultipleWidget,ModelSelect2MultipleWidget)
-from .models import Group,Compound
+from .models import Group,Compound,GHSClass
 
 class SearchForm(forms.Form):
     text=forms.CharField(label='Text to find',required=False)
@@ -23,16 +23,15 @@ class SearchForm(forms.Form):
             
 class CompoundForm(forms.ModelForm):
     ewid=forms.BooleanField(required=False)
-    sds_file = forms.FileField()
+    sds_file = forms.FileField(required=False)
+    class_extr=forms.ModelMultipleChoiceField(widget=Select2MultipleWidget,queryset=GHSClass.objects.all(),required=False)
     class Meta:
         model=Compound
         #fields=['name','all_names','subtitle']
-        exclude=[]
+        exclude=['class_extr','image']
         widgets={'pictograms':Select2MultipleWidget,'sds':Select2Widget,'class_extr':Select2MultipleWidget}
         
         
-class FileUploadForm(forms.Form):
-    sds_file=forms.FileField()
     
 
     

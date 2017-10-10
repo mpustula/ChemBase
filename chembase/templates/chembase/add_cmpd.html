@@ -12,7 +12,8 @@
 
 <div id='main_form'>
 <h3>Compound Info:</h3>
-<form action="{% url 'chembase:add' %}" method="get">
+<form enctype="multipart/form-data" action="{% url 'chembase:cmpd_save' %}" method="post">
+{% csrf_token %}
 <div class='cmpd_form' id='cmpd_form'>
 
 	<p class='control' id='names_ctrl'>Names and identification</p>
@@ -94,8 +95,7 @@
 	<img class='structure_new' src='{{structure_im}}' alt='structure' id='new_str_id' />	
 	</div>
 	<div class='field' id='field_image'>  
-	{{form.image.errors}}
-	{{form.image}}
+	<input name="image" id="id_image" type="hidden" value='{{structure_im}}'>
 	</div>	
 	
 	<input type="button" value="Load image from ChemSpider" id='chemspider' />
@@ -174,7 +174,7 @@
 	<div class='sds_field'>
 	{{form.sds_file.errors}}
 	<label id='sds_label' >SDS:</label>
-	<input type='text' name='sds_path' id='sds_path_field' required='' />
+	<input type='text' name='sds_path' id='sds_path_field' value="{{sds_name}}"/>
 	{{form.sds_file}}
 	<label class='choose_file_label' for="id_sds_file">Choose a file</label>
 	<input type="button" value="Extract SDS" id='sds_extr' />
@@ -281,6 +281,7 @@
 	arrayObject = JSON.parse(array);
 	//console.log(arrayObject);
 	dictObject = JSON.parse(values_dict);
+	$('#id_class_extr').val(Object.keys(arrayObject));
 	display_ghs_classes(arrayObject,dictObject);
 	</script>
 	

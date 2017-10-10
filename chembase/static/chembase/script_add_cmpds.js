@@ -115,6 +115,7 @@ $(document).ready(function(){
 				var image=json['image'];
 				console.log(image);
 				$('#new_str_id').attr('src',image);
+				$('#id_image').val(image);
 				},
 				
 			error : function(xhr,errmsg,err) {
