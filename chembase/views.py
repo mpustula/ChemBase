@@ -1,8 +1,11 @@
-from django.shortcuts import get_object_or_404,render
+from django.shortcuts import get_object_or_404,render,redirect
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
+from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth import authenticate, login,logout
 import json
 from django.utils import timezone
 
@@ -12,14 +15,15 @@ import difflib
 import re
 
 # Create your views here.
-from .models import Compound, GHSClass, Cmpd_Class
-from .forms import SearchForm, CompoundForm
+from .models import Compound, GHSClass, Cmpd_Class, SystemLog
+from .forms import SearchForm, CompoundForm, ItemForm
 from .functions import transform_sds
 
 def index(request):
-    return HttpResponse('Start: ChemBase')
+    return redirect('chembase:search')
     
-    
+@login_required()
+@permission_required('chembase.can_see_compound')
 def detail(request,cmpd_id):
     
     compound=get_object_or_404(Compound,pk=cmpd_id)
@@ -28,12 +32,25 @@ def detail(request,cmpd_id):
 
     return render(request,'chembase/detail.html',{'compound':compound,'exist':existing_items,'del':deleted_items})
     
-    
+
+@login_required()
+@permission_required('chembase.can_see_compound')
+@permission_required('chembase.can_add_compound')
 def add(request):
     #form=CompoundForm()
     return render(request,'chembase/add.html')
     
-    
+ 
+
+
+def add_item(request,cmpd_id):
+    cmpd=Compound.objects.get(pk=cmpd_id)
+    item_form=ItemForm()
+    return render(request,'chembase/add_item.html',{'compound':cmpd,'item_form':item_form})
+
+@login_required()
+@permission_required('chembase.can_see_compound')
+@permission_required('chembase.can_add_compound')
 def cmpd_save(request):
     
     if request.method=='POST':
@@ -42,7 +59,7 @@ def cmpd_save(request):
         if c.is_valid():
             new_cmpd=c.save(commit=False)           
             new_cmpd.save()
-            
+            data_dict=c.cleaned_data
             #####class_extr field
             for item in request.POST:
                 matchObj=re.match(r'id_class_(\d+$)',item)
@@ -73,7 +90,10 @@ def cmpd_save(request):
                         destination.write(chunk)
                 new_cmpd.sds=file_path
                 
-                
+            else:
+                new_cmpd.sds=request.POST['sds_path']
+                print('sds_path')
+                print(request.POST['sds_path'])
             ###image file
             csid=request.POST['csid']
             ##remove <<?timestamp=>> ending
@@ -85,28 +105,38 @@ def cmpd_save(request):
                     final_image_name='cmpd_num_'+str(new_cmpd.id)+'.png'
                 file_base='chembase/static/chembase/images/'
                 image_name_out=file_base+final_image_name
+                image_data=open('chembase'+image_name,'rb+').read()
                 with open(image_name_out, 'wb+') as destination:
-                    destination.write(open('chembase'+image_name,'rb+').read())
+                    destination.write(image_data)
                 new_cmpd.image='images/'+final_image_name
+                print('image_file:')            
+                print(image_name)
                 
                 
-                
+            
             ###ewidencja
-                
+            is_to_register=data_dict['ewid']
+            new_cmpd.set_registered(is_to_register)
                 
             ###log
-                
-                
+            user=request.user
+            new_cmpd.author=user
+            new_cmpd.save()
+            system_log_entry=SystemLog(model_name='Compound',model_instance_id=new_cmpd.id,
+                                       author=user,action='add',comment='')
+            system_log_entry.save()
             #new_cmpd=c
             #existing_items=new_cmpd.item_set(manager='citems').existing()
             #deleted_items=new_cmpd.item_set(manager='citems').deleted()
         
-            return render(request,'chembase/detail.html',{'compound':new_cmpd})#,'exist':existing_items,'del':deleted_items})
-            
+            #return render(request,'chembase/detail.html',{'compound':new_cmpd})#,'exist':existing_items,'del':deleted_items})
+            return redirect('chembase:add_item',cmpd_id=new_cmpd.id)
         else:
-            return HttpResponse(c.errors.as_data())
+            return HttpResponse(c)
     
-
+@login_required()
+@permission_required('chembase.can_see_compound')
+@permission_required('chembase.can_add_compound')
 def add_cmpd(request):
     if request.method=='POST':
         print(request)
@@ -189,7 +219,8 @@ def add_cmpd(request):
                                                     'sds_name':sds_name})
 
 
-
+@login_required()
+@permission_required('chembase.can_see_compound')
 def search_view(request):
     if request.method=='GET':
         form=SearchForm(request.GET)
@@ -384,6 +415,14 @@ def ghs_classes_transl(request):
             
         return JsonResponse(result)
             
+            
+def logout_view(request):
+    logout(request)
+    return redirect('chembase:login')
+    
+def account_view(request):
+    
+    return render(request,'chembase/account.html')
         
 
     

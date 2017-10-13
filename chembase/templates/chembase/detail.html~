@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<div class='main_part'>
+
 <div class='main'>
 <div class='title'>
 
@@ -41,7 +41,7 @@
 <div class='block_head'>Available</div>
 <div class='block'>
 <table>
-{% for item in compound.item_set(manager='citems').existing %}
+{% for item in exist %}
 <tr>
 <td class='value'>
 	{{item.localize}} 
@@ -68,16 +68,16 @@
 
 {% endfor %}
 </table>
-{% if not compound.existingItems %}
+{% if not exist %}
 <div>No items available</div>
 {% endif %}
 </div>
 
 
-{% if compound.item_set.deleted %}
+{% if del %}
 <div class='block_head' id='deleted_block_head'>Deleted</div>
 <div class='block' id='deleted_block'>
-{% for item in compound.item_set.deleted %}
+{% for item in del %}
 <div class='item'>{{item.localize}} - {{item.is_deleted}}</div>
 {% endfor %}
 </div>
@@ -143,12 +143,10 @@
 <p class='block_head'  id='listing_head'>Klasyfikacja - skrót</p>
 <div class='block' id='listing'>
 {% for class in compound.cmpd_class_set.all %}
-<p class='list_item'>{{class.ghs_class}} - {{class.number}}</p>
+<p class='list_item'>{{class.ghs_class.class_full_pl}} - {{class.number}}</p>
 {% endfor %}
 </div>
 </div>
-
-
 
 
 </div>

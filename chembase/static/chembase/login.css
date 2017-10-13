@@ -1,0 +1,80 @@
+div.main_box {
+  min-height: 700px;
+  overflow: hidden;
+  
+}
+
+div.login_box {
+  max-width: 450px;
+  margin: auto;
+  margin-top: 50px;
+  padding: 40px 30px;
+}
+
+p.block_head {
+  font-size: 24px;
+  font-family: var(--main-font-fam);
+  font-weight: lighter;
+  /*color: var(--text-extra-col);*/
+  color: white;
+  background-color: var(--box-head-col);
+  padding: 10px 15px;
+  
+}
+
+div.block {
+  display: block;
+  color: var(--text-extra-col);
+  font-size: 14px;
+  
+}
+
+p.error {
+  color: var(--text-highlight-col);
+}
+
+.block table {
+  margin: 20px auto;
+}
+
+.block table input {
+  padding: 3px 5px;
+}
+
+#pass_change input {
+  padding: 3px 5px;
+  width: 80%;
+  overflow: hidden;
+  display: block;
+  margin: auto;
+  margin-bottom: 10px;
+}
+
+#pass_change label {
+  margin-left: 30px;
+}
+
+.errorlist {
+  color: var(--text-highlight-col);
+  list-style-type: none;
+}
+
+div.field {
+  width: 100%;
+  overflow: hidden;
+  margin: 7px 3px;
+}
+
+div.label {
+  width: 200px;
+  overflow: hidden;
+  display: inline-block;
+  margin-left: 100px;
+}
+
+div.value {
+  width: 40%;
+  overflow: hidden;
+  display: block;
+}
+

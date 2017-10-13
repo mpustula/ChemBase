@@ -1,0 +1,120 @@
+{% extends "chembase/base.html" %}
+
+{% block content %}
+{% load static %}
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_search.css' %}">
+
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_add_cmpd.css' %}">
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_add_item.css' %}">
+
+<div class='main'>
+
+<h2>Add item</h2>
+
+<p class='control' id='names_ctrl'>Compound information:</p>
+
+<div class='names' id='cmpd_block'>
+<hr class='block_sep'>
+
+<div class='title'>
+
+<div class='image'>
+<img class='structure' src='{% static "/chembase/" %}{{compound.image }}' alt='structure'/>
+</div>
+
+<div class='names'>
+<h2>{{compound.name}}</h2>
+<p class='subtitle'>{{compound.subtitle}} </p>
+
+<p class='other'>Other names: {{compound.all_names}}</p>
+<p class='other'>PL: {{compound.pl_name}}{% if compound.pl_subtitle != "" %}, {{compound.pl_subtitle}}{% endif %}</p>
+
+</div>
+
+</div>
+
+
+<div class='label'>Compound Id: </div><div class='value'>{{compound.id}} </div>
+
+<div id='left_div'>
+<div class='label'>Formula: </div><div class='value'>{{compound.formulaHTML|safe}} </div>
+<div class='label'>Molecular weight: </div><div class='value'>{{compound.weight}} </div>
+<div class='label'>CAS: </div><div class='value'>{{compound.cas}} </div>
+</div>
+
+<div id='right_div'>
+<div class='label'>CSID: </div><div class='value'>{{compound.csid}} </div>
+<div class='label'>SMILES: </div><div class='value'>{{compound.smiles}} </div>
+<div class='label'>InChI: </div><div class='value'>{{compound.inchi}} </div>
+</div>
+
+
+<a id='full_info' target='_blank' href='{% url "chembase:detail" compound.id %}'>Click here to see more information about this compound</a>
+
+</div>
+
+<p class='control' id='item_ctrl'>Item information:</p>
+<div class='names' id='item_block'>
+<hr class='block_sep'>
+<form enctype="multipart/form-data" action="{% url 'chembase:cmpd_save' %}" method="post">
+{% csrf_token %}
+
+<div class='field'>
+{{item_form.quantity.errors}}
+<label for="{{item_form.quantity.id_for_label}}">Quantity:</label>
+{{item_form.quantity}}
+</div>
+
+<div class='field'>
+{{item_form.amount.errors}}
+<label for="{{item_form.amount.id_for_label}}">Amount (g or ml):</label>
+{{item_form.amount}}
+</div>
+
+<div class='field'>
+{{item_form.storage_temp.errors}}
+<label for="{{item_form.storage_temp.id_for_label}}">Storage temperature:</label>
+{{item_form.storage_temp}}
+</div>
+
+<div class='field' id='local'>
+{{item_form.room.errors}}
+<label for="{{item_form.room.id_for_label}}">Room:</label>
+{{item_form.room}}
+{{item_form.place.errors}}
+<label for="{{item_form.place.id_for_label}}">Shelf:</label>
+{{item_form.place}}
+{{item_form.place_num.errors}}
+<label for="{{item_form.place_num.id_for_label}}">Number:</label>
+{{item_form.place_num}}
+</div>
+
+<div class='field'>
+{{item_form.local.errors}}
+<label for="{{item_form.local.id_for_label}}">Localization:</label>
+{{item_form.local}}
+</div>
+
+
+<div class='field'>
+{{item_form.group.errors}}
+<label for="{{item_form.group.id_for_label}}">Group:</label>
+{{item_form.group}}
+</div>
+
+<div class='field'>
+{{item_form.hidden.errors}}
+<label for="{{item_form.hidden.id_for_label}}">Hidden:</label>
+{{item_form.hidden}}
+</div>
+
+
+</form>
+
+</div>
+
+</div>
+
+{% endblock %}
+
+

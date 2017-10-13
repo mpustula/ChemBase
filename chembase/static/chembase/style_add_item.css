@@ -1,0 +1,85 @@
+div.main {
+  overflow: hidden;
+}
+
+div#cmpd_block {
+  overflow: hidden;
+  width: 100%;
+  font-size: 14px;
+}
+
+p.other {
+  font-size: 14px;
+}
+
+div.names {
+  width: 70%;
+}
+
+hr.block_sep {
+  margin: 5px 0px;
+  width: 100%;
+}
+
+div.image {
+  width: 150px;
+  float: left;
+}
+img.structure {
+  width: 120px;
+}
+
+div#left_div {
+  width: 40%;
+  float: left;
+  margin: 5px 0px;
+}
+
+div#right_div {
+  margin: 5px 0px;
+  overflow: hidden;
+}
+
+div.value {
+  font-size: 14px;
+  overflow: hidden;
+}
+
+div.label {
+  width: 150px;
+}
+
+a#full_info {
+  width: 40%;
+  display: block;
+  margin-top: 10px;
+}
+
+div#item_block {
+  width: 100%;
+}
+
+div#local {
+  width: 100%;
+  overflow: hidden;
+  padding-left: 100px;
+}
+
+div#local input {
+  width: 15%;
+}
+
+
+div#local label {
+  width: 100px;
+}
+
+
+
+
+
+
+
+
+
+

@@ -71,6 +71,13 @@ div.main {
   padding-right: 100px;
   max-width: 1400px;
   margin: auto;
+  overflow: hidden;
+
+}
+
+div.main_content {
+  overflow: hidden;
+  min-height: 900px;
 }
 
 footer {
@@ -80,6 +87,9 @@ footer {
   margin-top: 50px;
   padding: 50px;
   text-align: center;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 
 div.navigation {
@@ -87,7 +97,8 @@ div.navigation {
 	display: block;
   margin: 0px;
   padding: 0px;
-  height: 100px;
+  height: 108px;
+  overflow: hidden;
 
 }
 
@@ -108,19 +119,34 @@ img.logo {
 	padding: 22px 16px;
 }
 
+div#user_info {
+  width: 60%;
+  float: right;
+  text-align: right;
+  margin: 0px 30px;
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--text-extra-col);
+}
+
+span#username {
+  font-weight: bold;
+  margin-right: 10px;
+}
 
 .navigation > ul {
     float: right;
     list-style-type: none;
     margin:0px;
-    padding-top: 58px;
-    overflow: hidden;
+    padding-top: 30px;
+    overflow: visible;
   
 }
 
 .navigation > li {
     float: right;
 }
+
 
 .navigation > li a {
     display: block;
@@ -287,11 +313,11 @@ div.two-cols {
 }
 
 p.list_item {
-  width: 50%;
+  width: 90%;
   color: var(--text-extra-col);
   float: left;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
 .control:hover {

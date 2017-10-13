@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<div class='main_part'>
+
 <div class='main'>
 <div class='title'>
 
@@ -143,12 +143,10 @@
 <p class='block_head'  id='listing_head'>Klasyfikacja - skrót</p>
 <div class='block' id='listing'>
 {% for class in compound.cmpd_class_set.all %}
-<p class='list_item'>{{class.ghs_class}} - {{class.number}}</p>
+<p class='list_item'>{{class.ghs_class.class_full_pl}} - kategoria {{class.number}}</p>
 {% endfor %}
 </div>
 </div>
-
-
 
 
 </div>

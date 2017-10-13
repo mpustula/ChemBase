@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 import re
 import sys, os
 from subprocess import call
@@ -96,13 +97,13 @@ class Compound(models.Model):
     weight=models.DecimalField("Molecular weight",max_digits=10,decimal_places=4,null=True,blank=True)
     density=models.CharField(max_length=100,blank=True)
     
-    image=models.FilePathField(max_length=200,blank=True)
+    image=models.CharField(max_length=300,blank=True)
     
     inchi=models.CharField('InChi',max_length=1000,blank=True)
     smiles=models.CharField('SMILES',max_length=1000,blank=True)
     molfile=models.TextField(blank=True)
     
-    sds=models.FilePathField('SDS',max_length=200,blank=True)
+    sds=models.CharField('SDS',max_length=300,blank=True)
     sds_name=models.CharField(max_length=2000,blank=True)
     sds_cas=models.CharField(max_length=100,blank=True)
     
@@ -125,6 +126,8 @@ class Compound(models.Model):
     adr_group=models.CharField(max_length=15,blank=True)
     
     dailyused=models.CharField("Daily usage",max_length=15,blank=True)
+    
+    author=models.ForeignKey(User,on_delete=models.PROTECT,default=1)
     
     extra_methods=ExtraCompoundsManager()
     objects=models.Manager()
@@ -184,7 +187,13 @@ class Compound(models.Model):
         return len(self.item_set(manager='citems').existing())
         
     def set_registered(self,true_or_false):
-        query_set=Ewidencja.objects.filter(compound=self)
+        current_state=self.is_registered()
+        if current_state!=true_or_false:
+            if current_state:
+                query_set=Ewidencja.objects.filter(compound=self)
+                query_set.delete()
+            if true_or_false:
+                Ewidencja.objects.create(compound=self,text='ewidencja')
         
     def is_registered(self):
         query_set=Ewidencja.objects.filter(compound=self)
@@ -361,6 +370,18 @@ class History(models.Model):
     
     class Meta:
         get_latest_by = 'date'
+        
+class SystemLog(models.Model):
+    model_name=models.CharField(max_length=50)
+    model_instance_id=models.IntegerField()
+    author=models.ForeignKey(User,on_delete=models.PROTECT)
+    date=models.DateTimeField(auto_now_add=True)
+    action=models.CharField(max_length=300)
+    comment=models.CharField(max_length=1000,blank=True)
+    
+    def __str__(self):
+        return str(self.date)
+    
 
     
 

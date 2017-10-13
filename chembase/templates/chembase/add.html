@@ -9,6 +9,8 @@
 <div class='main'>
 <h2>Add new item</h1>
 
+
+
 <div class='add_box' id='first_box'>
 <p class='intro'>Type in a name or CAS number of compound you want to add</p>
 <form action="{% url 'chembase:add' %}" method="post" id='cas_form'>
@@ -67,7 +69,55 @@ you can perform a ChemSpider database lookup, or add the compound by yourself. <
 <div class='add_box' id='hide' style='display:none'>
 <div class='add_box' id='wait_box'>
 <p class='intro'>The ChemSpider database query is performed. Please wait. </p>
+
+<!-- spinner 2 -->
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/spinner2.css' %}">
+
+<div class="container">
+  
+  <div class="canvas canvas1">
+    <div class="spinner1 spinnerMax">
+      <div class="spinner1 spinnerMid">
+        <div class="spinner1 spinnerMin"></div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+  
+  
+<!--
+  <div class="canvas canvas2">
+    <div class="spinner2"></div>   
+    <div class="hourHand"></div>
+    <div class="dot"></div>
+  </div>
+  
+  <div class="canvas canvas3">
+    <div class="spinner3"></div>   
+  </div>
+  
+  <div class="canvas canvas4">
+    <div class="spinner4"></div>   
+  </div>
+  
+  <div class="canvas canvas5">
+    <div class="spinner5"></div>   
+  </div>
+  
+  <div class="canvas canvas6">
+    <div class="spinner6 p1"></div>
+    <div class="spinner6 p2"></div>
+    <div class="spinner6 p3"></div>
+    <div class="spinner6 p4"></div>
+  </div>
+  
+</div>
+
+-->
+<!--
 <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+-->
 </div>
 </div>
 

@@ -3,6 +3,7 @@ div.add_box {
   height: 700px;
   margin: auto;
   margin-top: 30px;
+  margin-bottom: 30px;
   padding: 15px;
   box-shadow: 3px 3px 25px grey;
   position: relative;
@@ -16,10 +17,11 @@ div.add_box {
   }
 
 #wait_box {
-  width: 35%;
-  height: 120px;
+  width: 45%;
+  height: 300px;
   margin-top: 200px;
   border-radius: 10px;
+  box-shadow: unset;
 }
 
 #wait_box p {

@@ -5,16 +5,14 @@
 {{ form.media.css }}
 {% load static %}
 
+<meta charset="UTF-8">
+<meta name="author" content="marcin" >
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title> ChemBase </title>
 <link rel='stylesheet' type="text/css" href="{% static 'chembase/style.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="https://fonts.googleapis.com/css?family=Cabin|Cabin+Condensed|Roboto|Roboto+Condensed" rel="stylesheet"> 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
-<style type="text/css">
-    select {
-      width: 200px;
-    }
-  </style>
 </head>
 
 <body>
@@ -29,16 +27,21 @@
     <div class="navigation">
     <img class='logo' src='{% static "/chembase/icons/flask.png" %}' alt="icon">
     <div class='logo'>ChemBase 3.0 Reagents database</div>
+    {% if user.is_authenticated %}
+    	<div id='user_info'>You are logged as <span id='username'>{{user.first_name}} {{user.last_name}}</span><a href="{% url 'chembase:logout' %}">logout</a></div>
+	 {% else %}
+	 	<div id='user_info'>Anonymous user</div>
+	 {% endif %}
       <ul class='navigation'>
       
         <li>
-          <a href="https://www.djangoproject.com/start/overview/">Help</a>
+          <a href="">Help</a>
         </li>
         <li>
         {% if user.is_authenticated %}
-    
+    			<a href='{% url "chembase:account" %}'>Your account</a>
     		{% else %}
-         
+         	<a href='{% url "chembase:login" %}'>Log in</a>
         {% endif %}
         </li>
         <li class="active">
@@ -48,7 +51,7 @@
          	<a href='{% url "chembase:add" %}'>Add new</a>
         </li>
         <li>
-          <a href="https://www.djangoproject.com/community/">About</a>
+          <a href="">About</a>
         </li>
  
       </ul>
@@ -56,14 +59,15 @@
   </div>
 </div>
 
+<div class='main_content'>
 {% block content %}
 
 {% endblock %}
-
+</div>
 
 
 <footer>
-Info
+&#9400; Marcin Pustuła 2017
 </footer>
 
 
