@@ -9,7 +9,7 @@ import pandas as pd
 #from .models import H_Pict_Class
 
 def transform_sds(txt_file):
-    ghs_codes=pd.read_csv('chembase/static/chembase/data/GHSCodes.csv',sep=';',index_col='Code')
+    ghs_codes=pd.read_csv('/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/data/GHSCodes.csv',sep=';',index_col='Code')
     ghs_codes=ghs_codes.fillna('')
 
     f=open(txt_file,'r')  
@@ -104,8 +104,9 @@ def transform_sds(txt_file):
                     clas_df.loc[clas,'=']='='
                     clas_df.loc[clas,'number']=''
     #clas_text_extr=';'.join(clas_ext_list)
-    #print(clas_df)
-    clas_extr_dict={str(x):clas_df.loc[x,'number'] for x in clas_df.index.tolist()}
+    print(clas_df)
+    clas_extr_dict={'%d'%(x):clas_df.loc[x,'number'] for x in clas_df.index.tolist()}
+    print(clas_extr_dict)
     #print(clas_extr_dict)
     #clas_text_extr=clas_df.to_string(header=False)
         
@@ -128,7 +129,7 @@ def transform_sds(txt_file):
     #print pict_df
     #print pictures
     #print pictures
-    pic_list=[str(x) for x in pictures.index.tolist()]
+    pic_list=['%d'%(x) for x in pictures.index.tolist()]
     print(pic_list)
         
     un_number='ERROR'

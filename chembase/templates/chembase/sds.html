@@ -1,0 +1,22 @@
+{% extends "chembase/base.html" %}
+
+{% block content %}
+{% load static %}
+{% load chembase_tags %}
+
+
+
+<div class='main'>
+<h1>SDS Files:</h1>
+{% for item in list %}
+
+<p class='sds_item'>
+<a href='/static/chembase/data/sds/{{item}}'>{{item}}</a>
+</p>
+{% endfor %}
+
+</div>
+{% endblock %}
+
+
+

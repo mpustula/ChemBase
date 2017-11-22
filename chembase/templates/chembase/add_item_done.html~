@@ -1,0 +1,77 @@
+{% extends "chembase/base.html" %}
+
+{% block content %}
+{% load static %}
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_search.css' %}">
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_add_cmpd.css' %}">
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_add_item.css' %}">
+<script src="{% static 'chembase/script_add_item.js' %}"></script>
+
+<div class='main'>
+
+<h2>Item was added successfully</h2>
+
+<p class='control' id='names_ctrl'>Compound information:</p>
+
+<div class='names' id='cmpd_block'>
+<hr class='block_sep'>
+
+<div class='title'>
+
+<div class='image'>
+<img class='structure' src='{% static "/chembase/" %}{{compound.image }}' alt='structure'/>
+</div>
+
+<div class='names'>
+<h2>{{compound.name}}</h2>
+<p class='subtitle'>{{compound.subtitle}} </p>
+
+<p class='other'>Other names: {{compound.all_names}}</p>
+<p class='other'>PL: {{compound.pl_name}}{% if compound.pl_subtitle != "" %}, {{compound.pl_subtitle}}{% endif %}</p>
+
+</div>
+
+</div>
+
+
+<div class='label'>Compound Id: </div><div class='value'>{{compound.id}} </div>
+
+<div id='left_div'>
+<div class='label'>Formula: </div><div class='value'>{{compound.formulaHTML|safe}} </div>
+<div class='label'>Molecular weight: </div><div class='value'>{{compound.weight}} </div>
+<div class='label'>CAS: </div><div class='value'>{{compound.cas}} </div>
+</div>
+
+<div id='right_div'>
+<div class='label'>CSID: </div><div class='value'>{{compound.csid}} </div>
+<div class='label'>SMILES: </div><div class='value'>{{compound.smiles}} </div>
+<div class='label'>InChI: </div><div class='value'>{{compound.inchi}} </div>
+</div>
+
+
+<a id='full_info' target='_blank' href='{% url "chembase:detail" compound.id %}'>Click here to see more information about this compound</a>
+
+</div>
+
+<p class='control' id='item_ctrl'>Item information:</p>
+<div class='names' id='item_block'>
+<hr class='block_sep'>
+
+<div id='left_div'>
+<div class='label'>Item id: </div><div class='value'>{{item.id}} </div>
+<div class='label'>Location: </div><div class='value'>{{item.local}} </div>
+<div class='label'>Quantity: </div><div class='value'>{{item.quantity}} </div>
+<div class='label'>Amount: </div><div class='value'>{{item.amount}} </div>
+
+<div class='label'>Group: </div><div class='value'>{{item.group}} </div>
+<div class='label'>Hidden: </div><div class='value'>{{item.hidden}} </div>
+<div class='label'>Comment: </div><div class='value'>{{item.comment}} </div>
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}
+
+

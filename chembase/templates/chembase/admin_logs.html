@@ -1,0 +1,45 @@
+{% extends "chembase/base.html" %}
+
+{% block content %}
+{% load static %}
+
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_admin.css' %}">
+
+<div class='main'>
+<div class='title'>
+
+<h1>System administration</h1>
+
+
+<h2>System logs:</h2>
+
+<table class='log_table' summary="System logs" >
+<tr>
+<th>Time</th>
+<th>Model</th>
+<th>Compound</th>
+<th>Item</th>
+<th>Action</th>
+<th>Author</th>
+<th>Comment</th>
+</tr>
+{% for item in system_log %}
+<tr>
+<td><span class='log_date'>{{item.date|date:'Y-m-d H:i'}}</span></td>
+<td>{{item.model}}</td>
+<td><a href="{% url 'chembase:detail' item.compound_id %}" >{{item.compound_name}}</a></td>
+<td>{{item.item}}</td>
+<td>{{item.action}}</td>
+<td>{{item.author}}</td>
+<td>{{item.comment}}</td>
+
+</tr>
+{% endfor %}
+
+</table>
+</div>
+</div>
+
+
+</div>
+{% endblock %}

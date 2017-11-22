@@ -1,0 +1,192 @@
+.server_log_entry {
+  color: var(--text-extra-col);
+  font-family: var(--main-font-fam-cond);
+  font-weight: lighter;
+  margin: 1px 10px;
+  font-size: 14px;
+
+}
+
+.log_table tr:nth-child(odd) {
+  background-color: #f2f2f2
+}
+
+.log_table {
+  width: 100%;
+  border-collapse: collapse;
+  /*font-weight: lighter;*/
+  margin: 30px 0px
+}
+
+.log_table th {
+  height: 50px;
+  color: white;
+  background-color: var(--box-head-col);
+  
+}
+
+.log_table td {
+  height: 40px;
+  padding: 3px 10px;
+  text-align: center;
+  font-size: 11pt;
+}
+
+.fa-check {
+  color: green;
+}
+
+.fa-times {
+  color: darkred;
+}
+
+#add_new_user {
+  padding: 10px 5px;
+  width: 150px;
+  margin-bottom: 10px;
+  float: right;
+}
+
+div.field {
+  margin: 10px 5px;
+  padding: 4px 2px;
+  border: 0px solid;
+}
+
+div.field label {
+  width: 150px;
+  display: inline-block;
+  color: var(--text-extra-col);
+  font-family: var(--aux-font-fam);
+  border: 0px solid;
+  vertical-align: top;
+  
+}
+
+div.field input {
+  width: 400px;
+  display: inline-block;
+}
+
+#id_groups, #id_user_permissions, #id_own_groups {
+  width: 420px;
+}
+
+#id_group, #id_permission {
+  width: 600px;
+}
+
+
+#id_is_active, #id_is_staff, #id_is_superuser {
+  width: unset;
+  align: left;
+  
+}
+
+
+#permissions_label {
+  vertical-align: top;
+}
+
+#perm_label_field {
+  width: 150px;
+  display: inline-block;
+  padding-right: 0px;
+  vertical-align: top;
+  margin-left: 0px;
+}
+
+#perm_field {
+  width: 900px;
+  display: inline-block;
+  margin-left: 0px;
+}
+
+.box_head {
+  width: 100%;
+  margin: 0px;
+  background-color: var(--box-head-col);
+  color: white;
+  border: 1px solid;
+  border-color: var(--box-head-col);
+  padding: 5px;
+}
+
+.box_head:hover {
+  cursor: pointer;
+}
+
+#edit_permission {
+  width: 100%;
+  background-color: var(--search-box-col);
+  border-bottom-left-radius: var(--box-border-radius);
+  border-bottom-right-radius: var(--box-border-radius);
+  margin: 10px 0px;
+  margin-top: 0px;
+  border: 1px solid;
+  border-color: var(--box-head-col);
+  padding: 5px;
+  padding-top: 0px;
+  display: none;
+}
+
+#save_perm {
+  padding: 3px;
+  width: 100px;
+  margin: auto;
+  display: block;
+
+}
+
+#permissions {
+  margin-top: 10px;
+}
+
+
+#perm_table {
+  width: 101.5%;
+  margin:  0px;
+  border: 1px solid;
+  border-color: var(--box-head-col);
+}
+
+#perm_table td {
+  height: 30px;
+}
+
+#perm_table .perm_code {
+  width: 30px;
+}
+
+#del_perm, #edit_perm {
+  width: 80px;
+}
+
+#user_submit {
+  margin: 30px 5px;
+  padding: 10px 40px;
+}
+
+#user_submit[disabled] {
+  opacity: 0.4;
+}
+
+div#password_field {
+  width: 600px;
+  display: inline-block;
+}
+
+div.password_errors {
+  width: 400px;
+  display: inline-block;
+  color: darkred;
+}
+
+#password_field {
+  margin-top: 20px;
+}
+
+#password_commit_field {
+  margin-bottom: 35px;
+}
+

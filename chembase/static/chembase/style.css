@@ -55,15 +55,68 @@ input[type=submit], input[type=button]{
   opacity: 0.9;
 }
 
+.item_form {
+  display: inline-block;
+}
+
+input.small {
+  padding: 0px 5px;
+  width: 90px;
+  font-weight: unset;
+  background-color: var(--box-head-col);
+  border-color: var(--box-head-col);
+  display: inline-block;
+
+}
+
+
 input[type=submit]:hover, input[type=button]:hover {
   color: var(--text-highlight-col);
   background-color: white;
   cursor: pointer;
 }
 
+input.small:hover {
+  color: var(--box-head-col);
+}
+
+input[type=submit][disabled=true], input[type=button][disabled=true]{
+  color: white;
+  background-color: var(--text-highlight-col);
+  cursor: unset;
+}
+
+input[disabled=true] {
+  opacity: 0.5;
+}
+
+input.small[type=submit][disabled=true]{
+  color: white;
+  background-color: var(--box-head-col);
+
+}
+
+input.small[disabled=true]:hover {
+  background-color: var(--box-head-col);
+  color: white;
+  cursor:unset;
+}
+
+
+
+
+
+
 div.topband {
   background-color: var(--grey-back-col);
   overflow: hidden;
+}
+
+
+
+div.main_content {
+  overflow: hidden;
+  min-height: 900px;
 }
 
 div.main {
@@ -71,14 +124,11 @@ div.main {
   padding-right: 100px;
   max-width: 1400px;
   margin: auto;
-  overflow: hidden;
+
 
 }
 
-div.main_content {
-  overflow: hidden;
-  min-height: 900px;
-}
+
 
 footer {
   background-color:  var(--footer-col);
@@ -160,6 +210,12 @@ span#username {
 
 .navigation a:hover {
     background-color: var(--main-col);
+}
+
+#admin_link {
+  font-weight: lighter;
+  color: var(--text-extra-col);
+  font-family: var(--main-font-fam-cond);
 }
 
 
@@ -271,7 +327,9 @@ a:visited {
   opacity: 0.6;
 }
 
-
+tr {
+  height: 25px;
+}
 
 
 div.image {

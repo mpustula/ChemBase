@@ -1,7 +1,61 @@
 {% extends "chembase/base.html" %}
 
 {% block content %}
+{% load static %}
+<script src="{% static 'chembase/script_detail.js' %}"></script>
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_side_box.css' %}">
 
+<div class='side_band'>
+<div class='block_head'>Control panel</div>
+<div class='box'>
+<p class='title'>Options:</p>
+
+<form action="{% url 'chembase:add_item' compound.id %}" method="post" class='options_form'>
+{% csrf_token %}
+<input type='hidden' name='type' value='new' />
+<input type='hidden' name='item_id' value='' />
+<input class ='small' type='submit' value='Add new item' {% if not can_add %} disabled='true' {% endif %} />
+</form>
+
+<form action="{% url 'chembase:add_cmpd' %}" method="post" class='options_form'>
+{% csrf_token %}
+<input type='hidden' name='type' value='edit' />
+<input type='hidden' name='cmpd_id' value={{compound.id}} />
+<input type='hidden' name='output' value='update' />
+<input type='hidden' name='redirect' value="{% url 'chembase:detail' compound.id %}" />
+<input class ='small' type='submit' value='Edit compound' {% if not can_edit %} disabled='true' {% endif %} />
+</form>
+
+<form action="{% url 'chembase:add_cmpd' %}" method="post" class='options_form'>
+{% csrf_token %}
+<input type='hidden' name='type' value='edit' />
+<input type='hidden' name='cmpd_id' value={{compound.id}} />
+<input type='hidden' name='output' value='new' />
+<input type='hidden' name='redirect' value="" />
+<input class ='small' type='submit' value='Add new compound from this data' {% if not can_add_cmpd %} disabled='true' {% endif %} />
+</form>
+
+<p class='title'>Compound log:</p>
+{% for item in log_entries %}
+<div class='log_entry'><span class='log_date'>{{item.date|date:'Y-m-d H:i'}}</span>
+	 - {{item.action}} (<span class='log_auth'>{{item.author}}</span>)
+{{item.comment}}
+</div>
+{% endfor %}
+
+<p class='title'>Items log:</p>
+{% for item in item_log_entries %}
+<div class='log_entry'><span class='log_date'>{{item.date|date:'Y-m-d H:i'}}</span>
+	 - {{item.action}} {{item.item_loc}} (<span class='log_date'>{{item.author}}</span>)
+{{item.comment}}
+
+</div>
+{% endfor %}
+
+
+</div>
+
+</div>
 
 <div class='main'>
 <div class='title'>
@@ -15,7 +69,6 @@
 
 </div>
 <div class='image'>
-{% load static %}
 <img class='structure' src='{% static "/chembase/" %}{{compound.image }}' alt='structure'/>
 </div>
 
@@ -43,27 +96,45 @@
 <table>
 {% for item in exist %}
 <tr>
+<td class='button'>
+
+<form action="{% url 'chembase:add_item' compound.id %}" method="post" class='item_form'>
+{% csrf_token %}
+<input type='hidden' name='type' value='edit' />
+<input type='hidden' name='item_id' value={{item.a.id}} />
+<input class ='small' type='submit' value='Edit item' {% if not item.edit == True %} disabled='true' {% endif %} />
+</form>
+
+<form action="{% url 'chembase:item_delete' %}" method="post" class='item_form'>
+{% csrf_token %}
+<input type='hidden' name='action' value='delete' />
+<input type='hidden' name='item_id' value={{item.a.id}} />
+<input class ='small' type='submit' value='Delete item' id='del_item' {% if not item.edit == True %} disabled='true' {% endif %} />
+</form>
+
+</td>
 <td class='value'>
-	{{item.localize}} 
+	{{item.a.localize}} 
 </td>
 <td class='label'>
-	{% if item.amount %}
-		{% if item.quantity %}
-			{{item.quantity}}
+	{% if item.a.amount %}
+		{% if item.a.quantity %}
+			{{item.a.quantity}}
 		{% else %}
 			1
 		{% endif %}
-		x {{item.amount}} g (ml)
+		x {{item.a.amount}} g (ml)
 	{% endif %}
 </td>
 <td class='label'>
-	{% if item.annotation_set.all %}
-		{% for ann in item.annotation_set.all %}
+	{% if item.a.annotation_set.all %}
+		{% for ann in item.a.annotation_set.all %}
 			{{ann.annotation}}
 		{% endfor %}
 	{% endif %}
 
 </td>
+
 </tr>
 
 {% endfor %}
@@ -77,9 +148,52 @@
 {% if del %}
 <div class='block_head' id='deleted_block_head'>Deleted</div>
 <div class='block' id='deleted_block'>
+<table>
 {% for item in del %}
-<div class='item'>{{item.localize}} - {{item.is_deleted}}</div>
+<tr>
+<td class='button'>
+
+<form action="{% url 'chembase:add_item' compound.id %}" method="post" class='item_form'>
+{% csrf_token %}
+<input type='hidden' name='type' value='edit' />
+<input type='hidden' name='item_id' value={{item.a.id}} />
+<input class ='small' type='submit' value='Edit item' {% if not item.edit == True %} disabled='true' {% endif %} />
+</form>
+
+<form action="{% url 'chembase:item_delete' %}" method="post" class='item_form' >
+{% csrf_token %}
+<input type='hidden' name='action' value='restore' />
+<input type='hidden' name='item_id' value={{item.a.id}} />
+<input class ='small' type='submit' value='Restore item' id='rest_item' {% if not item.edit == True %} disabled='true' {% endif %} />
+</form>
+
+</td>
+<td class='value'>
+	{{item.a.localize}} 
+</td>
+<td class='label'>
+	{% if item.amount %}
+		{% if item.a.quantity %}
+			{{item.a.quantity}}
+		{% else %}
+			1
+		{% endif %}
+		x {{item.a.amount}} g (ml)
+	{% endif %}
+</td>
+<td class='label'>
+	{% if item.a.annotation_set.all %}
+		{% for ann in item.a.annotation_set.all %}
+			{{ann.annotation}}
+		{% endfor %}
+	{% endif %}
+
+</td>
+
+</tr>
+
 {% endfor %}
+</table>
 </div>
 {% endif %}
 
@@ -99,7 +213,6 @@
 </div>
 
 <div class='one-col'>
-
 
 <p class='block_head'>{{compound.h_numbers}}</p>
 <p class='block'>{{compound.h_text}}</p>
@@ -143,7 +256,7 @@
 <p class='block_head'  id='listing_head'>Klasyfikacja - skrót</p>
 <div class='block' id='listing'>
 {% for class in compound.cmpd_class_set.all %}
-<p class='list_item'>{{class.ghs_class.class_full_pl}} - kategoria {{class.number}}</p>
+<p class='list_item'>{{class.ghs_class.class_full_en}} - category {{class.number}}</p>
 {% endfor %}
 </div>
 </div>

@@ -1,0 +1,39 @@
+div.side_band {
+  width: 400px;
+  float: left;
+  margin: 20px 50px;
+  height: 100%;
+  min-height: 100%;
+}
+
+div.box {
+  height: 100%;
+  padding: 5px 8px;
+  border: 2px solid;
+  border-color: var(--box-head-col);
+  border-bottom-left-radius: var(--box-border-radius);
+  border-bottom-right-radius: var(--box-border-radius);
+}
+
+div.side_band div.block_head {
+  margin: 0px;
+  
+}
+
+p.title {
+  margin: 5px 0px;
+  margin-top: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  color: var(--text-extra-col);
+}
+
+div.log_entry {
+  font-size: 14px;
+}
+
+.side_band input[type=submit] {
+  width: 300px;
+  margin: 3px 0px;
+  padding: 3px 2px;
+}

@@ -48,7 +48,7 @@
 </table>
 </div>
 
-{% if can_add_cmpd %}
+{% if not can_add_cmpd %}
 <p class='intro'>If any of the compounds listed above do not match your query, 
 you can perform a ChemSpider database lookup, or add the compound by yourself. </p>
 {% endif %}

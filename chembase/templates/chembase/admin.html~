@@ -1,0 +1,70 @@
+{% extends "chembase/base.html" %}
+
+{% block content %}
+{% load static %}
+
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_admin.css' %}">
+
+<div class='main'>
+<div class='title'>
+
+<h1>System administration</h1>
+
+<h2>General information:</h2>
+
+<h3>Compounds</h3>
+
+Total number: {{compounds_number}}, active: {{existing_cmpds}}
+
+<h2>System logs:</h2>
+
+{% for item in system_log %}
+
+<p class='server_log_entry'><span class='log_date'>{{item.date|date:'Y-m-d H:i'}}</span> 
+: {{item.action}} 
+{% if item.item != '' %}
+item {{item.item}} of
+{% endif %}
+compound <a href="{% url 'chembase:detail' item.compound_id %}" >{{item.compound_name}}</a>
+by {{item.author}}
+
+</p>
+
+
+
+
+
+
+{% endfor %}
+
+<a href="{% url 'chembase:admin_logs' %}">Show more logs</a>
+
+<h2>Server status</h2>
+<a href='/server-status/'>Go to Apache2 status page</a>
+
+<h3>Access log file:</h3>
+
+{% for item in access_log %}
+
+<p class='server_log_entry'>{{item}}</p>
+
+{% endfor %}
+<a href=''>Show entire file</a>
+
+<h3>Error log file:</h3>
+{% for item in error_log %}
+
+<p class='server_log_entry'>{{item}}</p>
+
+{% endfor %}
+<a href=''>Show entire file</a>
+
+
+<a href='/admin/'>Go to django admin site</a>
+
+</div>
+</div>
+
+
+</div>
+{% endblock %}

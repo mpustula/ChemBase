@@ -3,6 +3,7 @@
 <html>
 <head>
 {{ form.media.css }}
+{{ pr_form.media.css }}
 {% load static %}
 
 <meta charset="UTF-8">
@@ -11,7 +12,7 @@
 <title> ChemBase </title>
 <link rel='stylesheet' type="text/css" href="{% static 'chembase/style.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link href="https://fonts.googleapis.com/css?family=Cabin|Cabin+Condensed|Roboto|Roboto+Condensed" rel="stylesheet"> 
+<link href="https://fonts.googleapis.com/css?family=Cabin|Cabin+Condensed|Roboto+Condensed:300,400|Roboto:100,300,400" rel="stylesheet"> 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 
@@ -34,6 +35,9 @@
 	 {% endif %}
       <ul class='navigation'>
       
+      	<li>
+          <a id='admin_link'href='{% url "chembase:admin" %}'>Admin site</a>
+        </li>
         <li>
           <a href="">Help</a>
         </li>
@@ -60,6 +64,8 @@
 </div>
 
 <div class='main_content'>
+
+
 {% block content %}
 
 {% endblock %}
@@ -72,5 +78,6 @@
 
 
 {{form.media.js}}
+{{pr_form.media.js}}
 </body>
 </html>

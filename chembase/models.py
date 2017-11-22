@@ -1,6 +1,7 @@
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 import re
 import sys, os
 from subprocess import call
@@ -22,7 +23,42 @@ from .functions import transform_sds
 #from rdkit.Chem import rdqueries
 # Create your models here.
 
+class OwnershipGroup(models.Model):
+    name=models.CharField(max_length=500)
+    
+    def __str__(self):
+        return self.name
+        
+class UserProfile(models.Model):
+    user=models.OneToOneField(User, on_delete=models.CASCADE)
+    own_groups=models.ManyToManyField(OwnershipGroup,blank=True)
+    
+    def __str__(self):
+        return str(self.user.username)+': '+str(self.own_groups.all())
+        
+        
+class ExtraPermissions(models.Model):
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
+    group=models.ForeignKey(OwnershipGroup, on_delete=models.CASCADE,blank=True)
+    permission=models.ForeignKey(Permission, on_delete=models.PROTECT,blank=True)
+    
+    def __str__(self):
+        return str(self.user.username)+': '+str(self.group.name)+', '+str(self.permission)
+        
+    def check_perm(user,perm,group=None):
+        
+        q=Q(user__exact=user,permission__codename__exact=perm.split('.')[1])
+        
+        if group:
+            q=q & Q(group__exact=group)
+        
+        user_extra_perms=ExtraPermissions.objects.filter(q)
 
+        if user_extra_perms:
+            return True
+        else:
+            return False
+            
 
 class Pictogram(models.Model):
     code=models.CharField(max_length=10)
@@ -50,6 +86,13 @@ class ExtraCompoundsManager(models.Manager):
         final_set=[]
         for compound in qset:
             if compound.how_many_items()!=0:
+                final_set.append(compound)
+        return final_set
+        
+    def allowed_cmpds(self,user,qset):
+        final_set=[]
+        for compound in qset:
+            if compound.how_many_allowed(user)!=0:
                 final_set.append(compound)
         return final_set
         
@@ -186,6 +229,21 @@ class Compound(models.Model):
     def how_many_items(self):
         return len(self.item_set(manager='citems').existing())
         
+    def how_many_allowed(self,user):
+        qset=self.item_set.all()
+        return len(self.item_set(manager='citems').allowed(user,qset))
+        
+    def edit_allowed(self,user):
+        item_set=self.item_set.all()
+        allowed=True
+        for item in item_set:
+            if not item.is_allowed(user,'chembase.change_item'):
+                allowed=False
+                break
+        
+        return allowed
+            
+        
     def set_registered(self,true_or_false):
         current_state=self.is_registered()
         if current_state!=true_or_false:
@@ -208,7 +266,7 @@ class Compound(models.Model):
         
         if png_data:
             image_png=png_data
-            temp_image='chembase/static/chembase/images/temp_images/temp.png'
+            temp_image='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp.png'
             with open(temp_image, 'wb+') as destination:
                 destination.write(image_png)
                 #for chunk in image_png.chunks():
@@ -225,15 +283,15 @@ class Compound(models.Model):
             indigo.setOption("render-relative-thickness", 1.2)
             indigo.setOption("render-bond-line-width", 1.5)
             
-            file_name='chembase/static/chembase/images/temp_images/temp.png'
+            file_name='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp.png'
             #file_name='temp.png'
             renderer.renderToFile(mol, file_name)
 
-        image_path='/static/chembase/images/temp_images/temp.png?timestamp=' + str(timezone.now())
+        image_path='/static/chembase/temp/temp.png?timestamp=' + str(timezone.now())
         return image_path
         
     def save_sds(sdsfile):
-        file_base='chembase/static/chembase/sds/temp_sds/temp'
+        file_base='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp.png'
         file_name=file_base+'.pdf'
         file_txt=file_base+'.txt'
         with open(file_name, 'wb+') as destination:
@@ -245,13 +303,13 @@ class Compound(models.Model):
         output=transform_sds(file_txt)
         
         return output
-        
+    
 
 
     def clean_formula(formula):
         i=0
         j=0
-        el_data=pd.read_csv("chembase/static/chembase/data/elementlist.csv")
+        el_data=pd.read_csv("/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/data/elementlist.csv")
         new_df=pd.DataFrame(columns=['Sym','Num','Order'])
         
         par=True
@@ -320,7 +378,20 @@ class ItemManager(models.Manager):
             if item.is_deleted():
                 del_items.append(item)              
         return del_items
-            
+        
+    def allowed(self,user,qset):
+        allowed_items=[]
+        for item in qset:
+            if item.is_allowed(user,'chembase.can_see_item'):
+                if item.is_allowed(user,'chembase.change_item'):
+                    allowed_items.append({'a':item,'edit':True})
+                else:
+                    allowed_items.append({'a':item,'edit':False})
+        return allowed_items
+        
+ 
+        
+        
 class Item(models.Model):
     compound=models.ForeignKey(Compound,on_delete=models.PROTECT)
     room=models.CharField(max_length=20)
@@ -328,11 +399,16 @@ class Item(models.Model):
     place_num=models.CharField(max_length=20)
             
     local=models.CharField(max_length=65,blank=True)
-    quantity=models.IntegerField(blank=True)
-    amount=models.DecimalField(max_digits=10,decimal_places=3,blank=True)
+    
+    quantity=models.IntegerField(blank=True,null=True)
+    amount=models.DecimalField(max_digits=10,decimal_places=3,blank=True,null=True)
+    
     storage_temp=models.CharField(max_length=10,blank=True)
+    
     group=models.ForeignKey(Group,on_delete=models.PROTECT,blank=True,null=True)
     hidden=models.BooleanField()
+    
+    owner=models.ForeignKey(OwnershipGroup,on_delete=models.PROTECT,default=2)
     
     objects = models.Manager()  # Default Manager
     citems = ItemManager()
@@ -340,9 +416,19 @@ class Item(models.Model):
     class Meta:
         ordering = ['group']
           
+    def __str__(self):
+        return self.compound.__str__()+' - '+self.local
     
     def localize(self):
         return self.room+'-'+self.place+'-'+self.place_num
+        
+    def delete(self):
+        del_item=History(item=self,action='1')
+        del_item.save()
+        
+    def restore(self):
+        del_item=History(item=self,action='restored')
+        del_item.save()
     
     def is_deleted(self):
         log_entries=self.history_set.all()
@@ -354,10 +440,21 @@ class Item(models.Model):
                 return 0
         else:
             return 0
+            
+    def is_allowed(self,user,perm):
+        item_owner=self.owner         
+            
+        return ExtraPermissions.check_perm(user,perm,item_owner)
+
+            
                     
 class Annotation(models.Model):
     item=models.ForeignKey(Item,on_delete=models.CASCADE)
     annotation=models.TextField(blank=True)
+    
+    def __str__(self):
+        
+        return self.item.__str__()+' - '+self.annotation
     
 class Ewidencja(models.Model):
     compound=models.ForeignKey(Compound,on_delete=models.CASCADE)
@@ -365,7 +462,7 @@ class Ewidencja(models.Model):
     
 class History(models.Model):
     item=models.ForeignKey(Item,on_delete=models.CASCADE)
-    date=models.DateTimeField()
+    date=models.DateTimeField(auto_now_add=True)
     action=models.CharField(max_length=30)
     
     class Meta:
@@ -380,7 +477,10 @@ class SystemLog(models.Model):
     comment=models.CharField(max_length=1000,blank=True)
     
     def __str__(self):
-        return str(self.date)
+        return str(self.date)+' - '+self.model_name+' '+str(self.model_instance_id)
+        
+    class Meta:
+        get_latest_by = 'date'
     
 
     

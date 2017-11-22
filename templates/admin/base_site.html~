@@ -1,0 +1,12 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+{% load static %}
+
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style.css' %}">
+<h1 id="site-name"><a href="{% url 'admin:index' %}">ChemBase 3.0 - Administrator page</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

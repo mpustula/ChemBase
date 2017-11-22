@@ -18,6 +18,7 @@ div.names {
 
 hr.block_sep {
   margin: 5px 0px;
+  margin-bottom: 10px;
   width: 100%;
 }
 
@@ -59,21 +60,56 @@ div#item_block {
   width: 100%;
 }
 
+div#item_block label{
+  width: 200px;
+  text-align: right;
+}
+
 div#local {
   width: 100%;
   overflow: hidden;
-  padding-left: 100px;
+  padding-left: 170px;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-size: 16px;
+  vertical-align: top;
 }
 
-div#local input {
+div#local select {
   width: 15%;
+  padding: 10px 5px;
 }
 
 
 div#local label {
   width: 100px;
+  padding: 5px 5px;
 }
 
+#id_hidden {
+  width: unset;
+  margin-top: 10px;
+}
+
+ul.errorlist {
+  color: darkred;
+  font-size: 14px;
+  list-style: none;
+  width: 200px;
+}
+
+#item_block input[type='submit'] {
+  margin-top: 10px;
+}
+
+.options_form input {
+  display: inline-block
+}
+
+.options_form {
+  padding: 5px 0px;
+  display: inline-block;
+}
 
 
 

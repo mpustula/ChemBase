@@ -230,6 +230,7 @@ $(document).ready(function(){
 				
 				$('#id_classification').val(json['clas_text']);
 				var risk_classes_dict=json['clas_extr'];
+				console.log(risk_classes_dict)
 				console.log(Object.keys(risk_classes_dict));
 				map_new={};
 				$.each(risk_classes_dict, function(index,value) {
@@ -239,6 +240,7 @@ $(document).ready(function(){
 				$('#id_class_extr').select2('destroy');
 				$('#id_class_extr').select2();
 				var classes_new=$('#id_class_extr').val();
+				console.log(classes_new);
 				transl_ghs(classes_new,map_new)
 				
 				},
