@@ -11,6 +11,9 @@ urlpatterns= [
     url(r'^search/$',views.search_view,name='search'),
     url(r'^search_ajax/$',views.search_ajax,name='search_ajax'),
     url(r'^search_ajax_chemspy/$',views.chemspy_ajax,name='chemspy_ajax'),
+    url(r'^search_qt/$',views.search_qt,name='search_qt'),
+    url(r'^search_rm/$',views.search_rm,name='search_rm'),
+    url(r'^search_gr/$',views.search_groups,name='search_gr'),
     url(r'^structure_ajax/$',views.structure_ajax,name='structure_ajax'),
     url(r'^image_ajax/$',views.image_ajax,name='image_ajax'),
     url(r'^formula_ajax/$',views.formula_ajax,name='formula_ajax'),
@@ -22,6 +25,7 @@ urlpatterns= [
     url(r'^add/item/done/$',views.item_save,name='item_save'),
     url(r'^add/item/cmpd/(?P<cmpd_id>[0-9]+)/$',views.add_item,name='add_item'),
     url(r'^add/item/(?P<item_id>[0-9]+)/done$',views.add_item_done,name='add_item_done'),
+    url(r'^sug/loc/cmpd/(?P<cmpd_id>[0-9]+)/$',views.suggest_loc,name='suggest_loc'),
     url(r'^item_delete/$',views.item_delete,name='item_delete'),
     url(r'^add/$',views.add,name='add'),
     url(r'^login/', auth_views.LoginView.as_view(template_name='chembase/login.html'),name='login'),
@@ -34,6 +38,8 @@ urlpatterns= [
     url(r'^admin/users$',views.users,name='admin_users'),
     url(r'^admin/user/(?P<user_id>[0-9]+)/$',views.edit_user,name='admin_user'),
     url(r'^admin/user/save$',views.save_user,name='admin_user_save'),
+    url(r'^status/$',views.status,name='server_status'),
+    url(r'^items_groups/$',views.get_groups,name='get_groups'),
     
 
 ] 

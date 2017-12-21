@@ -35,6 +35,7 @@
 <input class ='small' type='submit' value='Add new compound from this data' {% if not can_add_cmpd %} disabled='true' {% endif %} />
 </form>
 
+{% if user_staff %}
 <p class='title'>Compound log:</p>
 {% for item in log_entries %}
 <div class='log_entry'><span class='log_date'>{{item.date|date:'Y-m-d H:i'}}</span>
@@ -52,6 +53,7 @@
 </div>
 {% endfor %}
 
+{% endif %}
 
 </div>
 
@@ -79,6 +81,9 @@
 <h2>Identification:</h2>
 <div class='one-col'>
 
+<div class='label'>Group: </div><div class='value'>{{compound.group}}</div>
+
+
 <div class='label'>Formula: </div><div class='value'>{{compound.formulaHTML|safe}} </div>
 <div class='label'>Molecular weight: </div><div class='value'>{{compound.weight}} </div>
 <div class='label'>CAS: </div><div class='value'>{{compound.cas}} </div>
@@ -87,12 +92,21 @@
 <div class='label'>InChI: </div><div class='value'>{{compound.inchi}} </div>
 <div class='label'>Compound Id: </div><div class='value'>{{compound.id}} </div>
 
+
+	
 </div>
 <hr>
 <h2>Items</h2>
 
 <div class='block_head'>Available</div>
 <div class='block'>
+{% if compound.is_registered %}
+	<div class='res_field' id='warning'>
+	<p class="warning">
+	Fill the usage registry! Uzupełnij kartę ewidencji rozchodu!	
+	</p>
+	</div>
+{% endif %}
 <table>
 {% for item in exist %}
 <tr>
@@ -206,6 +220,8 @@
 <div class='label'>SDS CAS: </div><div class='value'>{{compound.sds_cas}}</div>
 <div class='label'>Signal word: </div><div class='value'>{{compound.warning}}</div>
 
+<div class='label'>Storage temperature: </div><div class='value'>{{compound.storage_temp}}</div>
+
 <div class='picts'>
 {% for pict in compound.pictograms.all %}
 <img class='pictogram' src='{% static "/chembase/" %}{{pict.path}}' alt='pictograms'/>
@@ -255,7 +271,7 @@
 </div>
 <p class='block_head'  id='listing_head'>Klasyfikacja - skrót</p>
 <div class='block' id='listing'>
-{% for class in compound.cmpd_class_set.all %}
+{% for class in compound.ghs_class_numbers.all %}
 <p class='list_item'>{{class.ghs_class.class_full_en}} - category {{class.number}}</p>
 {% endfor %}
 </div>

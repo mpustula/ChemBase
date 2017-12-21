@@ -36,6 +36,7 @@
 
 </div>
 
+<div class='label'>Group: </div><div class='value'>{{compound.group}} </div>
 
 <div class='label'>Compound Id: </div><div class='value'>{{compound.id}} </div>
 
@@ -51,6 +52,7 @@
 <div class='label'>InChI: </div><div class='value'>{{compound.inchi}} </div>
 </div>
 
+<div class='label'>Storage temperature: </div><div class='value'>{{compound.storage_temp}} </div>
 
 <a id='full_info' target='_blank' href='{% url "chembase:detail" compound.id %}'>Click here to see more information about this compound</a>
 {% if item_id == 'new' %}
@@ -97,17 +99,6 @@
 {{form.amount}}
 </div>
 
-<div class='field'>
-{{form.storage_temp.errors}}
-<label for="{{form.storage_temp.id_for_label}}">Storage temperature:</label>
-{{form.storage_temp}}
-</div>
-
-<div class='field'>
-{{form.group.errors}}
-<label for="{{form.group.id_for_label}}">Group:</label>
-{{form.group}}
-</div>
 
 <div class='field' id='local'>
 {{form.room.errors}}

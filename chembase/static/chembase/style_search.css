@@ -57,6 +57,33 @@ span.select2-container--default {
 
 .options input {
   width: unset;
+  display: inline-block;
+}
+
+#add_class {
+  width: 100px;
+  margin: 5px;
+  padding: 7px
+}
+
+#class_table {
+  font-size: 14px;
+  width: 40%;
+  margin-left: 20%;
+  border-collapse: collapse;
+  
+}
+
+#class_table th {
+  font-weight: lighter;
+}
+
+#class_table .perm_code {
+  width: 50px;
+}
+
+#class_table td {
+  text-align: center;
 }
 
 h4 {
@@ -161,15 +188,27 @@ div.res_field {
 }
 
 div.other_names {
-  width: 30%;
+  width: 25%;
+  float: left;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+div.items {
+  width: 25%;
   float: left;
   overflow: hidden;
 }
 
-div.items {
-  width: 40%;
-  float: left;
-  overflow: hidden;
+#warning {
+  width: 20%;
+  padding: 0px;
+}
+
+p.warning {
+  margin: 0px;
+  color: darkred;
+  font-size: 14px;
 }
 
 div.picts {
@@ -183,12 +222,18 @@ img.pictogram {
 }
 
 #formula {
-  width: 40%;
+  width: 12%;
 }
 
 #cas {
-  width: 15%;
+  width: 12%;
 }
+
+#group {
+  width:30%;
+}
+
+
 
 .name, .name:visited {
   padding: 0px;
@@ -208,6 +253,8 @@ p.subtitle {
   margin: 0px;
   color: var(--text-extra-col)
 }
+
+
 
 p.res_field, p.value {
   font-weight: unset;

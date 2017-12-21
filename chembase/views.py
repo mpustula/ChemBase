@@ -18,7 +18,7 @@ import os
 from django.contrib.auth.models import User, Permission
 # Create your views here.
 from .models import Compound, GHSClass, Cmpd_Class, SystemLog,Item,Group, Annotation,History, ExtraPermissions, UserProfile,OwnershipGroup
-from .forms import SearchForm, CompoundForm, ItemForm, UserForm, UserProfileForm, ExtraPermForm
+from .forms import SearchForm, CompoundForm, ItemForm, UserForm, UserProfileForm, ExtraPermForm,GroupForm,GHSClassForm
 
 
 
@@ -28,6 +28,27 @@ def can_add_item(user):
 def index(request):
     return redirect('chembase:search')
     
+def status(request):
+    
+    if request.user.is_authenticated:
+        return HttpResponse(request.user.first_name+' '+request.user.last_name)
+    else:
+        return HttpResponse('Login error')
+
+
+def get_groups(request):
+    
+    if request.user.is_authenticated:
+        groups=Group.objects.all()
+        
+        groups_dict={item.id:item.group_name for item in groups}
+        
+        return JsonResponse(groups_dict)
+    
+    else:
+        
+        return HttpResponse('Login error')   
+
 @login_required()
 def detail(request,cmpd_id):
     
@@ -47,11 +68,16 @@ def detail(request,cmpd_id):
     
     items_log=SystemLog.objects.filter(model_name='item',model_instance_id__in=items)
     
+    if user.is_staff:
+        user_staff=True
+    else:
+        user_staff=False
+    
     if can_add_item(user):
         can_add=True
     else:
         can_add=False
-    if ExtraPermissions.check_perm(user,'chembase.add_compound'):
+    if user.has_perm('chembase.add_compound'):
         can_add_cmpd=True
     else:
         can_add_cmpd=False
@@ -71,14 +97,14 @@ def detail(request,cmpd_id):
 
     return render(request,'chembase/detail.html',{'compound':compound,'exist':allowed_existing,
                                                   'del':allowed_deleted,'log_entries':log_items,'item_log_entries':items_log_list,
-                                                  'can_add':can_add,'can_add_cmpd':can_add_cmpd,'can_edit':can_edit})
+                                                  'can_add':can_add,'can_add_cmpd':can_add_cmpd,'can_edit':can_edit,'user_staff':user_staff})
     
 
 @login_required()
 @user_passes_test(can_add_item)
 def add(request):
     #form=CompoundForm()
-    if ExtraPermissions.check_perm(request.user,'chembase.add_compound'):
+    if request.user.has_perm('chembase.add_compound'):
         can_add_cmpd=True
     else:
         can_add_cmpd=False
@@ -132,7 +158,7 @@ def add_item(request,cmpd_id):
         #print(owner_group_choices)
         item_form.fields['owner'].choices=((item.group.id,item.group.name) for item in owner_group_choices)
 
-    if ExtraPermissions.check_perm(request.user,'chembase.add_compound'):
+    if request.user.has_perm('chembase.add_compound'):
         can_add_cmpd=True
     else:
         can_add_cmpd=False
@@ -145,6 +171,27 @@ def add_item(request,cmpd_id):
                                                     'place_num_init':place_num_init,
                                                     'can_add_cmpd':can_add_cmpd,
                                                     'can_edit':can_edit})
+                                                    
+@login_required()
+def suggest_loc(request,cmpd_id):
+    compound=Compound.objects.get(pk=cmpd_id)
+    
+    existing_items=compound.item_set(manager='citems').existing()
+    deleted_items=compound.item_set(manager='citems').deleted()
+    
+    existing_loc=[item.local for item in existing_items]
+    deleted_loc=[item.local for item in deleted_items]
+    
+    ###group_loc
+    group_items=Item.objects.filter(compound__group__exact=compound.group,compound__storage_temp__exact=compound.storage_temp)
+    
+    group_loc=[item.local for item in group_items if not item.is_deleted()]
+    
+    values_dict={'compound':compound.name,'existing':existing_loc,'deleted':deleted_loc,'group':group_loc}
+    
+    
+    return JsonResponse(values_dict)
+    
     
 @login_required()
 def item_save(request):
@@ -198,6 +245,11 @@ def item_save(request):
                     group_obj=Group(group_name=group_id)
                     group_obj.save()
                 new_item.group=group_obj
+            
+            
+            owner_id=request.POST.get('owner')
+            owner_obj=OwnershipGroup.objects.get(pk=owner_id)
+            new_item.owner=owner_obj
             
             
             ###delete old comments
@@ -256,14 +308,14 @@ def item_delete(request):
         return redirect('chembase:detail',cmpd_id=item.compound.id)
 
 
-
 @login_required()
 def cmpd_save(request):
     
     if request.method=='POST':
         save_as=request.POST.get('save_as')
+        redir_url=request.POST.get('redirect')
         if save_as=='new':
-            if not ExtraPermissions.check_perm(request.user,'chembase.add_compound'):
+            if not request.user.has_perm('chembase.add_compound'):
                 return redirect('/login/?next=%s' % request.path)
             c=CompoundForm(request.POST,request.FILES)
             cmpd_action='add'
@@ -333,8 +385,15 @@ def cmpd_save(request):
                 print('image_file:')            
                 print(image_name)
                 
-                
-            
+            ###group
+            group_id=request.POST.get('group')
+            if group_id:
+                try:
+                    group_obj=Group.objects.get(pk=group_id)
+                except:
+                    group_obj=Group(group_name=group_id)
+                    group_obj.save()
+                new_cmpd.group=group_obj
             ###ewidencja
             is_to_register=data_dict['ewid']
             new_cmpd.set_registered(is_to_register)
@@ -351,13 +410,16 @@ def cmpd_save(request):
             #deleted_items=new_cmpd.item_set(manager='citems').deleted()
         
             #return render(request,'chembase/detail.html',{'compound':new_cmpd})#,'exist':existing_items,'del':deleted_items})
-            redir_url=request.POST.get('redirect')
+            
             if redir_url=='':
                 return redirect('chembase:add_item',cmpd_id=new_cmpd.id)
             else:
                 return redirect(redir_url)
         else:
-            return HttpResponse(c)
+            return render(request,'chembase/add_cmpd.html',{'form':CompoundForm(request.POST,request.FILES),'pr_form':GroupForm(request.POST),'structure_im':'',
+                                                    'classes_dict':{},
+                                                    'classes_names_dict':{},
+                                                    'sds_name':'','save_as':save_as,'redirect':redir_url})
     
 @login_required()
 def add_cmpd(request):
@@ -365,8 +427,9 @@ def add_cmpd(request):
     redir_url=''
     if request.method=='POST':
         rtype=request.POST.get('type')
+        group_form=GroupForm()
         if rtype=='new_cmpd':
-            if not ExtraPermissions.check_perm(request.user,'chembase.add_compound'):
+            if not request.user.has_perm('chembase.add_compound'):
                 return redirect('/login/?next=%s' % request.path)
             form=CompoundForm()
             str_image=''
@@ -399,10 +462,12 @@ def add_cmpd(request):
             for item in classes_list:
                 classes_names_dict[item.ghs_class.id]=item.ghs_class.class_full_en
                 classes_dict["id_class_"+str(item.ghs_class.id)]=item.number
-
+            
+            group_form.fields['group'].initial=compound.group            
+            
             
         elif rtype=='spider':
-            if not ExtraPermissions.check_perm(request.user,'chembase.add_compound'):
+            if not request.user.has_perm('chembase.add_compound'):
                 return redirect('/login/?next=%s' % request.path)
             cmpd_id=request.POST.get('cmpd_id')
             cas=request.POST.get('cas')
@@ -415,7 +480,8 @@ def add_cmpd(request):
             smiles=compound.smiles
             molfile=compound.mol_2d
             #str_image=compound.image_url
-            str_image=Compound.render_image('',compound.image)
+            image_id=request.session.session_key
+            str_image=Compound.render_image('',compound.image,image_id)
             name=compound.common_name
             mw=compound.molecular_weight
             iupac_name=cirpy.resolve(inchi,'iupac_name')
@@ -449,7 +515,7 @@ def add_cmpd(request):
         classes_dict={}
         classes_names_dict={}
         sds_name=''
-    return render(request,'chembase/add_cmpd.html',{'form':form,'structure_im':str_image,
+    return render(request,'chembase/add_cmpd.html',{'form':form,'pr_form':group_form,'structure_im':str_image,
                                                     'classes_dict':json.dumps(classes_dict),
                                                     'classes_names_dict':json.dumps(classes_names_dict),
                                                     'sds_name':sds_name,'save_as':save_as,'redirect':redir_url})
@@ -459,6 +525,7 @@ def add_cmpd(request):
 def search_view(request):
     if request.method=='GET':
         form=SearchForm(request.GET)
+        pr_form=GHSClassForm()
         if form.is_valid():
             #print(form.cleaned_data)
             #print(request.GET)
@@ -470,7 +537,17 @@ def search_view(request):
             stype=form.cleaned_data['stype']
             cut=form.cleaned_data['cutoff']
             group=form.cleaned_data['group']
-                        
+            
+            ghs_codes=request.GET.getlist('class_code_')
+            #print(ghs_codes)
+            ghs_classes=[]
+            for item in ghs_codes:
+                class_id=item.split('-')[0]
+                number=item.split('-')[1]
+                class_text=GHSClass.objects.get(pk=class_id).class_text
+                ghs_classes.append({'id':item,'group':class_text,'number':number})
+            
+            #print(ghs_classes)
             if smiles!='':
                 structure=True
             else:
@@ -478,7 +555,7 @@ def search_view(request):
     else:
         form=SearchForm()
         
-    result=search(request.user,query,query_cas,'and',query_place,smiles,dele,stype,cut,group)
+    result=search(request.user,query,query_cas,'and',query_place,smiles,dele,stype,cut,group,ghs_codes)
     
     if result:
         found=len(result)
@@ -498,8 +575,45 @@ def search_view(request):
         found=0
         cmpds_list=None
             
-    return render(request,'chembase/search.html',{'form':form,'results':cmpds_list,'str':structure,'found':found})
+    return render(request,'chembase/search.html',{'form':form,'pr_form':pr_form,'results':cmpds_list,'str':structure,'found':found,'ghs_classes':ghs_classes})
+
+def search_qt(request):
     
+    if request.user.is_authenticated:
+       
+        query=request.GET.get('text')
+        query_cas=request.GET.get('cas')
+        query_place=request.GET.get('place')
+        linker=request.GET.get('linker')
+        smiles=request.GET.get('smiles')
+        dele=bool(request.GET.get('dele'))
+
+        stype=request.GET.get('stype')
+        cut=request.GET.get('cutoff')
+        if cut:
+            cutoff=float(cut)
+        else:
+            cutoff=0.6
+        group=request.GET.get('group')
+
+        result=search(request.user,query=query,query_cas=query_cas,query_place=query_place,
+                      linker=linker,smiles=smiles,dele=dele,stype=stype,cut=cutoff,group=group)
+                      
+        json_dict={}
+        for compound in result:          
+            existing_items=compound.item_set(manager='citems').existing()
+    
+            allowed_existing=compound.item_set(manager='citems').allowed(request.user,existing_items)
+            items_list=[(item['a'].local,[x.annotation for x in item['a'].annotation_set.all()]) for item in allowed_existing]
+            
+            data_dict={'name':compound.name,'cas':compound.cas,'subtitle':compound.subtitle,'image':compound.image,'items':items_list}
+            json_dict[compound.id]=data_dict            
+        
+        return JsonResponse(json_dict)
+        
+    else:
+        return HttpResponse('Login error')
+
 def search_ajax(request):
     
     if request.method=='POST':
@@ -509,48 +623,102 @@ def search_ajax(request):
                  
         return JsonResponse({item.id:{'name':item.name,'cas':item.cas,'subtitle':item.subtitle,'image':item.image} for item in result})
 
-def search(user,query='',query_cas='',linker='and',query_place='',smiles='',dele=False,stype='sim',cut=0.6,group=None):
+def search(user,query='',query_cas='',linker='and',query_place='',smiles='',dele=False,stype='sim',cut=0.6,group=None,ghs_codes=[]):
             
-    if (query!='' or query_cas!='' or query_place!='' or smiles!='' or group):
+    if (query!='' or query_cas!='' or query_place!='' or smiles!='' or group or ghs_codes):
         q1=Q(name__icontains=query) | Q(all_names__icontains=query) | \
             Q(pl_name__icontains=query)
 
         q2=Q(cas__icontains=query_cas)
         q3=Q(item__local__icontains=query_place)
         if group:
-            q4=Q(item__group__exact=group)
+            q4=Q(group__exact=group)
         else:
             q4=Q()
+            
+        q5=Q()
+        for item in ghs_codes:
+            class_id=item.split('-')[0]
+            number=item.split('-')[1]
+            ghs_class=GHSClass.objects.get(pk=class_id)
+            q5 = q5 | Q(class_extr__exact=ghs_class,ghs_class_numbers__number__exact=number)
         
         if linker=='and':
-            q=q1 & q2 & q3 & q4
+            q=q1 & q2 & q3 & q4 & q5
         elif linker=='or':
             q=q1 | q2
             if query_place!='':
                 q=q | q3
             if group:
                 q=q | q4
-            
+            if ghs_codes:
+                q = q | q5
+
             
         found_cmpds=Compound.objects.filter(q).distinct()
         if user!='abstract_user':
             found_cmpds=Compound.extra_methods.allowed_cmpds(user,found_cmpds)
         if not dele:
             found_cmpds=Compound.extra_methods.existing(found_cmpds)
+
         if smiles=='':
-            sorted_cmpds=Compound.extra_methods.sort_by_name_simil(found_cmpds,query,cut)
+            if query!='':
+                query_to_compare=query
+                sorted_cmpds=Compound.extra_methods.sort_by_name_simil(found_cmpds,query_to_compare,0.1)
+            elif query_cas!='':
+                query_to_compare=query_cas
+                sorted_cmpds=Compound.extra_methods.sort_by_name_simil(found_cmpds,query_to_compare,0.1)
+            else:
+                sorted_cmpds=found_cmpds
+            
         else:
             if stype=='sim':
                 sorted_cmpds=Compound.extra_methods.sort_by_str_simil(found_cmpds,smiles,cut)
             else:
                 sorted_cmpds=Compound.extra_methods.substr_match(found_cmpds,smiles,cut)
         #existing_cmpds=found_cmpds
-
     else:
         sorted_cmpds=None
         
     return sorted_cmpds
+
+@login_required()
+def search_rm(request):
     
+    can=GHSClass.objects.get(pk=4)
+    mut=GHSClass.objects.get(pk=10)
+    q1=Q(number__exact='1A') | Q(number__exact='1B')
+    q2=Q(ghs_class__exact=can) | Q(ghs_class__exact=mut) 
+    
+    rm_cmpds_cl=Cmpd_Class.objects.filter(q1 & q2)
+    
+    rm_cmpds=set([item.compound for item in rm_cmpds_cl])
+    
+    return render(request,'chembase/search_rm.html',{'results':rm_cmpds})
+
+@login_required()
+def search_groups(request):
+    
+    compounds=Compound.objects.all()
+
+    compound_groups=[]
+    for item in compounds:
+        items=item.item_set.all()
+        #if len(items)>1:
+        groups=[x.storage_temp for x in items]
+            #if len(set(groups))>1:
+            #    print(groups)
+        #groups_set=set(groups)
+        #if len(groups_set)==1:
+            #print(list(groups_set))
+            #item.group=list(groups_set)[0]
+            #item.save()
+        if not item.storage_temp:
+            compound_groups.append({'cmpd':item,'cmpd_group':item.storage_temp,'items':items,'groups':groups})
+        
+    return render(request,'chembase/search_gr.html',{'results':compound_groups})
+        
+
 def chemspy_ajax(request):
     
     if request.method=='POST':
@@ -611,14 +779,15 @@ def image_ajax(request):
         query_csid=request.POST.get('csid')
         mol_file=request.POST.get('mol')
         print(mol_file)
+        image_id=request.session.session_key
         if query_csid:
             cs=ChemSpider('c36756c7-401d-4097-9496-32ccbe7d876d')
             compound=cs.get_compound(query_csid)
             #image_path=compound.image_url
-            image_path=Compound.render_image('',compound.image)
+            image_path=Compound.render_image('',compound.image,image_id)
 
         elif mol_file:
-            image_path=Compound.render_image(mol_file,'')
+            image_path=Compound.render_image(mol_file,'',image_id)
         else:
             image_path=''
                 
@@ -694,9 +863,10 @@ def sds_index(request):
 @login_required()    
 def admin(request):
     
-    access_log=open('/var/log/apache2/access.log','r').readlines()[-10:]
-    error_log=open('/var/log/apache2/error.log','r').readlines()[-10:]
-
+    #access_log=open('/var/log/apache2/access.log','r').readlines()[-10:]
+    #+error_log=open('/var/log/apache2/error.log','r').readlines()[-10:]
+    access_log=[]
+    error_log=[]
     
     systemLogs=SystemLog.objects.all()[::-1][0:10]
     

@@ -29,10 +29,12 @@ class CompoundForm(forms.ModelForm):
     class Meta:
         model=Compound
         #fields=['name','all_names','subtitle']
-        exclude=['class_extr','image','author']
+        exclude=['class_extr','image','author','group']
         widgets={'pictograms':Select2MultipleWidget,'sds':Select2Widget,'class_extr':Select2MultipleWidget}
         
-        
+class GroupForm(forms.Form):
+    group=forms.ModelChoiceField(widget=ModelSelect2Widget(queryset=Group.objects.all(),
+            search_fields=['group_name__icontains'],attrs={'data-tags':'true'}),queryset=Group.objects.all(),required=False)        
 #        
 #class GroupChoices(AutoModelSelect2TagField):
 #        queryset = Group.objects
@@ -40,7 +42,13 @@ class CompoundForm(forms.ModelForm):
 #    
 #        def get_model_field_values(self, value):
 #            return {'name': value }
-        
+            
+            
+class GHSClassForm(forms.Form):
+    ghs_class=forms.ModelMultipleChoiceField(widget=ModelSelect2Widget(queryset=GHSClass.objects.all(),
+            search_fields=['class_text__icontains']),queryset=GHSClass.objects.all(),required=False)
+    number=forms.CharField(required=False)
+    
 class ItemForm(forms.ModelForm):
     room_choices=set([item.room for item in Item.objects.all()])
     comment=forms.CharField(required=False)
@@ -49,9 +57,8 @@ class ItemForm(forms.ModelForm):
     #place=forms.ChoiceField(widget=Select2Widget(attrs={'data-tags':'true'}),choices=((x,x) for x in room_choices))
     class Meta:
         model=Item
-        exclude=['compound','room']
-        widgets={'group':Select2Widget(attrs={'data-tags':'true'}),
-                 'place':Select2Widget(attrs={'data-tags':'true','required':'true'}),
+        exclude=['compound','room','group','storage_temp']
+        widgets={'place':Select2Widget(attrs={'data-tags':'true','required':'true'}),
                  'place_num':Select2Widget(attrs={'data-tags':'true','required':'true'}),
                  'owner':Select2Widget}
                  

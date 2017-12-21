@@ -67,6 +67,13 @@ div.field input {
   width: 70%
 }
 
+#group_field {
+  margin: 10px 0px;
+  padding: 5px 0px
+}
+
+
+
 #ketcher_div {
   width: 70%;
 }

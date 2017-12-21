@@ -120,9 +120,10 @@ div.main_content {
 }
 
 div.main {
-  padding-left: 100px;
-  padding-right: 100px;
+  padding-left: 50px;
+  padding-right: 50px;
   max-width: 1400px;
+  width: 70%;
   margin: auto;
 
 
@@ -228,6 +229,12 @@ div.title {
 div.names {
   width: 70%;
   float: left;
+}
+
+p.warning {
+  margin: 0px;
+  color: darkred;
+  font-size: 14px;
 }
 
 h1 {

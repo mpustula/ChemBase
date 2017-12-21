@@ -87,8 +87,18 @@
 	</div>
 	
 	<p class='control' id='str_ctrl'>Structure</p>
+	
+
+	
 	<div class='structure' id='str_block'>
 	<hr class='block_sep'>
+	
+	<div class='field' id='group_field'>
+	{{pr_form.group.errors}}
+	<label for="{{pr_form.group.id_for_label}}">Group:</label>
+	{{pr_form.group}}
+	</div>
+	
 	
 	<div id='image_div'>
 	<p class='info'>Picture:</p>
@@ -138,6 +148,9 @@
 	{{form.molfile.errors}}
 	{{form.molfile}}
 	</div>
+	
+
+	
 		
 	</div>
 	
@@ -201,6 +214,12 @@
 	<div class='pictograms' id='pictograms_frame'>
 	
 	</div>
+	
+	<div class='field'>
+	{{form.storage_temp.errors}}
+	<label for="{{form.storage_temp.id_for_label}}">Storage temperature:</label>
+	{{form.storage_temp}}
+	</div>	
 	
 	<div class='field'>
 	{{form.warning.errors}}

@@ -1,17 +1,25 @@
 from django import template
 #from urllib.parse import urlencode
-import urllib.parse
+#import urllib.parse
 from chembase.models import Compound
 
 register=template.Library()
 
 @register.simple_tag(takes_context=True)
 def url_replace(context, **kwargs):
-    query = context['request'].GET.dict()
-    #print(query)
+
+    query = context['request'].GET.copy()#.dict()
+
+    for key in kwargs.keys():
+        try:
+            query.pop(key)
+        except KeyError:
+            pass
+    #query.pop(kwargs.keys())
     query.update(kwargs)
     #print(urllib.parse.urlencode(query))
-    return urllib.parse.urlencode(query) 
+    return query.urlencode()    
+    #return urllib.parse.urlencode(query) 
 
 @register.simple_tag
 def allowed_items_number(user,compound):

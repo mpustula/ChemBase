@@ -93,6 +93,44 @@
 		</div> 
 	</div>
 	
+	<div class='general'>
+		<h4>Risk classes:</h4>
+		<div class='field'>
+		{{pr_form.ghs_lass.errors}}
+		<label for="{{pr_form.ghs_class.id_for_label}}">Risk class:</label>
+		{{pr_form.ghs_class}}
+		</div>
+		<div class='field'>
+		{{pr_form.number.errors}}
+		<label for="{{pr_form.number.id_for_label}}">Category:</label>
+		{{pr_form.number}}
+		<input type='button' value='Add' id='add_class'/>
+		
+		<table id='class_table' class='log_table'>
+		<thead>
+		<tr>
+		<th>Code</th>
+		<th>Class</th>
+		<th>Category</th>
+		<th></th>
+		</tr>
+		</thead>
+		<tbody>
+		
+		{% for class in ghs_classes %}
+<tr id={{class.id}}>
+<td><input class='perm_code' type='text' name='class_code_' value="{{class.id}}" /></td>
+<td>{{class.group}}</td>
+<td>{{class.number}}</td>
+<td><input class='small' id='del_perm' type='button' value='Delete' num={{class.id}} /></td>
+</tr>
+{% endfor %}
+
+		</tbody>
+		</table>
+		</div>
+	</div>
+	
 	</div>
 	<input type='hidden' name='smiles' id='id_smiles' />
 	<input type="submit" value="Search" id='form_input' />
@@ -134,7 +172,13 @@
 	{{compound.formulaHTML|safe}}	
 	</p>
 	</div>
-
+	
+	<div class='res_field' id='group'>
+	<p class="res_field">
+	{{compound.group}}	
+	</p>
+	</div>
+	
 	<div class='res_field'>
 	<p class="res_field">
 	{% allowed_items_number user compound %}
@@ -149,13 +193,27 @@
 	PL: {{compound.pl_name}}, {{compound.pl_subtitle}}
 	</p>
 	</div>
-	<div class='items'>
+	
+	<div class='items' id='items_div'>
 	<p class="subtitle">
 	Items:
 	{% allowed_items_list user compound %}
-
+	
 	</p>
 	</div>
+	
+	{% if compound.is_registered %}
+	<div class='res_field' id='warning'>
+	<p class="warning">
+	Fill the usage registry!	
+	</p>
+	<p class='warning'>
+	Uzupełnij kartę ewidencji rozchodu!	
+	</p>
+	</div>
+	
+	{% endif %}
+	
 	<div class='picts'>
 	{% for pict in compound.pictograms.all %}
 	<img class='pictogram' src='{% static "/chembase/" %}{{pict.path}}' alt='pictograms'/>

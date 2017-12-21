@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User, Permission
 import re
 import sys, os
-from subprocess import call
+from subprocess import call, getoutput
 import pandas as pd
 from difflib import SequenceMatcher
 sys.path.append('/home/marcin/Dokumenty/programy/indigo-python-1.2.3.r0-linux/')
@@ -80,6 +80,12 @@ class H_Pict_Class(models.Model):
     pictogram=models.ForeignKey(Pictogram,on_delete=models.PROTECT)
     ghs_class=models.ForeignKey(GHSClass,on_delete=models.PROTECT)
     
+class Group(models.Model):
+    group_name=models.CharField(max_length=150)
+    
+    def __str__(self):
+        return self.group_name
+    
 class ExtraCompoundsManager(models.Manager):
     
     def existing(self,qset):
@@ -124,8 +130,6 @@ class ExtraCompoundsManager(models.Manager):
         
         return [x[0] for x in final_list if x[1]>cutoff]
         
-        
-    
 
 class Compound(models.Model):
     name=models.CharField('Name (english)',max_length=2000)
@@ -139,6 +143,9 @@ class Compound(models.Model):
     formula=models.CharField(max_length=100,blank=True)
     weight=models.DecimalField("Molecular weight",max_digits=10,decimal_places=4,null=True,blank=True)
     density=models.CharField(max_length=100,blank=True)
+    
+    group=models.ForeignKey(Group,on_delete=models.PROTECT,blank=True,null=True,default=23)
+    storage_temp=models.CharField(max_length=10,blank=True,default=None)
     
     image=models.CharField(max_length=300,blank=True)
     
@@ -185,12 +192,12 @@ class Compound(models.Model):
         return html_form
         
     def name_similarity(self,text):
-        
+
         main=SequenceMatcher(None, text, self.name).ratio()
         pl=SequenceMatcher(None, text, self.pl_name).ratio()
         all_n=SequenceMatcher(None, text, self.all_names).ratio()
         cas_n=SequenceMatcher(None, text, self.cas).ratio()
-        
+
         return max([main,pl,all_n,cas_n])
     
     def smiles_similarity(self,smiles):
@@ -262,11 +269,11 @@ class Compound(models.Model):
             
         return ans
         
-    def render_image(molfile,png_data):
+    def render_image(molfile,png_data,image_id):
         
         if png_data:
             image_png=png_data
-            temp_image='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp.png'
+            temp_image='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp'+image_id+'.png'
             with open(temp_image, 'wb+') as destination:
                 destination.write(image_png)
                 #for chunk in image_png.chunks():
@@ -283,15 +290,15 @@ class Compound(models.Model):
             indigo.setOption("render-relative-thickness", 1.2)
             indigo.setOption("render-bond-line-width", 1.5)
             
-            file_name='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp.png'
+            file_name='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp'+image_id+'.png'
             #file_name='temp.png'
             renderer.renderToFile(mol, file_name)
 
-        image_path='/static/chembase/temp/temp.png?timestamp=' + str(timezone.now())
+        image_path='/static/chembase/temp/temp'+image_id+'.png?timestamp=' + str(timezone.now())
         return image_path
         
     def save_sds(sdsfile):
-        file_base='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp.png'
+        file_base='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp'
         file_name=file_base+'.pdf'
         file_txt=file_base+'.txt'
         with open(file_name, 'wb+') as destination:
@@ -301,11 +308,12 @@ class Compound(models.Model):
                 #print command
         call(command,shell=True)
         output=transform_sds(file_txt)
-        
+        delete_files='rm '+file_name
+        getoutput(delete_files)
+        delete_files_txt='rm '+file_txt
+        getoutput(delete_files_txt)
         return output
     
-
-
     def clean_formula(formula):
         i=0
         j=0
@@ -345,20 +353,14 @@ class Compound(models.Model):
             if num!="":
                 new_formula=new_formula+'_{'+num+'}'
                 
-        return new_formula        
+        return new_formula
+
     
 class Cmpd_Class(models.Model):
-    compound=models.ForeignKey(Compound,on_delete=models.CASCADE)
-    ghs_class=models.ForeignKey(GHSClass,on_delete=models.CASCADE)
+    compound=models.ForeignKey(Compound,on_delete=models.CASCADE,related_name='ghs_class_numbers')
+    ghs_class=models.ForeignKey(GHSClass,on_delete=models.CASCADE,related_name='ghs_class_numbers')
     number=models.CharField(max_length=10)
-
-class Group(models.Model):
-    group_name=models.CharField(max_length=150)
-    
-    def __str__(self):
-        return self.group_name
-    
-    
+  
 
 class ItemManager(models.Manager):
 
@@ -389,9 +391,7 @@ class ItemManager(models.Manager):
                     allowed_items.append({'a':item,'edit':False})
         return allowed_items
         
- 
-        
-        
+
 class Item(models.Model):
     compound=models.ForeignKey(Compound,on_delete=models.PROTECT)
     room=models.CharField(max_length=20)
@@ -400,7 +400,7 @@ class Item(models.Model):
             
     local=models.CharField(max_length=65,blank=True)
     
-    quantity=models.IntegerField(blank=True,null=True)
+    quantity=models.IntegerField(blank=True,null=True,default=1)
     amount=models.DecimalField(max_digits=10,decimal_places=3,blank=True,null=True)
     
     storage_temp=models.CharField(max_length=10,blank=True)
