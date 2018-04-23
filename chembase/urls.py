@@ -25,7 +25,7 @@ urlpatterns= [
     url(r'^add/item/done/$',views.item_save,name='item_save'),
     url(r'^add/item/cmpd/(?P<cmpd_id>[0-9]+)/$',views.add_item,name='add_item'),
     url(r'^add/item/(?P<item_id>[0-9]+)/done$',views.add_item_done,name='add_item_done'),
-    url(r'^sug/loc/cmpd/(?P<cmpd_id>[0-9]+)/$',views.suggest_loc,name='suggest_loc'),
+    url(r'^sug/loc/cmpd/$',views.suggest_loc,name='suggest_loc'),
     url(r'^item_delete/$',views.item_delete,name='item_delete'),
     url(r'^add/$',views.add,name='add'),
     url(r'^login/', auth_views.LoginView.as_view(template_name='chembase/login.html'),name='login'),
@@ -40,6 +40,9 @@ urlpatterns= [
     url(r'^admin/user/save$',views.save_user,name='admin_user_save'),
     url(r'^status/$',views.status,name='server_status'),
     url(r'^items_groups/$',views.get_groups,name='get_groups'),
+    url(r'^group/details/(?P<group_id>[0-9]+)/$',views.group_details,name='admin_group'),
+    url(r'^admin/logs/(?P<file_type>[a-z]+)/$',views.log_file,name='log_files'),
+    url(r'^admin/orz$',views.orz_form,name='admin_orz'),
     
 
 ] 

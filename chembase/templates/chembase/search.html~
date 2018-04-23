@@ -119,7 +119,7 @@
 		
 		{% for class in ghs_classes %}
 <tr id={{class.id}}>
-<td><input class='perm_code' type='text' name='perm_code_' value="{{class.id}}" /></td>
+<td><input class='perm_code' type='text' name='class_code_' value="{{class.id}}" /></td>
 <td>{{class.group}}</td>
 <td>{{class.number}}</td>
 <td><input class='small' id='del_perm' type='button' value='Delete' num={{class.id}} /></td>

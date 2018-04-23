@@ -11,51 +11,58 @@
 <h1>System administration</h1>
 
 
-<h2>Users:</h2>
+<h2>Details of group >>{{group}}<< </h2>
 
+</div>
 
-<form action="{% url 'chembase:admin_user' 0 %}" method="get" class='options_form'>
-<input class ='small' id='add_new_user' type='submit' value='Add new user' />
-</form>
-
+<h3>Users and permissions</h3>
 
 <table class='log_table' summary="System logs" >
 <tr>
-<th>Username</th>
+<th>User</th>
 <th>Fisrt name</th>
 <th>Last name</th>
-<th>E-mail address</th>
-<th>Active</th>
-<th>Superuser</th>
-<th>Groups</th>
+<th>Can see item</th>
+<th>Can change item</th>
+<th>Permission</th>
+
 </tr>
-{% for item in users %}
+{% for item in permissions %}
 <tr>
-<td><a href="{% url 'chembase:admin_user' item.id %}" >{{item.username}}</a></td>
+<td><a href="{% url 'chembase:admin_user' item.id %}">{{item.username}}</a></td>
 <td>{{item.first_name}}</td>
 <td>{{item.last_name}}</td>
-<td>{{item.email}}</td>
-<td>{% if item.is_active %}
+<td>{% if item.see_item %}
 <i class="fa fa-check" aria-hidden="true"></i>
 {% else %}
 <i class="fa fa-times" aria-hidden="true"></i>
 {% endif %}
 </td>
-<td>{% if item.is_superuser %}
+<td>{% if item.change_item %}
 <i class="fa fa-check" aria-hidden="true"></i>
 {% else %}
 <i class="fa fa-times" aria-hidden="true"></i>
-{% endif %}</td>
-<td>{% for group in item.userprofile.own_groups.all %}
-<p class='group'>{{group}}</p>
+{% endif %}
+</td>
+<td>
+{% for x in item.all_permissions %}
+<p>{{x}}</p>
+
 {% endfor %}
 </td>
+
+
+
 
 </tr>
 {% endfor %}
 
 </table>
-</div>
+
+
+
+
+
 </div>
 
 

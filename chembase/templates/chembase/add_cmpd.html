@@ -1,5 +1,7 @@
 {% extends "chembase/base.html" %}
 
+{% block title %} Add compound {% endblock %}
+
 {% block content %}
 {% load static %}
 <link rel='stylesheet' type="text/css" href="{% static 'chembase/style_search.css' %}">
@@ -195,6 +197,13 @@
 	</div>
 	
 	<div class='field'>
+	{{form.paper_sds.errors}}
+	<label></label>
+	{{form.paper_sds}}
+	<label for="{{form.paper_sds.id_for_label}}">Only paper copy available</label>
+	</div>	
+	
+	<div class='field'>
 	{{form.sds_name.errors}}
 	<label for="{{form.sds_name.id_for_label}}">Name from file:</label>
 	{{form.sds_name}}
@@ -309,6 +318,12 @@
 	{{form.dayliused.errors}}
 	<label for="{{form.dailyused.id_for_label}}">Daily usage:</label>
 	{{form.dailyused}}
+	</div>
+	
+	<div class='field'>
+	{{form.resp.errors}}
+	<label for="{{form.resp.id_for_label}}">Present in respiratory zone:</label>
+	{{form.resp}}
 	</div>
 	
 	<div class='field'>

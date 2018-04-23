@@ -59,13 +59,24 @@ div.field label {
   color: var(--text-extra-col);
   font-family: var(--aux-font-fam);
   border: 0px solid;
-  vertical-align: top;
+  vertical-align: middle;
   
 }
 
 div.field input {
   width: 400px;
   display: inline-block;
+}
+
+h3 {
+  width: 220px;
+  display: inline-block;
+}
+
+#perm_guide {
+  display: inline-block;
+  font-size: 11pt;
+  margin-left: -40px;
 }
 
 #id_groups, #id_user_permissions, #id_own_groups {
@@ -80,7 +91,35 @@ div.field input {
 #id_is_active, #id_is_staff, #id_is_superuser {
   width: unset;
   align: left;
+  display: inline-block;
+  vertical-align: middle;
   
+}
+
+#is_staff_field {
+  width: 200px;
+  display: inline-block;
+}
+
+#staff_error {
+  width: 70%;
+  display: inline-block;
+  margin: 0px;
+  padding: 10px 0px;
+}
+
+#staff_error p {
+  margin: 0px;
+  padding: 0px;
+  font-size: 11pt;
+}
+
+#staff_error .error {
+  color: darkred;
+}
+
+#staff_error .notice {
+  color: orange;
 }
 
 
@@ -190,3 +229,153 @@ div.password_errors {
   margin-bottom: 35px;
 }
 
+
+
+ /* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 40%; /* Could be more or less, depending on screen size */
+    font-size: 12pt;
+    font-family: var(--aux-font-fam);
+    color: var(--text-extra-col);
+    font-weight: light;
+    
+}
+
+.modal-content h3 {
+  width: 50%;
+  display: block;
+  margin: 10px 0px;
+  padding: 0px;
+  font-family: var(--main-font-fam);
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+} 
+
+div#entries {
+  margin-top: 20px;
+}
+
+div.item {
+  border-top: 1px solid;
+  direction: block;
+  padding: 10px;
+  background-color: var(--search-box-col);
+}
+
+div.item:hover {
+  cursor: pointer;
+  background-color: white;
+}
+
+div.code {
+  display: inline-block;
+  width: 150px;
+  font-family: var(--main-font-fam);
+  color: var(--text-highlight-col);
+}
+
+div.bottom {
+  padding-left: 154px;
+  padding-top: 10px;
+  display: none;
+}
+
+div.pdf {
+  display: inline-block;
+}
+
+div.opis {
+  display: inline-block;
+  font-family: var(--aux-font-fam);
+  color: var(--text-extra-col);
+  width: 80px;
+  vertical-align: top;
+}
+
+div#incl_cmpds {
+  width: 170px;
+}
+
+#id_stanowisko {
+  margin-right: 10px;
+}
+
+#id_kod_stanowiska {
+  width: 150px;
+}
+
+#hidden_field {
+  display: none;
+}
+
+
+#new_form:hover {
+  cursor: pointer;
+}
+
+div.val, div.val_long {
+  display: inline-block;
+  font-family: var(--main-font-fam);
+  width: 150px;
+  vertical-align: top;
+}
+
+div.val_long {
+  width: 300px;
+}
+
+#spiner_canvas {
+  width: 6em;
+  height: 6em;
+}
+
+#orz_input {
+  margin-top: 35px;
+  margin-bottom: 92px;
+  display: ;
+}
+
+#wait_box {
+  padding-top: 0px;
+  margin-top: -15px;
+
+}
+
+
+p.intro {
+  text-align: center;
+  margin-top: -10px;
+  margin-bottom: 5px;
+  color: var(--text-extra-col);
+}

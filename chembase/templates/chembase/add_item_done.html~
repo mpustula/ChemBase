@@ -59,11 +59,14 @@
 
 <div id='left_div'>
 <div class='label'>Item id: </div><div class='value'>{{item.id}} </div>
+
+
 <div class='label'>Location: </div><div class='value'>{{item.local}} </div>
 <div class='label'>Quantity: </div><div class='value'>{{item.quantity}} </div>
 <div class='label'>Amount: </div><div class='value'>{{item.amount}} </div>
 
-<div class='label'>Group: </div><div class='value'>{{item.group}} </div>
+<div class='label'>Group: </div><div class='value'>{{compound.group}} </div>
+<div class='label'>Owner: </div><div class='value'>{{item.owner}} </div>
 <div class='label'>Hidden: </div><div class='value'>{{item.hidden}} </div>
 <div class='label'>Comment: </div><div class='value'>{{item.comment}} </div>
 </div>

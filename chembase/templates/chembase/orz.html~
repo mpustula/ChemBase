@@ -1,0 +1,149 @@
+{% extends "chembase/base.html" %}
+
+{% block title %} ORZ Documents {% endblock %}
+
+{% block content %}
+{% load static %}
+
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_admin.css' %}">
+<script src="{% static 'chembase/script_orz.js' %}"></script>
+
+<div class='main'>
+<div class='title'>
+<h1>Risk assessment documents creator</h1>
+<h2>Kreator formularzy oceny ryzyka zawodowego (ORZ.a.II)</h2>
+</div>
+
+<h3 id='new_form'><i class='fa fa-plus-square-o'></i> New form</h3>
+<div id='orz_form'>
+<form id='orz_submit_form' enctype="multipart/form-data" action="/" method="post">
+{% csrf_token %}
+<div class='field'>
+	{{form.owner.errors}}
+	<label for="{{form.owner.id_for_label}}">Group:</label>
+	{{form.owner}}
+	</div>
+	
+	<div class='field' id='hidden_field'>
+	{{form.stanowisko.errors}}
+	<label for="{{form.stanowisko.id_for_label}}">Workplace name:</label>
+	{{form.stanowisko}}
+	
+	{{form.kod_stanowiska.errors}}
+	<label for="{{form.kod_stanowiska.id_for_label}}">Workplace code:</label>
+	{{form.kod_stanowiska}}
+	</div>
+	
+	
+<div class='field'>
+	{{form.date_from.errors}}
+	<label for="{{form.date_from.id_for_label}}">Date from:</label>
+	{{form.date_from}}
+	</div>
+
+<div class='field'>
+	{{form.date_to.errors}}
+	<label for="{{form.date_to.id_for_label}}">Date to:</label>
+	{{form.date_to}}
+	</div>
+
+<input id="orz_input" type="submit" value="Send" />
+
+</form>
+</div>
+
+<div class='add_box' id='wait_box' style='display:'>
+<!-- spinner 2 -->
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/spinner2.css' %}">
+
+<div class="container">
+  
+  <div id='spiner_canvas' class="canvas canvas1">
+    <div class="spinner1 spinnerMax">
+      <div class="spinner1 spinnerMid">
+        <div class="spinner1 spinnerMin"></div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+  
+<!-- 
+  <div class="canvas canvas2">
+    <div class="spinner2"></div>   
+    <div class="hourHand"></div>
+    <div class="dot"></div>
+  </div>
+  
+  <div class="canvas canvas3">
+    <div class="spinner3"></div>   
+  </div>
+  
+  <div class="canvas canvas4">
+    <div class="spinner4"></div>   
+  </div>
+  
+  <div class="canvas canvas5">
+    <div class="spinner5"></div>   
+  </div>
+  
+  <div class="canvas canvas6">
+    <div class="spinner6 p1"></div>
+    <div class="spinner6 p2"></div>
+    <div class="spinner6 p3"></div>
+    <div class="spinner6 p4"></div>
+  </div>
+  
+</div>
+-->
+<!--
+<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+-->
+
+<p class='intro'>The file is being processed. Please wait. </p>
+</div>
+
+<div id='entries'>
+
+{% for item in entries %}
+
+<div class='item'>
+
+<div class='top'>
+<div class='code'>{{item.code_name}}</div>
+<div class='opis'>Group:</div>
+<div class='val_long'>{{item.owner}}</div>
+<div class='opis'>From:</div>
+<div class='val'>{{item.date_from|date:'Y-m-d'}}</div>
+<div class='opis'>To:</div>
+<div class='val'>{{item.date_to|date:'Y-m-d'}}</div>
+<div class='opis'>Author:</div>
+<div class='val'>{{item.author.first_name}} {{item.author.last_name}}</div>
+
+<div class='pdf'><a target='_blank' href='{% static "/chembase/data/orz/" %}{{item.code_name}}/ORZaII.pdf'>PDF</a></div>
+
+</div>
+<div class='bottom'>
+<div class='opis'>Created:</div>
+<div class='val'>{{item.date|date:'Y-m-d H:i'}}</div>
+<div class='opis' id='incl_cmpds'>Included compounds:</div>
+<div class='val'>{{item.num_cmpds}}</div>
+<div class='opis'>Status:</div>
+<div class='val'>{{item.status_text}}</div>
+
+</div>
+
+
+</div>
+
+
+{% endfor %}
+
+</div>
+
+
+</div>
+
+
+</div>
+{% endblock %}

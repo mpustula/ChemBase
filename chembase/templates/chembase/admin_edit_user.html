@@ -82,7 +82,7 @@
 <input type='text' name='last_login_text' value="{{user_ed.last_login}}" disabled="true" />
 </div>
 
-<h3>Groups and permissions</h3>
+<h3>Groups and permissions</h3> <a id='perm_guide' href="" >Show description</a>
 
 <div class='field'>
 {{form.groups.errors}}
@@ -102,10 +102,15 @@
 {{form.is_active}}
 </div>
 
-<div class='field'>
+<div class='field' id='is_staff_field'>
 {{form.is_staff.errors}}
 <label for="{{form.is_staff.id_for_label}}">Staff:</label>
 {{form.is_staff}}
+</div>
+
+<div id='staff_error' class='password_errors'>
+
+
 </div>
 
 <div class='field'>
@@ -185,6 +190,39 @@
 </div>
 </div>
 
+
+</div>
+
+
+<!-- The Modal -->
+<div id="perm_info" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span id='close_modal' class="close">&times;</span>
+    <h3>Groups and permissions information</h3>
+    <ul>
+    <li>General permissions which can be used:
+    <ul>
+		<li>chembase | compound | Can add compound - allows to add new compounds to the database.</li>
+		<li>auth | user | Can change user - allows to create new user and change existing ones.</li>    
+    </ul>
+    </li>
+    <li>Specific permissions for given items group:
+    <ul>
+		<li>chembase | item | Can see item - allows user to find and see items from given group.</li>
+		<li>chembase | item | Can change item - allows user to change, delete and restore items from given group.</li>
+		<li>chembase | item | Can add item - allows user to add new item into the group. Without the "Can add compound" permission, user can only add items of compounds already present in the database.</li>
+	</ul>
+	<li>Account type attributes:
+	 <ul>
+	 	<li>Active - determines whether user can log into page. Change for inactive instead of deleting account.</li>
+	 	<li>Staff - allows user to log into Django admin site. <em>Use with care, especially together with "auth" type permission!</em>
+	 	<li>Superuser - grants user with all permissions.</li>
+    </ul>
+   </li>
+   </ul>
+  </div>
 
 </div>
 

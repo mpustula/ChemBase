@@ -85,7 +85,8 @@
 
 
 <div class='label'>Formula: </div><div class='value'>{{compound.formulaHTML|safe}} </div>
-<div class='label'>Molecular weight: </div><div class='value'>{{compound.weight}} </div>
+<div class='label'>Molecular weight: </div><div class='value'>{{compound.weight}} g/mol </div>
+<div class='label'>Density: </div><div class='value'>{{compound.density}} kg/m3 </div>
 <div class='label'>CAS: </div><div class='value'>{{compound.cas}} </div>
 <div class='label'>CSID: </div><div class='value'>{{compound.csid}} </div>
 <div class='label'>SMILES: </div><div class='value'>{{compound.smiles}} </div>
@@ -215,7 +216,17 @@
 <h2>Safety</h2>
 
 <div class='label'>SDS: </div><div class='value'>
-	<a target='_blank' href='{% static "/chembase/" %}{{compound.sds }}'>{{compound.sds}}</a></div>
+	{% if compound.sds %}
+	<a target='_blank' href='{% static "/chembase/" %}{{compound.sds }}'>{{compound.sds}}</a>
+	{% else %}
+		{% if compound.isPaperSDS %}
+		Paper copy available only
+		{% else %}
+		Not available
+		{% endif %}
+	{% endif %}
+	
+	</div>
 <div class='label'>SDS name: </div><div class='value'>{{compound.sds_name}}</div>
 <div class='label'>SDS CAS: </div><div class='value'>{{compound.sds_cas}}</div>
 <div class='label'>Signal word: </div><div class='value'>{{compound.warning}}</div>
@@ -263,6 +274,14 @@
 	{% endif %}
 	</div>
 
+<div class='label'>Obecny w strefie oddychania: </div>
+	<div class='value'>
+	{% if compound.inRespZone %}
+	TAK
+	{% else %}
+	NIE
+	{% endif %}
+	</div>
 
 <div class='two_part'>
 <div class='two-cols'>

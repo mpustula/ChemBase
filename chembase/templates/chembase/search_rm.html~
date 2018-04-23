@@ -1,0 +1,42 @@
+{% extends "chembase/base.html" %}
+
+{% block content %}
+{% load static %}
+{% load chembase_tags %}
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_search.css' %}">
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_admin.css' %}">
+
+
+<div class='main'>
+
+<table class='log_table' summary="System logs" >
+<tr>
+<th>Name</th>
+<th>PL Name</th>
+<th>CAS</th>
+<th>Last name</th>
+
+</tr>
+{% for item in results %}
+<tr>
+<td>{{item}}</td>
+<td>{{item.pl_name}}</td>
+<td>{{item.cas}}</td>
+<td>{% for x in item.item_set.all %}
+{{x.local}}
+
+{% endfor %}
+</td>
+
+
+
+</tr>
+{% endfor %}
+</table>
+
+
+</div>
+{% endblock %}
+
+
+

@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_select2'
+    'django_select2',
+    #'account'
 ]
 
 MIDDLEWARE = [
@@ -48,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'account.middleware.ExpiredPasswordMiddleware',
 ]
 
 ROOT_URLCONF = 'Chem.urls'
@@ -127,3 +129,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 LOGIN_URL = 'chembase:login'
 
+
+SESSION_COOKIE_AGE = 28800
+
+ACCOUNT_PASSWORD_USE_HISTORY = True
+ACCOUNT_PASSWORD_EXPIRY = 0

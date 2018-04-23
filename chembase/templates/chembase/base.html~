@@ -3,13 +3,12 @@
 <html>
 <head>
 {{ form.media.css }}
-{{ pr_form.media.css }}
 {% load static %}
 
 <meta charset="UTF-8">
 <meta name="author" content="marcin" >
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> ChemBase </title>
+<title> {% block title % {% endblock %} - ChemBase 3.0 </title>
 <link rel='stylesheet' type="text/css" href="{% static 'chembase/style.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link href="https://fonts.googleapis.com/css?family=Cabin|Cabin+Condensed|Roboto+Condensed:300,400|Roboto:100,300,400" rel="stylesheet"> 
@@ -78,6 +77,6 @@
 
 
 {{form.media.js}}
-{{pr_form.media.js}}
+
 </body>
 </html>

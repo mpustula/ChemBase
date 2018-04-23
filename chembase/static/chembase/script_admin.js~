@@ -31,7 +31,7 @@ function staff_warning() {
 		if (is_staff==true) {
 			if (perms.indexOf('auth') >= 0) {
 				$('#staff_error').html('<p  class="error">Warning! Granting user account with "Staff" attribute and "auth" type privileges may be in some cases used to create a superuser account!</p>')
-			}
+			
 			else {$('#staff_error').html('<p  class="notice">Notice - staff attribute allows user to log into Django admin site and manipulate objects manually. Use with care.</p>')}
 			}
 		else {

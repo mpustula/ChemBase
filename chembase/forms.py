@@ -7,7 +7,7 @@ Created on Thu Aug  3 14:31:32 2017
 
 from django import forms
 from django_select2.forms import (Select2Widget,ModelSelect2Widget,Select2MultipleWidget,ModelSelect2MultipleWidget,Select2TagWidget)
-from .models import Group,Compound,GHSClass,Item,OwnershipGroup, ExtraPermissions, UserProfile
+from .models import Group,Compound,GHSClass,Item,OwnershipGroup, ExtraPermissions, UserProfile, ORZForm
 from django.contrib.auth.models import User, Permission
 
 class SearchForm(forms.Form):
@@ -24,6 +24,8 @@ class SearchForm(forms.Form):
             
 class CompoundForm(forms.ModelForm):
     ewid=forms.BooleanField(required=False)
+    resp=forms.BooleanField(required=False)
+    paper_sds=forms.BooleanField(required=False)
     sds_file = forms.FileField(required=False)
     class_extr=forms.ModelMultipleChoiceField(widget=Select2MultipleWidget,queryset=GHSClass.objects.all(),required=False)
     class Meta:
@@ -83,7 +85,17 @@ class ExtraPermForm(forms.ModelForm):
     class Meta:
         model=ExtraPermissions
         exclude=['user']
-        widgets={'group':Select2Widget,'permission':Select2Widget}       
+        widgets={'group':Select2Widget,'permission':Select2Widget}
+        
+        
+class ORZ_Form(forms.ModelForm):
+    stanowisko=forms.CharField(required=False)
+    kod_stanowiska=forms.CharField(required=False)
+    
+    class Meta:
+        model=ORZForm
+        fields=['owner','date_from','date_to']
+        widgets={'owner':Select2Widget}
                                 
         
         

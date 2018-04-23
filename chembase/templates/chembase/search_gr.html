@@ -1,0 +1,46 @@
+{% extends "chembase/base.html" %}
+
+{% block content %}
+{% load static %}
+{% load chembase_tags %}
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_search.css' %}">
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_admin.css' %}">
+
+
+<div class='main'>
+
+<table class='log_table' summary="System logs" >
+<tr>
+<th>Compound</th>
+<th>Compound group</th>
+<th>Items</th>
+<th>Groups</th>
+
+</tr>
+{% for item in results %}
+<tr>
+<td>{{item.cmpd}}</td>
+<td>{{item.cmpd_group}}</td>
+<td>{% for x in item.items %}
+<p>{{x}}</p>
+
+{% endfor %}
+</td>
+<td>{% for x in item.groups %}
+<p>{{x}}</p>
+
+{% endfor %}
+</td>
+
+
+
+</tr>
+{% endfor %}
+</table>
+
+
+</div>
+{% endblock %}
+
+
+

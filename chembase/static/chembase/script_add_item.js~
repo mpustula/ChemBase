@@ -69,7 +69,7 @@ $(document).ready(function(){
 				}
 				var del=json['deleted']
 				if (del.length>0) {
-					html=html+'<hr class="suggestions_hr"><p>The old entries of this compound have been found:</p>';
+					html=html+'<hr><p>The old entries of this compound have been found:</p>';
 					$.each(del, function (index,name) {
 						html=html+"<p class='items_location'>"+name+"</p>";
 						});
@@ -79,7 +79,7 @@ $(document).ready(function(){
 				var group_name=json['group_name']
 				var st_temp=json['st_temp']
 				if (group.length>0) {
-					html=html+'<hr class="suggestions_hr"><p>The other compounds from group "'+group_name+'" are located as follows:</p>';
+					html=html+'<hr><p>The other compounds from group "'+group_name+'" are located as follows:</p>';
 					html=html+'<table id="items_table" class="group_items"><tr><th>Location</th><th>Number of compounds</th></tr>'
 					$.each(group, function (index,name) {
 						html=html+"<tr><td>"+name[0]+"</td><td>"+name[1]+"</td></tr>";

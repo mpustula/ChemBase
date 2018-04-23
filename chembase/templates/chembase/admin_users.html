@@ -26,6 +26,7 @@
 <th>Last name</th>
 <th>E-mail address</th>
 <th>Active</th>
+<th>Staff</th>
 <th>Superuser</th>
 <th>Groups</th>
 </tr>
@@ -36,6 +37,12 @@
 <td>{{item.last_name}}</td>
 <td>{{item.email}}</td>
 <td>{% if item.is_active %}
+<i class="fa fa-check" aria-hidden="true"></i>
+{% else %}
+<i class="fa fa-times" aria-hidden="true"></i>
+{% endif %}
+</td>
+<td>{% if item.is_staff %}
 <i class="fa fa-check" aria-hidden="true"></i>
 {% else %}
 <i class="fa fa-times" aria-hidden="true"></i>

@@ -231,7 +231,17 @@ label.choose_file_label:hover, #sds_extr:hover {
   width:49.5%;
 }
 
+#id_paper_sds {
+  display: inline-block;
+  width: 20px;
+  margin-top: 2px;
+  margin-bottom: 15px
+}
 
+label[for=id_paper_sds] {
+  float: unset;
+  padding: 0px;
+}
 
 
 .field textarea {
@@ -263,10 +273,11 @@ div.inline label {
   width: 35%
 }
 
-#id_ewid {
+#id_ewid, #id_resp {
   width: 10px;
   margin-top: 10px;
 }
+
 
 img.pictograms {
   width: 5%;

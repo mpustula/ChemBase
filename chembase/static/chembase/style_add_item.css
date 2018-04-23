@@ -65,6 +65,54 @@ div#item_block label{
   text-align: right;
 }
 
+a#suggestions {
+  display: inline-block;
+  padding: 10px 0px;
+}
+
+#suggestions_div {
+  display: block;
+  margin-left: 220px;
+  padding: 10px;
+  font-family: var(--aux-font-fam);
+  color: var(--text-extra-col);
+  display: none;
+  font-size: 11pt;
+  background-color: gainsboro;
+  width: 71.5%;
+  border-radius: 4px;
+  
+}
+
+#suggestions_div p {
+  margin: 2px;
+}
+
+hr.suggestions_hr {
+  margin-top: 10px;
+  color: gray;
+  background-color: gray;
+}
+
+p.items_location {
+  padding-left: 10px;
+  font-weight: bold;
+}
+
+table.group_items {
+  margin-left: 10px;
+  border-collapse: collapse;
+}
+
+table.group_items td, th {
+  border: solid 1px grey;
+  padding: 5px
+}
+
+table.group_items th {
+  font-weight: normal;
+}
+
 div#local {
   width: 100%;
   overflow: hidden;

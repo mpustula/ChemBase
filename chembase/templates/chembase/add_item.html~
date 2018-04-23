@@ -52,6 +52,7 @@
 <div class='label'>InChI: </div><div class='value'>{{compound.inchi}} </div>
 </div>
 
+<div class='label'>Storage temperature: </div><div class='value'>{{compound.storage_temp}} </div>
 
 <a id='full_info' target='_blank' href='{% url "chembase:detail" compound.id %}'>Click here to see more information about this compound</a>
 {% if item_id == 'new' %}
@@ -83,7 +84,7 @@
 <form enctype="multipart/form-data" action="{% url 'chembase:item_save' %}" method="post">
 {% csrf_token %}
 
-<input type='hidden' name='cmpd_id' value={{compound.id}} />
+<input id='cmpd_id_input' type='hidden' name='cmpd_id' value={{compound.id}} />
 <input type='hidden' name='item_id' value={{item_id}} />
 
 <div class='field'>
@@ -98,6 +99,35 @@
 {{form.amount}}
 </div>
 
+<div class='field'>
+{{form.hidden.errors}}
+<label for="{{form.hidden.id_for_label}}">Hidden:</label>
+{{form.hidden}}
+</div>
+
+<div class='field'>
+{{form.comment.errors}}
+<label for="{{form.comment.id_for_label}}">Comment:</label>
+{{form.comment}}
+</div>
+
+<hr>
+
+
+<div class='field'>
+{{form.owner.errors}}
+<label for="{{form.owner.id_for_label}}">Item owner:</label>
+{{form.owner}}
+</div>
+
+<div class='field'>
+<label>Location</label>
+<a id='suggestions' href=''>Show the location suggestions</a>
+</div>
+
+<div id='suggestions'>
+
+</div>
 
 <div class='field' id='local'>
 {{form.room.errors}}
@@ -117,29 +147,13 @@
 
 <div class='field'>
 {{form.local.errors}}
-<label for="{{form.local.id_for_label}}">Location:</label>
+<label for="{{form.local.id_for_label}}"></label>
 {{form.local}}
 </div>
 
 
 
-<div class='field'>
-{{form.hidden.errors}}
-<label for="{{form.hidden.id_for_label}}">Hidden:</label>
-{{form.hidden}}
-</div>
 
-<div class='field'>
-{{form.comment.errors}}
-<label for="{{form.comment.id_for_label}}">Comment:</label>
-{{form.comment}}
-</div>
-
-<div class='field'>
-{{form.owner.errors}}
-<label for="{{form.owner.id_for_label}}">Item owner:</label>
-{{form.owner}}
-</div>
 
 <input type='Submit' value='Save' />
 </form>
