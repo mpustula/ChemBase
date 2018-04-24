@@ -1,0 +1,7 @@
+#ignore files in sds and images
+chembase/static/chembase/sds/*
+chembase/static/chembase/images/*.png
+chembase/static/chembase/data/sds/*
+Chem/settings.py
+chembase/migrations/*
+chembase/__pycache__/*
