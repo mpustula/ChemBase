@@ -46,6 +46,8 @@ def allowed_items_list(user,compound):
     
     result_list=[]
     for item in allowed_existing:
+        if item['a'].is_registered():
+            return 'To see items with registered usage click here'
         annot=''
         if item['a'].annotation_set.all():
             for ann in item['a'].annotation_set.all():
@@ -55,7 +57,7 @@ def allowed_items_list(user,compound):
             result_list.append(item['a'].local)
     
     #print(result_list)
-    
+    #return result_list
     return ', '.join(result_list)
     
 

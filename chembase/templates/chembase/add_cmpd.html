@@ -113,6 +113,7 @@
 	
 	<input type="button" value="Load image from ChemSpider" id='chemspider' />
 	<input type="button" value="Load image from editor" id='editor' />
+
 	</div>	
 	
 	<div id='ketcher_div'>
@@ -129,7 +130,13 @@
           });
           $('#str_chemspider').on('click', function () {
           	fetch_structure();
-          });	
+          });
+          $('#id_molecule').on('input', function () {
+          	molecule=$('#id_molfile').val();
+          	console.log(molecule);
+			 	ketcher.setMolecule(molecule);
+          });
+          
           $('#mol_editor').on('click', function () {
           	molecule=$('#id_molfile').val();
           	console.log(molecule);
@@ -143,7 +150,8 @@
 	
 	<input type="button" value="Dwonload from ChemSpider" id='str_chemspider' />
 	<input type="button" value="Show in editor" id='mol_editor' />
-	
+	<input type="button" value="Clean structure" id='clean_str' />
+	<input type="button" value="Calculate properties of structure" id='properties' />
 	</div>
 	
 	<div class='field' id='field_molfile'>  
@@ -226,7 +234,7 @@
 	
 	<div class='field'>
 	{{form.storage_temp.errors}}
-	<label for="{{form.storage_temp.id_for_label}}">Storage temperature:</label>
+	<label for="{{form.storage_temp.id_for_label}}">Storage temperature [&degC]:</label>
 	{{form.storage_temp}}
 	</div>	
 	
@@ -314,23 +322,7 @@
 	display_ghs_classes(arrayObject,dictObject);
 	</script>
 	
-	<div class='field'>
-	{{form.dayliused.errors}}
-	<label for="{{form.dailyused.id_for_label}}">Daily usage:</label>
-	{{form.dailyused}}
-	</div>
-	
-	<div class='field'>
-	{{form.resp.errors}}
-	<label for="{{form.resp.id_for_label}}">Present in respiratory zone:</label>
-	{{form.resp}}
-	</div>
-	
-	<div class='field'>
-	{{form.ewid.errors}}
-	<label for="{{form.ewid.id_for_label}}">Registered usage:</label>
-	{{form.ewid}}
-	</div>
+
 	
 	</div>
 	

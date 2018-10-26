@@ -1,5 +1,7 @@
 {% extends "chembase/base.html" %}
 
+{% block title %} {% if user_ed.id %} Edit user {{user_ed.username}} {% else %} New user {% endif %} - Admin Tools {% endblock %}
+
 {% block content %}
 {% load static %}
 
@@ -9,6 +11,11 @@
 
 <div class='main'>
 <div class='title'>
+
+<div class='nav_links'>
+<a href="{% url 'chembase:admin' %}">Admin site</a> > <a href="{% url 'chembase:admin_users_groups' %}">Users, groups and permissions</a> > <a href="{% url 'chembase:admin_users' %}">Users</a> > Edit user
+</div>
+
 
 <h1>System administration</h1>
 
@@ -22,7 +29,7 @@
 
 <div class='field'>
 <label>User Id:</label>
-<input type='text' name='user_id_text' value="{{user_ed.id}}" disabled="true" />
+<input type='text' name='user_id_text' value="{{user_ed.id}}" disabled="true" id='user_id_id'/>
 <input type='hidden' name='user_id' value="{{user_ed.id}}"  />
 </div>
 
@@ -50,6 +57,20 @@
 <label for="{{form.password_commit.id_for_label}}">Commit password:</label>
 {{form.password_commit}}
 </div>
+
+{% if user_ed.id %}
+	{% if request.user.is_superuser %}
+	<div class='field' id='password_reset'>
+	<input id='reset_pass' type='button' value='Reset password' />
+	</div>
+	{% endif %}
+{% else %}
+	<div class='field' id='password_reset'>
+	<input id='random_pass' name='if_random_pass' type='checkbox'/><label>Set random password and send by e-mail</label>
+	</div>
+{% endif %}
+
+
 
 
 <div class='field'>
@@ -210,9 +231,10 @@
     </li>
     <li>Specific permissions for given items group:
     <ul>
-		<li>chembase | item | Can see item - allows user to find and see items from given group.</li>
+		<li>chembase | item | Can see item - allows user to find and see items from given group and to see the risk assessment documents for this group.</li>
 		<li>chembase | item | Can change item - allows user to change, delete and restore items from given group.</li>
 		<li>chembase | item | Can add item - allows user to add new item into the group. Without the "Can add compound" permission, user can only add items of compounds already present in the database.</li>
+		<li>chembase | item | Can add orz form - allows user to create a risk assessment (ORZ.a.II) forms for given group.</li>
 	</ul>
 	<li>Account type attributes:
 	 <ul>

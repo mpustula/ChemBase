@@ -32,10 +32,12 @@ $('#orz_submit_form').on('submit', function(event) {
 		event.preventDefault();
 		var owner=$('#id_owner').val();
 		var stanowisko=$('#id_stanowisko').val();
-		var kod=$('#kod_stanowiska').val();
+		var kod=$('#id_kod_stanowiska').val();
 		var from=$('#id_date_from').val();
 		var to=$('#id_date_to').val();
-		$('#orz_input').fadeOut('fasf',function(){$('#wait_box').fadeIn('fast')});
+		$('#orz_input').hide();
+		$('#wait_box').show();
+		
 		send_orz(owner,stanowisko,kod,from,to);
 		console.log('submitted');
 		
@@ -83,7 +85,9 @@ function send_orz(owner,stanowisko,kod,from,to) {
 				
 			error : function(xhr,errmsg,err) {
             console.log(xhr.status + ": " + xhr.responseText);
-            
+            var error_p="<p class='warning'> From not created - system error. Server response: "+xhr.status + ": " + xhr.responseText+"</p>"
+            $('#wait_box').fadeOut('fasf',function(){$('#orz_input').fadeIn('fast')});
+            $('#entries').prepend(error_p);
             }
 				
 			

@@ -12,115 +12,24 @@
 
 <h1>System administration</h1>
 
-<h2>General information:</h2>
+<form action="{% url 'chembase:admin_cmpds_items' %}" method="get" class='tile_form'>
+<input class ='tile' id='cmpds' type='submit' value='Compounds and items' />
+</form>
 
-<h3>Compounds</h3>
+<form action="{% url 'chembase:admin_users_groups' %}" method="get" class='tile_form'>
+<input class ='tile' id='users' type='submit' value='Users, group and permission' />
+</form>
 
-Total number: {{compounds_number}}, active: {{existing_cmpds}}
+<form action="{% url 'chembase:admin_server' %}" method="get" class='tile_form'>
+<input class ='tile' id='server' type='submit' value='Server status' />
+</form>
 
-<h2>Users</h2>
-
-<table class='log_table' summary="Users" >
-<tr>
-<th>User</th>
-<th>First name</th>
-<th>Last name</th>
-<th>e-mail address</th>
-<th>Joined</th>
-<th>Last login</th>
-
-</tr>
-{% for item in users %}
-<tr>
-<td>{{item}}</td>
-<td>{{item.first_name}}</td>
-<td>{{item.last_name}}</td>
-<td>{{item.email}}</td>
-<td>{{item.date_joined}}</td>
-<td>{{item.last_login}}</td>
-
-</tr>
-{% endfor %}
-
-</table>
-
-<a href="{% url 'chembase:admin_users' %}">See all users</a>
-
-<h2>Groups</h2>
-
-<table class='log_table' summary="Groups" >
-<tr>
-<th>Group</th>
-<th>Number of members</th>
-<th>Number of items</th>
-
-</tr>
-{% for item in groups %}
-<tr>
-<td><a href="{% url 'chembase:admin_group' item.id %}" >{{item.name}}</a></td>
-<td>{{item.userprofile_set.all.count}}</td>
-<td>{{item.item_set.all.count}}</td>
-
-</tr>
-{% endfor %}
-
-</table>
-
-<h2>System logs:</h2>
-
-<table class='log_table' summary="System logs" >
-<tr>
-<th>Time</th>
-<th>Model</th>
-<th>Compound</th>
-<th>Item</th>
-<th>Action</th>
-<th>Author</th>
-<th>Comment</th>
-</tr>
-{% for item in system_log %}
-<tr>
-<td><span class='log_date'>{{item.date|date:'Y-m-d H:i'}}</span></td>
-<td>{{item.model}}</td>
-<td><a href="{% url 'chembase:detail' item.compound_id %}" >{{item.compound_name}}</a></td>
-<td>{{item.item}}</td>
-<td>{{item.action}}</td>
-<td>{{item.author}}</td>
-<td>{{item.comment}}</td>
-
-</tr>
-{% endfor %}
-
-</table>
-
-<a href="{% url 'chembase:admin_logs' %}">Show more logs</a>
-
-<h2>Server status</h2>
-<a href='/server-status/'>Go to Apache2 status page</a>
-<br>
-<h3>Access log file:</h3>
-
-{% for item in access_log %}
-
-<p class='server_log_entry'>{{item}}</p>
-
-{% endfor %}
-<a href="{% url 'chembase:log_files' 'access' %}">Show entire file</a>
-<br>
-<h3>Error log file:</h3>
-{% for item in error_log %}
-
-<p class='server_log_entry'>{{item}}</p>
-
-{% endfor %}
-<a href="{% url 'chembase:log_files' 'error' %}">Show entire file</a>
-<br>
-
-<a href='/admin/'>Go to django admin site</a>
+<form action="{% url 'chembase:admin_settings' %}" method="get" class='tile_form'>
+<input class ='tile' id='settings' type='submit' value='Settings' />
+</form>
 
 </div>
 </div>
-
 
 </div>
 {% endblock %}

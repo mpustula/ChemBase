@@ -103,13 +103,7 @@
 
 <div class='block_head'>Available</div>
 <div class='block'>
-{% if compound.is_registered %}
-	<div class='res_field' id='warning'>
-	<p class="warning">
-	Fill the usage registry! Uzupełnij kartę ewidencji rozchodu!	
-	</p>
-	</div>
-{% endif %}
+
 <table>
 {% for item in exist %}
 <tr>
@@ -151,6 +145,14 @@
 	{% endif %}
 
 </td>
+
+{% if item.a.is_registered %}
+	<td class='label'>
+	<p class="warning">
+	Fill the usage registry! Uzupełnij kartę ewidencji rozchodu!	
+	</p>
+	<td>
+{% endif %}
 
 </tr>
 
@@ -260,31 +262,6 @@
 
 <h2>Ocena ryzyka zawodowego</h2>
 
-<div class='label'>Zużycie dzienne: </div><div class='value'>{{compound.dailyused}}</div>
-<div class='label'>Ewidencja zużycia: </div>
-	<div class='value'>
-	{% if compound.ewidencja_set.all %}
-		{% for entry in compound.ewidencja_set.all %}
-			{% if entry.text == 'ewidencja'  %}
-				TAK
-			{% else %}
-				NIE
-			{% endif %}
-		{% endfor %}
-	{% else %}
-		NIE
-	{% endif %}
-	</div>
-
-<div class='label'>Obecny w strefie oddychania: </div>
-	<div class='value'>
-	{% if compound.inRespZone %}
-	TAK
-	{% else %}
-	NIE
-	{% endif %}
-	</div>
-
 <div class='two_part'>
 <div class='two-cols'>
 <p class='block_head'>Klasyfikacja</p>
@@ -298,6 +275,29 @@
 </div>
 </div>
 
+<div class='block_head'>Szczegółowe informacje dla poszczególnych grup</div>
+<div class='block'>
 
+<table id="orz_table" >
+<tr>
+<th>Grupa</th>
+<th>Zużycie dzienne</th>
+<th>Ewidencja zużycia</th>
+<th>Obecny w strefie oddychania</th>
+</tr>
+
+{% for item in orzdet %}
+<tr>
+
+<td>{{item.group}}</td>
+
+<td class='value'>{{item.du}}</td>
+<td class='value'>{{item.ewid}}</td>
+<td class='value'>{{item.resp}}</td>
+</tr>
+{% endfor %}
+</table>
+
+</div>
 </div>
 {% endblock %}

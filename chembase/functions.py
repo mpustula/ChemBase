@@ -104,15 +104,15 @@ def transform_sds(txt_file):
                     clas_df.loc[clas,'=']='='
                     clas_df.loc[clas,'number']=''
     #clas_text_extr=';'.join(clas_ext_list)
-    print(clas_df)
+    #print(clas_df)
     clas_extr_dict={'%d'%(x):clas_df.loc[x,'number'] for x in clas_df.index.tolist()}
-    print(clas_extr_dict)
+    #print(clas_extr_dict)
     #print(clas_extr_dict)
     #clas_text_extr=clas_df.to_string(header=False)
         
     pict_df=pd.DataFrame(index=['1','2','3','4','5','6','7','8','9'],columns=['value'])
     #print pict_df
-    #print H
+    #print(H)
     for item in H:
         if item=='H317':
             if not 'H335' in H:
@@ -122,15 +122,15 @@ def transform_sds(txt_file):
                pict_df.loc[ghs_codes.loc[item,'Pict_short'],'value']=1 
         else:
             pict_df.loc[ghs_codes.loc[item,'Pict_short'],'value']=1
-    #print pict_df
+    #print(pict_df)
     if pict_df.loc['6','value']==1:
         pict_df.loc['7','value']=0
     pictures=pict_df[pict_df['value']>=1]
     #print pict_df
     #print pictures
-    #print pictures
-    pic_list=['%d'%(x) for x in pictures.index.tolist()]
-    print(pic_list)
+    #print(pictures)
+    pic_list=['%d'%(x) for x in pictures.index.tolist() if x]
+    #print(pic_list)
         
     un_number='ERROR'
     transport_class='ERROR'

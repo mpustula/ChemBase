@@ -23,8 +23,8 @@ class SearchForm(forms.Form):
             
             
 class CompoundForm(forms.ModelForm):
-    ewid=forms.BooleanField(required=False)
-    resp=forms.BooleanField(required=False)
+    #ewid=forms.BooleanField(required=False)
+    #resp=forms.BooleanField(required=False)
     paper_sds=forms.BooleanField(required=False)
     sds_file = forms.FileField(required=False)
     class_extr=forms.ModelMultipleChoiceField(widget=Select2MultipleWidget,queryset=GHSClass.objects.all(),required=False)
@@ -32,7 +32,8 @@ class CompoundForm(forms.ModelForm):
         model=Compound
         #fields=['name','all_names','subtitle']
         exclude=['class_extr','image','author','group']
-        widgets={'pictograms':Select2MultipleWidget,'sds':Select2Widget,'class_extr':Select2MultipleWidget}
+        widgets={'pictograms':Select2MultipleWidget,'sds':Select2Widget,'class_extr':Select2MultipleWidget,'storage_temp':Select2Widget}
+        #'storage_temp':Select2Widget}
         
 class GroupForm(forms.Form):
     group=forms.ModelChoiceField(widget=ModelSelect2Widget(queryset=Group.objects.all(),
@@ -54,6 +55,9 @@ class GHSClassForm(forms.Form):
 class ItemForm(forms.ModelForm):
     room_choices=set([item.room for item in Item.objects.all()])
     comment=forms.CharField(required=False)
+    ewid=forms.BooleanField(required=False)
+    resp=forms.BooleanField(required=False)
+    dailyused=forms.CharField(required=False)
     #group = forms.ModelChoiceField(widget=Select2TagWidget(attrs={'data-maximum-selection-length': 1,'data-placeholder':'Group','data-minimum-input-length':"0"}),queryset=Group.objects.all(),required=False)
     room=forms.ChoiceField(widget=Select2Widget(attrs={'data-tags':'true','required':'true'}),choices=((x,x) for x in room_choices))
     #place=forms.ChoiceField(widget=Select2Widget(attrs={'data-tags':'true'}),choices=((x,x) for x in room_choices))
@@ -97,8 +101,21 @@ class ORZ_Form(forms.ModelForm):
         fields=['owner','date_from','date_to']
         widgets={'owner':Select2Widget}
                                 
-        
-        
-    
+                            
+class ExpirePasswords(forms.Form):
+    users=forms.ModelMultipleChoiceField(widget=ModelSelect2MultipleWidget(queryset=User.objects.all(),
+            search_fields=['last_name__icontains']),queryset=User.objects.all(),required=False)
+    exp_date=forms.IntegerField(required=True)
+    if_mail=forms.BooleanField(required=False)
+
+
+class OwnershipGroupForm(forms.ModelForm):
+
+    class Meta:
+        model = OwnershipGroup
+        fields = {'name','short_name','admin'}
+        widgets = {'admin': ModelSelect2Widget(queryset=User.objects.all(),
+            search_fields=['last_name__icontains'])}
+
 
     

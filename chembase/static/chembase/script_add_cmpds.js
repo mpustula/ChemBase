@@ -187,6 +187,60 @@ $(document).ready(function(){
 	
 	});
 	
+		$('#clean_str').on('click', function(event) {
+		event.preventDefault();
+		$.ajax({
+			url :'/clean_str_ajax/',
+			type : "POST",
+			data : {mol: $('#id_molfile').val()},
+			
+			success : function(json) {
+				console.log(json);
+				console.log('success');
+				
+				$('#id_molfile').val(json['new_mol'])
+				},
+				
+			error : function(xhr,errmsg,err) {
+            console.log(xhr.status + ": " + xhr.responseText)
+            
+            }
+				
+			
+		});
+	
+	});
+	
+		$('#properties').on('click', function(event) {
+		event.preventDefault();
+		$.ajax({
+			url :'/properties_ajax/',
+			type : "POST",
+			data : {mol: $('#id_molfile').val()},
+			
+			success : function(json) {
+				console.log(json);
+				console.log('success');
+				
+				var form=json['formula'];
+				console.log(form);
+				$('#id_formula').val(form);
+				$('#id_weight').val(json['mass']);
+				$('#id_smiles').val(json['smiles']);
+				$('#id_inchi').val(json['inchi'])
+				
+				},
+				
+			error : function(xhr,errmsg,err) {
+            console.log(xhr.status + ": " + xhr.responseText)
+            
+            }
+				
+			
+		});
+	
+	});
+	
 	$('#id_sds_file').on('change', function () {
 		var file_to_sent=$('#id_sds_file')[0].files[0]
 		console.log(file_to_sent);

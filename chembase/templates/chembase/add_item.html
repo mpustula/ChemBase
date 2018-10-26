@@ -79,39 +79,15 @@
 </div>
 
 <p class='control' id='item_ctrl'>Item information:</p>
+
 <div class='names' id='item_block'>
+
 <hr class='block_sep'>
 <form enctype="multipart/form-data" action="{% url 'chembase:item_save' %}" method="post">
 {% csrf_token %}
 
 <input id='cmpd_id_input' type='hidden' name='cmpd_id' value={{compound.id}} />
 <input type='hidden' name='item_id' value={{item_id}} />
-
-<div class='field'>
-{{form.quantity.errors}}
-<label for="{{form.quantity.id_for_label}}">Quantity:</label>
-{{form.quantity}}
-</div>
-
-<div class='field'>
-{{form.amount.errors}}
-<label for="{{form.amount.id_for_label}}">Amount (g or ml):</label>
-{{form.amount}}
-</div>
-
-<div class='field'>
-{{form.hidden.errors}}
-<label for="{{form.hidden.id_for_label}}">Hidden:</label>
-{{form.hidden}}
-</div>
-
-<div class='field'>
-{{form.comment.errors}}
-<label for="{{form.comment.id_for_label}}">Comment:</label>
-{{form.comment}}
-</div>
-
-<hr>
 
 
 <div class='field'>
@@ -150,6 +126,57 @@
 <label for="{{form.local.id_for_label}}"></label>
 {{form.local}}
 </div>
+
+<div class='field'>
+{{form.quantity.errors}}
+<label for="{{form.quantity.id_for_label}}">Quantity:</label>
+{{form.quantity}}
+</div>
+
+<div class='field'>
+{{form.amount.errors}}
+<label for="{{form.amount.id_for_label}}">Amount (g or ml):</label>
+{{form.amount}}
+</div>
+
+<div class='field'>
+{{form.hidden.errors}}
+<label for="{{form.hidden.id_for_label}}">Hidden:</label>
+{{form.hidden}}
+</div>
+
+<div class='field'>
+{{form.comment.errors}}
+<label for="{{form.comment.id_for_label}}">Comment:</label>
+{{form.comment}}
+</div>
+
+
+<p class='control' id='item_ctrl'>Risk assessment details:</p>
+
+
+<div class='field'>
+{{form.dailyused.errors}}
+<label for="{{form.dailyused.id_for_label}}">Daily usage:</label>
+{{form.dailyused}}
+</div>
+
+<div class='field'>
+{{form.ewid.errors}}
+<label for="{{form.dailyused.id_for_label}}">Registered:</label>
+{{form.ewid}}
+</div>
+
+<div class='field'>
+{{form.resp.errors}}
+<label for="{{form.resp.id_for_label}}">Present in respiratory zone:</label>
+{{form.resp}}
+</div>
+
+<hr>
+
+
+
 
 
 

@@ -1,29 +1,50 @@
 from django.shortcuts import get_object_or_404,render,redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.db.models import Q
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-from django.contrib.auth import authenticate, login,logout
+from django.contrib.auth import authenticate, login,logout, update_session_auth_hash
+from django.contrib.auth.models import Permission
+from django.contrib.auth.forms import PasswordChangeForm
+from django.views.decorators.debug import sensitive_post_parameters
+from django.shortcuts import resolve_url
+from django.template.response import TemplateResponse
+from django.utils.translation import ugettext as _
 import json
 from django.utils import timezone
+
 
 from chemspipy import ChemSpider
 import cirpy
 import difflib
 import re
 import os
+import datetime
 
 from django.contrib.auth.models import User, Permission
 # Create your views here.
-from .models import Compound, GHSClass, Cmpd_Class, SystemLog,Item,Group, Annotation,History, ExtraPermissions, UserProfile,OwnershipGroup, ORZForm
-from .forms import SearchForm, CompoundForm, ItemForm, UserForm, UserProfileForm, ExtraPermForm,GroupForm,GHSClassForm, ORZ_Form
+from .models import Compound, GHSClass, Cmpd_Class, SystemLog,Item,Group, Annotation,History, ExtraPermissions, UserProfile,OwnershipGroup, ORZForm, ORZExtraFields
+from .forms import (SearchForm, CompoundForm, ItemForm, UserForm, UserProfileForm, 
+                    ExtraPermForm,GroupForm,GHSClassForm, ORZ_Form, ExpirePasswords, OwnershipGroupForm)
 
 
 
 def can_add_item(user):
     return ExtraPermissions.check_perm(user,'chembase.add_item')
+    
+def check_password_valid(request):
+    now=timezone.now()
+    valid=request.user.userprofile.password_expiry_date
+      
+    if valid and now>valid:
+        request.user.is_active=False
+        request.user.save()
+        #print('expired')
+        #return HttpResponse('chembase/password_expired.html')
+        #return TemplateResponse(request,'chembase/password_expired.html')
+        request.user.logout()
 
 def index(request):
     return redirect('chembase:search')
@@ -47,10 +68,51 @@ def get_groups(request):
     
     else:
         
-        return HttpResponse('Login error')   
+        return HttpResponse('Login error') 
+        
+
+
+
+@sensitive_post_parameters()
+@csrf_protect
+@login_required
+def password_change(request,
+                    template_name='chembase/change_password.html',
+                    post_change_redirect=None,
+                    password_change_form=PasswordChangeForm,
+                    current_app=None, extra_context=None):
+    if post_change_redirect is None:
+        post_change_redirect = reverse('chembase:password_change_done')
+    else:
+        post_change_redirect = resolve_url(post_change_redirect)
+    if request.method == "POST":
+        form = password_change_form(user=request.user, data=request.POST)
+        if form.is_valid():
+                form.save()
+                # Updating the password logs out all other sessions for the user
+                # except the current one if
+                # django.contrib.auth.middleware.SessionAuthenticationMiddleware
+                # is enabled.
+                update_session_auth_hash(request, form.user)
+                form.user.userprofile.set_password_expiry(365)
+                return HttpResponseRedirect(post_change_redirect)
+    else:
+        form = password_change_form(user=request.user)
+    context = {
+        'form': form,
+        'title': _('Password change'),
+    }
+    if extra_context is not None:
+        context.update(extra_context)
+
+    if current_app is not None:
+        request.current_app = current_app
+
+    return TemplateResponse(request, template_name, context)
 
 @login_required()
 def detail(request,cmpd_id):
+    check_password_valid(request)
     
     compound=get_object_or_404(Compound,pk=cmpd_id)
     existing_items=compound.item_set(manager='citems').existing()
@@ -86,6 +148,16 @@ def detail(request,cmpd_id):
     else:
         can_edit=False
         
+    own_groups=set([x.owner for x in existing_items+deleted_items])
+    orz_details=[]
+    for item in own_groups:
+        orz_fields=ORZExtraFields.objects.filter(compound=compound,owner=item)
+        if orz_fields:
+            orzdict={'group':item.name,'du':orz_fields[0].dailyused,'ewid':orz_fields[0].ewidencja,'resp':orz_fields[0].respzone}
+        else:
+            orzdict={'group':item.name,'du':'','ewid':False,'resp':False}
+        orz_details.append(orzdict)
+        
     #items_log.annotate(extra_field=Value('a'))
     #print(items_log[0].item_loc)
     items_log_list=[{'date':x.date,'author':x.author,'action':x.action,
@@ -97,12 +169,13 @@ def detail(request,cmpd_id):
 
     return render(request,'chembase/detail.html',{'compound':compound,'exist':allowed_existing,
                                                   'del':allowed_deleted,'log_entries':log_items,'item_log_entries':items_log_list,
-                                                  'can_add':can_add,'can_add_cmpd':can_add_cmpd,'can_edit':can_edit,'user_staff':user_staff})
+                                                  'can_add':can_add,'can_add_cmpd':can_add_cmpd,'can_edit':can_edit,'user_staff':user_staff,'orzdet':orz_details})
     
 
 @login_required()
 @user_passes_test(can_add_item)
 def add(request):
+    check_password_valid(request)
     #form=CompoundForm()
     if request.user.has_perm('chembase.add_compound'):
         can_add_cmpd=True
@@ -120,6 +193,7 @@ def add_item_done(request,item_id):
 
 @login_required()
 def add_item(request,cmpd_id):
+    check_password_valid(request)
     cmpd=Compound.objects.get(pk=cmpd_id)
     rtype=request.POST.get('type')
     if rtype=='edit':
@@ -139,13 +213,16 @@ def add_item(request,cmpd_id):
         room_init=item.room
         place_init=item.place
         place_num_init=item.place_num
-        owner_group_choices=ExtraPermissions.objects.filter(user__exact=request.user,permission__codename__exact='add_item')
+        #owner_group_choices=ExtraPermissions.objects.filter(user__exact=request.user,permission__codename__exact='add_item')
+        owner_group_choices=ExtraPermissions.permitted_groups(request.user,'chembase.add_item')
         #print(owner_group_choices)
         #choices=((item.owner.id,item.owner.name),((item.group.id,item.group.name) for item in owner_group_choices))
         #choices.append(((item.group.id,item.group.name) for item in owner_group_choices))
-        item_form.fields['owner'].choices=((item.group.id,item.group.name) for item in owner_group_choices)
+        item_form.fields['owner'].choices=((item.id,item.name) for item in owner_group_choices)
         if not ExtraPermissions.check_perm(request.user,'chembase.add_item',item.owner):
             item_form.fields['owner'].choices.append((item.owner.id,item.owner.name))
+            
+        
     else:
         if not can_add_item(request.user):
             return redirect('/login/?next=%s' % request.path)
@@ -155,9 +232,10 @@ def add_item(request,cmpd_id):
         room_init=''
         place_init=''
         place_num_init=''
-        owner_group_choices=ExtraPermissions.objects.filter(user__exact=request.user,permission__codename__exact='add_item')
+        #owner_group_choices=ExtraPermissions.objects.filter(user__exact=request.user,permission__codename__exact='add_item')
+        owner_group_choices=ExtraPermissions.permitted_groups(request.user,'chembase.add_item')
         #print(owner_group_choices)
-        item_form.fields['owner'].choices=((item.group.id,item.group.name) for item in owner_group_choices)
+        item_form.fields['owner'].choices=((item.id,item.name) for item in owner_group_choices)
 
     if request.user.has_perm('chembase.add_compound'):
         can_add_cmpd=True
@@ -174,13 +252,35 @@ def add_item(request,cmpd_id):
                                                     'can_edit':can_edit})
                                                     
 @login_required()
+@user_passes_test(can_add_item)
 def suggest_loc(request):
     cmpd_id=request.GET.get('cmpd_id')
     owner=request.GET.get('owner')
+    owner_obj=OwnershipGroup.objects.filter(name__exact=owner)[0]
     ignore_temp=request.GET.get('ignore_temp')
-    resp_dict=Item.suggest_loc(cmpd_id,request.user,owner,ignore_temp)
+    if ExtraPermissions.check_perm(request.user,'chembase.can_see_item',owner_obj):
+        resp_dict=Item.suggest_loc(cmpd_id,request.user,owner,ignore_temp)
     
-    return JsonResponse(resp_dict)
+        return JsonResponse(resp_dict)
+    else:
+        return HttpResponse('You do not have permission required to see this content!',status=403)
+    
+    
+@login_required()
+def get_orz_details(request):
+    cmpd_id=request.GET.get('cmpd_id')
+    cmpd=Compound.objects.get(pk=cmpd_id)
+    owner_id=request.GET.get('owner_id')
+    owner=OwnershipGroup.objects.get(pk=owner_id)
+    
+    fields=ORZExtraFields.objects.filter(compound__exact=cmpd,owner=owner)    
+    
+    if fields:
+        orz_dict={'du':fields[0].dailyused,'ewid':fields[0].ewidencja,'resp':fields[0].respzone}
+    else:
+        orz_dict={'du':None,'ewid':None,'resp':None}
+    
+    return JsonResponse(orz_dict)
     
     
 @login_required()
@@ -256,7 +356,27 @@ def item_save(request):
                 
             new_item.save()
             
+            ###orz_details
+            current_details=ORZExtraFields.objects.filter(compound__exact=cmpd,owner__exact=owner_obj)
+            print(current_details)
+            new_details={'du':request.POST.get('dailyused'),'ewid':request.POST.get('ewid'),'resp':request.POST.get('resp')}
+            print(new_details)
             
+            if new_details['du'] or new_details['ewid'] or new_details['resp']:
+                if current_details:
+                    current_details[0].dailyused=new_details['du']
+                    current_details[0].ewidencja=bool(new_details['ewid'])
+                    current_details[0].respzone=bool(new_details['resp'])
+                    current_details[0].save()
+                    print(current_details[0])
+                    print(current_details)
+                else:
+                    new_detail=ORZExtraFields(compound=cmpd,owner=owner_obj,dailyused=new_details['du'],ewidencja=bool(new_details['ewid']),respzone=bool(new_details['resp']))
+                    new_detail.save()
+                    print(new_detail)
+            else:
+                if current_details:
+                    current_details.delete()
             
             ###log
             user=request.user
@@ -391,12 +511,7 @@ def cmpd_save(request):
                     group_obj=Group(group_name=group_id)
                     group_obj.save()
                 new_cmpd.group=group_obj
-            ###ewidencja
-            is_to_register=data_dict['ewid']
-            new_cmpd.set_registered(is_to_register)
-            ###respiratory zone
-            resp_zone=data_dict['resp']
-            new_cmpd.set_resp(resp_zone)
+
             ###paper sds
             paper_sds=data_dict['paper_sds']
             new_cmpd.set_paper(paper_sds)
@@ -425,6 +540,7 @@ def cmpd_save(request):
     
 @login_required()
 def add_cmpd(request):
+    check_password_valid(request)
     save_as='new'
     redir_url=''
     if request.method=='POST':
@@ -454,12 +570,7 @@ def add_cmpd(request):
             str_image='/static/chembase/'+compound.image
             form = CompoundForm(instance=compound)
             sds_name=compound.sds
-            ewid=Compound.is_registered(compound)
-            if ewid:
-                form.fields['ewid'].initial=True
-            resp=Compound.inRespZone(compound)
-            if resp:
-                form.fields['resp'].initial=True
+
             paper=Compound.isPaperSDS(compound)
             if paper:
                 form.fields['paper_sds'].initial=True
@@ -491,7 +602,7 @@ def add_cmpd(request):
             image_id=request.session.session_key
             str_image=Compound.render_image('',compound.image,image_id)
             name=compound.common_name
-            mw=compound.molecular_weight
+            mw=compound.molecular_weight or 0
             iupac_name=cirpy.resolve(inchi,'iupac_name')
             sds_name=''
             if iupac_name!=name:
@@ -508,10 +619,11 @@ def add_cmpd(request):
                                          'all_names':other_name,
                                          'csid':cmpd_id,
                                          'smiles':smiles,
-                                         'weight':mw,
+                                         'weight':'%.4f'%mw,
                                          'molfile':molfile})
         else:
             form=CompoundForm()
+            group_form=GroupForm()
             str_image=''
             classes_dict={}
             classes_names_dict={}
@@ -519,6 +631,7 @@ def add_cmpd(request):
             
     else:
         form=CompoundForm()
+        group_form=GroupForm()
         str_image=''
         classes_dict={}
         classes_names_dict={}
@@ -531,6 +644,7 @@ def add_cmpd(request):
 
 @login_required()
 def search_view(request):
+    check_password_valid(request)
     if request.method=='GET':
         form=SearchForm(request.GET)
         pr_form=GHSClassForm()
@@ -586,7 +700,7 @@ def search_view(request):
     return render(request,'chembase/search.html',{'form':form,'pr_form':pr_form,'results':cmpds_list,'str':structure,'found':found,'ghs_classes':ghs_classes})
 
 def search_qt(request):
-    
+    check_password_valid(request.user)
     if request.user.is_authenticated:
        
         query=request.GET.get('text')
@@ -634,8 +748,15 @@ def search_ajax(request):
 def search(user,query='',query_cas='',linker='and',query_place='',smiles='',dele=False,stype='sim',cut=0.6,group=None,ghs_codes=[]):
             
     if (query!='' or query_cas!='' or query_place!='' or smiles!='' or group or ghs_codes):
-        q1=Q(name__icontains=query) | Q(all_names__icontains=query) | \
-            Q(pl_name__icontains=query)
+        qa=Q()
+        qb=Q()
+        qc=Q()
+        for item in query.split():
+            qa = qa & Q(name__icontains=item)
+            qb = qb & Q(all_names__icontains=item)
+            qc = qc & Q(pl_name__icontains=item)
+            
+        q1=qa | qb | qc
 
         q2=Q(cas__icontains=query_cas)
         q3=Q(item__local__icontains=query_place)
@@ -706,6 +827,22 @@ def search_rm(request):
 
 @login_required()
 def search_groups(request):
+    
+    
+    ###moving daily used, registered resp_zone to separate class
+#    items=Item.objects.all()
+#    for item in items:
+#        cmpd=item.compound
+#        owner=item.owner
+#        extr_fields=ORZExtraFields.objects.filter(compound__exact=cmpd,owner__exact=owner)
+#        if not extr_fields:
+#            dused=cmpd.dailyused
+#            ewid=cmpd.is_registered()
+#            rzone=cmpd.inRespZone()
+#            new_field=ORZExtraFields(compound=cmpd,owner=owner,dailyused=dused,ewidencja=ewid,respzone=rzone)
+#            new_field.save()
+#            
+    #####end
     
     compounds=Compound.objects.all()
 
@@ -800,6 +937,7 @@ def image_ajax(request):
             image_path=''
                 
         return JsonResponse({'image':image_path})
+
         
 def formula_ajax(request):
     if request.method=='POST':
@@ -807,6 +945,26 @@ def formula_ajax(request):
         new_formula=Compound.clean_formula(formula)
         
         return JsonResponse({'new_formula':new_formula})
+                
+def properties_ajax(request):
+    if request.method=='POST':
+        mol_file=request.POST.get('mol')
+        properties=Compound.calculate_properties(mol_file)
+        
+        if properties:
+            return JsonResponse(properties)
+        else:
+            return HttpResponse('Invalid structure!',code=409)
+            
+def clean_str_ajax(request):
+    if request.method=='POST':
+        mol_file=request.POST.get('mol')
+        properties=Compound.clean_structure(mol_file)
+        
+        if properties:
+            return JsonResponse(properties)
+        else:
+            return HttpResponse('Invalid structure!',code=409)
         
 def sds_ajax(request):
     
@@ -855,7 +1013,7 @@ def logout_view(request):
     return redirect('chembase:login')
     
 def account_view(request):
-    
+    check_password_valid(request)
     return render(request,'chembase/account.html')
                 
 def sds_index(request):
@@ -868,7 +1026,9 @@ def sds_index(request):
                 
     return render(request,'chembase/sds.html',{'list':sorted(pdf_list)})
     
-    
+
+@login_required()
+@user_passes_test(lambda u: u.is_staff)   
 def log_file(request,file_type):
     if file_type=="access":
         file_log=open('/var/log/apache2/access.log','r')
@@ -883,11 +1043,20 @@ def log_file(request,file_type):
 
 @login_required()        
 def admin(request):
-    
+    check_password_valid(request)
+
+
+    return render(request,'chembase/admin.html')
+                                                 
+@login_required()
+@user_passes_test(lambda u: u.is_staff)    
+def server(request):
+    check_password_valid(request)
     access_log=open('/var/log/apache2/access.log','r')
     access_lines=access_log.readlines()[-15:]
     error_log=open('/var/log/apache2/error.log','r')
     error_lines=error_log.readlines()[-15:]
+    
     #access_log=[]
     #error_log=[]
 
@@ -895,6 +1064,23 @@ def admin(request):
     #  This can be done by:
     #    sudo chmod 644 /var/log/apache2/access.log /var/log/apache2/error.log
     # and by changing "create 640 root adm" into "create 644 roor adm" in /etc/logrotate.d/apache2 file
+
+    return render(request,'chembase/admin_server.html',{'access_log':access_lines[::-1],
+                                                 'error_log':error_lines[::-1],
+                                                 })
+                                                 
+
+@login_required()
+@user_passes_test(lambda u: u.is_staff)    
+def settings(request):
+    check_password_valid(request)
+
+    
+    return render(request,'chembase/admin_settings.html')
+
+@login_required()        
+def cmpds_items(request):
+    check_password_valid(request)
 
     systemLogs=SystemLog.objects.all()[::-1][0:10]
     
@@ -916,18 +1102,14 @@ def admin(request):
     compounds_number=len(compounds_all)
     existing_compounds=len(Compound.extra_methods.existing(compounds_all))
     
-    items_groups=OwnershipGroup.objects.all()
-    
-    users=User.objects.all().order_by('-last_login')[0:5]
-    return render(request,'chembase/admin.html',{'access_log':access_lines[::-1],
-                                                 'error_log':error_lines[::-1],
-                                                 'system_log':system_log_list,
+
+    return render(request,'chembase/admin_cmpds_items.html',{'system_log':system_log_list,
                                                  'compounds_number':compounds_number,
-                                                 'existing_cmpds':existing_compounds,
-                                                 'groups':items_groups,'users':users})
+                                                 'existing_cmpds':existing_compounds})
+                                                 
 @login_required() 
 def logs(request):
-    
+    check_password_valid(request)
     systemLogs=SystemLog.objects.all()[::-1]
     
     system_log_list=[]
@@ -957,16 +1139,68 @@ def logs(request):
     
 @login_required()
 @permission_required('auth.change_user')
+def users_groups(request):
+    check_password_valid(request)
+    
+    users_all=User.objects.all()
+    
+    users_total=len(users_all)
+    users=users_all.order_by('-last_login')[0:5]
+    
+    now=datetime.datetime.now() 
+    
+    users_active=users_all.filter(last_login__gte=now-datetime.timedelta(days=30)).order_by('-last_login')
+    active_total=len(users_active)
+    
+    users_inactive=users_all.filter(last_login__lte=now-datetime.timedelta(days=60)).order_by('last_login')
+    inactive_total=len(users_inactive)
+    
+    users_with_permissions=[]
+    existing_permissions=[]
+    
+    for item in users_all:
+        permissions=Permission.objects.filter(user=item)
+        if permissions:
+            users_line={'user':item}
+            users_with_permissions.append(users_line)
+            for j in permissions:
+                existing_permissions.append(j)
+        elif item.is_superuser or item.is_staff:
+            users_line={'user':item}
+            users_with_permissions.append(users_line)
+        
+    #userperm=list(set(users_with_permissions))
+    userperm=users_with_permissions
+
+    permissions=list(set(existing_permissions))
+
+    for user in userperm:
+        perms=[]
+        for item in permissions:
+            perms.append(user['user'].has_perm(item.content_type.app_label+'.'+item.codename))
+        user['perms']=perms
+    
+    items_groups=OwnershipGroup.objects.all()
+   
+    return render(request,'chembase/admin_users_groups.html',{'users':users,'users_total':users_total,'users_active':users_active[0:10],
+                                                              'active_total':active_total,'users_inactive':users_inactive,'inactive_total':inactive_total,
+                                                              'groups':items_groups,'perms':permissions,'users_perms':userperm})
+    
+    
+@login_required()
+@permission_required('auth.change_user')
 def users(request):
+    check_password_valid(request)
     
     users=User.objects.all()
-   
+      
     return render(request,'chembase/admin_users.html',{'users':users})
     
 
 @login_required()
 @permission_required('auth.change_user') 
 def edit_user(request,user_id):
+    check_password_valid(request)
     
     if int(user_id)!=0:
         user=User.objects.get(pk=user_id)
@@ -985,8 +1219,8 @@ def edit_user(request,user_id):
         profile_form=UserProfileForm()
         user_permissions=None
         user=None
-        user_form.fields['password'].required=True
-        user_form.fields['password_commit'].required=True
+        user_form.fields['password'].required=False
+        user_form.fields['password_commit'].required=False
     
     perm_form=ExtraPermForm()
     if request.user.is_superuser:
@@ -1014,6 +1248,7 @@ def save_user(request):
             is_staff=user.is_staff
             user_form=UserForm(request.POST,instance=user)
             password=None
+            if_random_pass=0
         else:
             user_form=UserForm(request.POST)
             is_su=False
@@ -1021,17 +1256,30 @@ def save_user(request):
             password=request.POST.get('password')
             password_commit=request.POST.get('password_commit')
             
-            if not (password and password==password_commit):
-                return render(request,'chembase/admin_edit_user.html',{'form':user_form,'pr_form':UserProfileForm(request.POST),
-                                                               'perm_form':ExtraPermForm(request.POST),'pass_err':'The passwords do not match!'})
+            if_random_pass=request.POST.get('if_random_pass')
+            
+            if if_random_pass:
+                password=''
+                password_commit=''
+            else:        
+                if not (password and password==password_commit):
+                    return render(request,'chembase/admin_edit_user.html',{'form':user_form,'pr_form':UserProfileForm(request.POST),
+                                                                   'perm_form':ExtraPermForm(request.POST),'pass_err':'The passwords do not match!'})
         if user_form.is_valid():
             set_su=user_form.cleaned_data['is_superuser']
             set_staff=user_form.cleaned_data['is_staff']
+            
+            mail=user_form.cleaned_data['email']
+            if if_random_pass and not mail:
+                return render(request,'chembase/admin_edit_user.html',{'form':user_form,'pr_form':UserProfileForm(request.POST),
+                                                                   'perm_form':ExtraPermForm(request.POST),'pass_err':'E-mail address is required for random password generation!'})
 
             if ((is_su==set_su and is_staff==set_staff) or request.user.is_superuser):
                 new_user=user_form.save()
             else:
                 return HttpResponse("Permission denied - you cannot alter 'Staff' and 'Superuser' fields!")
+                
+            
             if password:
                 new_user.set_password(password)
                 new_user.save()
@@ -1061,6 +1309,10 @@ def save_user(request):
 
                 new_perm=ExtraPermissions(user=new_user,group=group,permission=perm)
                 new_perm.save()
+                
+            if if_random_pass:
+                new_user.userprofile.set_random_password()
+                            
 
         else:
             print(user_form.errors.as_data())
@@ -1074,36 +1326,146 @@ def save_user(request):
     return redirect('chembase:admin_users')
     
 @login_required()
+@permission_required('auth.change_user') 
+def reset_password(request):
+
+    if request.method=='POST':
+        if request.user.is_superuser:
+            edited_user_id=request.POST.get('user_id')
+            user=User.objects.get(pk=edited_user_id)
+            ans=user.userprofile.set_random_password("Reset")
+            if ans[0]:
+                return HttpResponse(ans[1])
+            else:
+                return HttpResponse(ans[1],status=400)
+        else:
+            return HttpResponse('You do not have superuser permission required to reset a password!',status=403)
+
+@login_required()
+@user_passes_test(lambda u: u.is_superuser)           
+def expire_passwords(request):
+    
+    if request.method=='POST':
+        user_id=request.POST.get('user_id')
+        days=int(request.POST.get('date'))
+        #date=(datetime.datetime.today()+datetime.timedelta(days=days)).strftime('%Y-%m-%d')
+        if_mail=request.POST.get('if_mail')
+        #print(if_mail)
+        user=User.objects.get(pk=user_id)
+        username=user.username
+        names=user.get_full_name()
+        if user.is_superuser:
+            ans='User '+names+' ('+username+') has superuser privileges. Superuser password cannot be forced to expire!'
+            return HttpResponse(ans,status=403)
+        else:
+            if if_mail=="false":
+                user.userprofile.set_password_expiry(days)
+                ans='Password for user: '+names+' ('+username+') will expire on '+ \
+                    user.userprofile.password_expiry_date.strftime('%Y-%m-%d')+'. Notification e-mail has NOT been sent!'
+                status=200
+            else:
+                user_mail=user.email
+                if user_mail:
+                    user.userprofile.set_password_expiry(days)
+                    mail_ans=user.userprofile.sent_expiry_mail()
+                    if mail_ans[0]:
+                        ans='Password for user: '+names+' ('+username+') will expire on '+ \
+                            user.userprofile.password_expiry_date.strftime('%Y-%m-%d')+'. Notification e-mail has been sent to: '+user_mail
+                        status=200
+                    else:
+                        ans='E-mail during sending error.'
+                        status=500
+                else:
+                    ans='No valid e-mail address has been found for user: '+names+' ('+username+'). Request cancelled.'
+                    status=409
+            return HttpResponse(ans,status=status)
+        
+    else:
+        exp_form=ExpirePasswords()
+        return render(request,'chembase/admin_expire_passwords.html',{'form':exp_form})
+    
+
+@login_required()
 def group_details(request,group_id):
+    check_password_valid(request)
     
     group=OwnershipGroup.objects.get(pk=group_id)
     
+    items=group.item_set.all()
+    items_num=len(items)
+    
+    active_items=group.item_set(manager='citems').existing()
+    active_num=len(active_items)
+    
+    locations=set([item.room for item in active_items])
+    
+    loc_occ=[]
+    
+    for loc in locations:
+        count=0
+        loc_items=items.filter(room__exact=loc)
+        for item in loc_items:
+            if not item.is_deleted():
+                count=count+1
+        loc_occ.append([count,loc])
+        
+    #locations_occupancy=[{x,len(items.filter(room__exact=x))} for x in locations]
+    occupancies=sorted(loc_occ,reverse=True)
+    
+    orz=ORZForm.objects.filter(owner__exact=group)
+    orz_num=len(orz)
+    
+    if orz:   
+        last_orz=orz.order_by('-date')[0]
+    else:
+        last_orz=None
+    
+    
     users_permissions=ExtraPermissions.objects.filter(group__exact=group).order_by('user')
-    print(users_permissions)
     
     perm_users=set([x.user for x in users_permissions])
-    print(perm_users)
     
     permissions_dict=[{'id':x.id,'user':x.username,'first_name':x.first_name,'last_name':x.last_name,
                        'see_item':users_permissions.filter(user__exact=x,permission__codename__exact='can_see_item').exists(),
                        'change_item':users_permissions.filter(user__exact=x,permission__codename__exact='change_item').exists(),
                        'all_permissions':[item.permission for item in users_permissions.filter(user__exact=x)]} for x in perm_users]
                        
-    print(permissions_dict)
+
     
-    return render(request,'chembase/admin_groups.html',{'group':group,'permissions':permissions_dict})
+    return render(request,'chembase/admin_groups.html',{'group':group,'permissions':permissions_dict,'items':items_num,'ex_items':active_num,
+                                                        'locations':occupancies,'orz':orz_num,'last_orz':last_orz})
     
 @login_required()    
 def orz_form(request):
+    check_password_valid(request)
+    
+    groups=ExtraPermissions.permitted_groups(request.user,'chembase.can_see_item')
+    #orz_permissions=ExtraPermissions.objects.filter(user__exact=request.user,permission__codename__exact='can_see_item')
+    #groups=[x.group for x in orz_permissions]
+    
+    groups_add=ExtraPermissions.permitted_groups(request.user,'chembase.add_orzform')
+    #orz_add_permissions=ExtraPermissions.objects.filter(user__exact=request.user,permission__codename__exact='add_orzform')
+    #groups_add=[x.group for x in orz_add_permissions]
+    
+    
+    
     if request.method=='POST':
         form=ORZ_Form(request.POST)
+        form.fields['owner'].choices=((item.id,item.name) for item in groups_add)
+        
         if form.is_valid():
             owner=form.cleaned_data['owner']
+            
+            perm=ExtraPermissions.check_perm(request.user,'chembase.add_orzform',owner)
+            if not perm:
+                return HttpResponse('Permission denied - you can not create a form for this group!',status=403)
+                
             dfrom=form.cleaned_data['date_from']
             dto=form.cleaned_data['date_to']
             
             stanowisko=form.cleaned_data['stanowisko']
             kod=form.cleaned_data['kod_stanowiska']
+            #print(kod)
             
             
             orz_entry=ORZForm.objects.create(owner=owner,author=request.user,date_from=dfrom)
@@ -1111,6 +1473,7 @@ def orz_form(request):
                 orz_entry.date_to=dto
                                             
             orz_entry.run(stanowisko,kod)
+            
             if orz_entry.date_from:
                 from_date=orz_entry.date_from.strftime("%d.%m.%Y")
             else:
@@ -1121,12 +1484,48 @@ def orz_form(request):
                     'created':orz_entry.date.strftime("%Y-%m-%d %H:%M:%S"),
                     'num':orz_entry.num_cmpds,'status':orz_entry.status_text}
             return JsonResponse(result)
+        else:
+            return HttpResponse('The "Group" field must be chosen. If you cannot see any choices, you do not have permission to create a form!',status=403)
             
             
     else:
         form=ORZ_Form()
-        
-    orz_entries=ORZForm.objects.all()[::-1]
+        form.fields['owner'].choices=((item.id,item.name) for item in groups_add)
+
+    orz_entries=ORZForm.objects.filter(owner__in=groups)[::-1]
     
     return render(request,'chembase/orz.html',{'form':form,'entries':orz_entries})
-    
+
+
+@login_required()
+@user_passes_test(lambda u: u.is_superuser)
+def edit_group(request, group_id):
+    check_password_valid(request)
+
+    if int(group_id) != 0:
+        own_group = OwnershipGroup.objects.get(pk=group_id)
+
+        group_form = OwnershipGroupForm(instance=own_group)
+    else:
+        group_form = OwnershipGroupForm()
+        own_group = None
+
+    return render(request, 'chembase/admin_group_edit.html', {'form': group_form,'gr_id':group_id,'group':own_group})
+
+@login_required()
+@user_passes_test(lambda u: u.is_superuser)
+def save_group(request):
+    if request.method == 'POST':
+        group_id = int(request.POST.get('group_id'))
+        if group_id:
+            own_group=OwnershipGroup.objects.get(pk=group_id)
+            group_form = OwnershipGroupForm(request.POST, instance=own_group)
+        else:
+            group_form = OwnershipGroupForm(request.POST)
+
+        if group_form.is_valid():
+            group = group_form.save()
+            return redirect('chembase:admin_group','%d'%group.id)
+        else:
+            return render(request, 'chembase/admin_group_edit.html',
+                          {'form': group_form, 'gr_id': group_id, 'group': own_group})

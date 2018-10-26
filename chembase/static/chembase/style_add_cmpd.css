@@ -106,7 +106,7 @@ div.field input {
   margin-bottom: 10px;
 }
 
-#str_chemspider, #mol_editor {
+#str_chemspider, #mol_editor, #clean_str, #properties {
   width: 100%;
   margin-top: 10px;
   margin-bottom: 0px;

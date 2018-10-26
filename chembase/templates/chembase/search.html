@@ -199,22 +199,12 @@
 	<div class='items' id='items_div'>
 	<p class="subtitle">
 	Items:
+	<a target='_blank' href="{% url 'chembase:detail' compound.id %}" >
 	{% allowed_items_list user compound %}
-	
+	</a>
 	</p>
 	</div>
-	
-	{% if compound.is_registered %}
-	<div class='res_field' id='warning'>
-	<p class="warning">
-	Fill the usage registry!	
-	</p>
-	<p class='warning'>
-	Uzupełnij kartę ewidencji rozchodu!	
-	</p>
-	</div>
-	
-	{% endif %}
+
 	
 	<div class='picts'>
 	{% for pict in compound.pictograms.all %}

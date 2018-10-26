@@ -65,6 +65,10 @@ div#item_block label{
   text-align: right;
 }
 
+input#id_local {
+  margin-bottom: 25px;
+}
+
 a#suggestions {
   display: inline-block;
   padding: 10px 0px;

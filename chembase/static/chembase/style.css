@@ -55,6 +55,18 @@ input[type=submit], input[type=button]{
   opacity: 0.9;
 }
 
+input[type=submit]:disabled, input[type=button]:disabled {
+  opacity: 0.5;
+}
+
+input[type=submit]:disabled:hover, input[type=button]:disabled:hover {
+  opacity: 0.5;
+  color: white;
+  background-color: var(--text-highlight-col);
+  cursor:unset;
+}
+
+
 .item_form {
   display: inline-block;
 }
@@ -237,6 +249,20 @@ p.warning {
   font-size: 14px;
 }
 
+p#password_warning {
+  font-size: 14px;
+  color: darkred;
+  margin: auto;
+  text-align: center;
+  margin: 5px;
+}
+
+p.success {
+  margin: 0px;
+  color: forestgreen;
+  font-size: 14px;
+}
+
 h1 {
   color: var(--text-highlight-col);
   font-family: var(--main-font-fam-cond);
@@ -336,6 +362,11 @@ a:visited {
 
 tr {
   height: 25px;
+}
+
+#orz_table td, #orz_table th {
+  padding-left: 15px;
+  padding-right: 15px;
 }
 
 

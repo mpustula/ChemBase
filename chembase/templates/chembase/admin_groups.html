@@ -1,21 +1,50 @@
 {% extends "chembase/base.html" %}
 
+{% block title %} {{group}} {% endblock %}
+
 {% block content %}
 {% load static %}
 
 <link rel='stylesheet' type="text/css" href="{% static 'chembase/style_admin.css' %}">
 
 <div class='main'>
+
+<div class='nav_links'>
+<a href="{% url 'chembase:admin' %}">Admin site</a> > <a href="{% url 'chembase:admin_users_groups' %}">Users, groups and permissions</a> > {{group}}
+</div>
+
 <div class='title'>
 
-<h1>System administration</h1>
+<h1>System administration: Details of group >>{{group}}<<</h1>
 
+<form action="{% url 'chembase:admin_group_edit' group.id %}" method="get" class='options_form'>
+<input class ='small' id='edit_group' type='submit' value='Edit group' />
+</form>
 
-<h2>Details of group >>{{group}}<< </h2>
+<div class='admin_entries'><span>Short name:</span><span class='value' >{{group.short_name}}</span></div>
 
 </div>
 
-<h3>Users and permissions</h3>
+
+<h2>Compounds and items</h2>
+
+<div class='admin_entries'><span>Total number of items:</span><span class='value' >{{items}}</span></div>
+<div class='admin_entries'><span>Existing items:</span><span class='value' >{{ex_items}}</span></div>
+
+<div class='admin_entries'><span>Main locations:</span><span class='value' >
+{% for item in locations %}
+{{item.1}} ({{item.0}} items),
+{% endfor %}
+</span></div>
+
+<h3>Risk assessment documents</h3>
+<div class='admin_entries'><span>Number of existing ORZ.a.II documents:</span><span class='value' >{{orz}}</span><a href="{% url 'chembase:admin_orz' %}">Go to risk documentation section</a></div>
+<div class='admin_entries'><span>Last document:</span><span class='value' >{{last_orz.date}}</span></div>
+
+<h2>Users and permissions</h2>
+
+<div class='admin_entries'><span>Group admin:</span><span class='value' >{{group.admin.get_full_name}} ({{group.admin.username}})</span></div>
+
 
 <table class='log_table' summary="System logs" >
 <tr>
@@ -46,7 +75,7 @@
 </td>
 <td>
 {% for x in item.all_permissions %}
-<p>{{x}}</p>
+{{x.name}},
 
 {% endfor %}
 </td>

@@ -1,0 +1,28 @@
+{% extends "chembase/base.html" %}
+
+{% block title %} System settings {% endblock %}
+
+{% block content %}
+{% load static %}
+
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_admin.css' %}">
+
+<div class='main'>
+
+<div class='nav_links'>
+<a href="{% url 'chembase:admin' %}">Admin site</a> > System settings
+</div>
+
+<div class='title'>
+
+<h1>System settings</h1>
+
+
+<a href='/admin/'>Go to django admin site</a>
+
+</div>
+</div>
+
+
+</div>
+{% endblock %}

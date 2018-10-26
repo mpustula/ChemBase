@@ -1,0 +1,68 @@
+{% extends "chembase/base.html" %}
+
+{% block title %} {% if group.id %} Edit group {{group.short_name}} {% else %} New group {% endif %} - Admin Tools {% endblock %}
+
+{% block content %}
+{% load static %}
+
+
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_admin.css' %}">
+<script src="{% static 'chembase/script_admin.js' %}"></script>
+
+<div class='main'>
+<div class='title'>
+
+<div class='nav_links'>
+<a href="{% url 'chembase:admin' %}">Admin site</a> > <a href="{% url 'chembase:admin_users_groups' %}">Users, groups and permissions</a> > Edit group
+</div>
+
+
+<h1>System administration</h1>
+
+
+<h2>Edit group:</h2>
+
+<form action="{% url 'chembase:admin_group_save' %}" method="post">
+{% csrf_token %}
+
+
+<div class='field'>
+<label>Group Id:</label>
+<input type='text' name='group_id_text' value="{{gr_id}}" disabled="true" id='gr_id_id'/>
+<input type='hidden' name='group_id' value="{{gr_id}}"  />
+</div>
+
+<div class='field'>
+{{form.name.errors}}
+<label for="{{form.name.id_for_label}}">Name:</label>
+{{form.name}}
+</div>
+
+
+<div class='field'>
+{{form.short_name.errors}}
+<label for="{{form.short_name.id_for_label}}">Short name:</label>
+{{form.short_name}}
+</div>
+
+<div class='field'>
+{{form.admin.errors}}
+<label for="{{form.admin.id_for_label}}">Admin:</label>
+{{form.admin}}
+</div>
+
+<input type='Submit' id='group_submit' value='Save' />
+
+</form>
+</div>
+</div>
+
+
+</div>
+
+
+
+
+
+
+{% endblock %}

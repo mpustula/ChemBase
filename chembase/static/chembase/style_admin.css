@@ -1,3 +1,30 @@
+input.tile {
+  width: 250px;
+  height: 100px;
+  margin: 10px;
+  display: inline-block;
+  float: left;
+  opacity: 1;
+
+}
+
+div.nav_links {
+  margin: 5px;
+  color: var(--text-extra-col);
+  font-family: var(--main-font-fam-cond);
+}
+
+div.admin_entries {
+  margin: 10px;
+  color: var(--text-extra-col);
+}
+
+div.admin_entries span {
+  margin-right: 15px;
+
+}
+
+
 .server_log_entry {
   color: var(--text-extra-col);
   font-family: var(--main-font-fam-cond);
@@ -32,6 +59,21 @@
   font-size: 11pt;
 }
 
+#active_users td, #inactive_users td {
+  font-size: 10pt;
+  height: 30px
+}
+
+#active_users, #inactive_users {
+  font-size: 10pt;
+  width: 70%
+}
+
+#active_users th, #inactive_users th {
+  font-size: 10pt;
+  height: 30px
+}
+
 .fa-check {
   color: green;
 }
@@ -40,11 +82,12 @@
   color: darkred;
 }
 
-#add_new_user {
+#add_new_user, #exp_users {
   padding: 10px 5px;
-  width: 150px;
+  width: 200px;
+  margin-right: 10px;
   margin-bottom: 10px;
-  float: right;
+  float: left;
 }
 
 div.field {
@@ -226,10 +269,32 @@ div.password_errors {
 }
 
 #password_commit_field {
+  margin-bottom: 5px;
+}
+
+div#password_reset {
+  width: 600px;
+  padding-left: 160px;
   margin-bottom: 35px;
 }
 
+input#reset_pass {
+  height: 25px;
+  padding: 2px;
+  margin-bottom: 10px;
+  opacity: 1
+}
 
+input#random_pass {
+  width: unset;
+  display: inline-block;
+  vertical-align: middle;
+  
+}
+
+div#password_reset label {
+  width: 400px;
+}
 
  /* The Modal (background) */
 .modal {
@@ -327,13 +392,8 @@ div#incl_cmpds {
   width: 170px;
 }
 
-#id_stanowisko {
-  margin-right: 10px;
-}
 
-#id_kod_stanowiska {
-  width: 150px;
-}
+
 
 #hidden_field {
   display: none;
@@ -360,10 +420,41 @@ div.val_long {
   height: 6em;
 }
 
+#orz_form {
+  display: none;
+  background-color: var(--search-box-col);
+  border-color: var(--box-head-col);
+  border: 1px solid;
+  border-radius: var(--box-border-radius);
+  padding: 10px 20px;
+  margin: 10px 15px;
+}
+
+#orz_form label {
+  margin-left: 15px
+}
+
+#orz_form select {
+  width: 700px;
+}
+
+#id_date_from, #id_date_to {
+  width: 15%
+}
+
+
+
+#id_stanowisko {
+  width: 60%;
+}
+
+#id_kod_stanowiska {
+  width: 10%;
+}
+
 #orz_input {
-  margin-top: 35px;
-  margin-bottom: 92px;
-  display: ;
+  margin-top: 5px;
+  margin-bottom: 10px;
 }
 
 #wait_box {
@@ -372,6 +463,25 @@ div.val_long {
 
 }
 
+#id_users {
+  width: 70%;
+}
+
+#id_exp_date {
+  width: 60px;
+}
+
+#id_if_mail {
+  display: inline-block;
+  width: 10px;
+  vertical-align: middle;
+}
+
+#add_new_group {
+  width: 120px;
+  padding: 5px
+  
+}
 
 p.intro {
   text-align: center;

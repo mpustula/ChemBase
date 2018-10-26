@@ -1,5 +1,7 @@
 {% extends "chembase/base.html" %}
 
+{% block title %} Users - Admin Tools {% endblock %}
+
 {% block content %}
 {% load static %}
 
@@ -7,6 +9,11 @@
 
 <div class='main'>
 <div class='title'>
+
+<div class='nav_links'>
+<a href="{% url 'chembase:admin' %}">Admin site</a> > <a href="{% url 'chembase:admin_users_groups' %}">Users, groups and permissions</a> > Users
+</div>
+
 
 <h1>System administration</h1>
 
@@ -18,6 +25,9 @@
 <input class ='small' id='add_new_user' type='submit' value='Add new user' />
 </form>
 
+<form action="{% url 'chembase:admin_user_expire' %}" method="get" class='options_form'>
+<input class ='small' id='exp_users' type='submit' value='Force users passwords expiry' />
+</form>
 
 <table class='log_table' summary="System logs" >
 <tr>
@@ -29,6 +39,7 @@
 <th>Staff</th>
 <th>Superuser</th>
 <th>Groups</th>
+<th>Password expiry date</th>
 </tr>
 {% for item in users %}
 <tr>
@@ -57,6 +68,13 @@
 <p class='group'>{{group}}</p>
 {% endfor %}
 </td>
+<td>{% if item.userprofile.password_expiry_date %}
+{{item.userprofile.password_expiry_date}}
+{% else %}
+<i class="fa fa-times" aria-hidden="true"></i>
+{% endif %}
+</td>
+
 
 </tr>
 {% endfor %}

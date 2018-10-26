@@ -1,0 +1,159 @@
+{% extends "chembase/base.html" %}
+
+{% block title %} Users, groups and permissions - Admin Tools {% endblock %}
+
+{% block content %}
+{% load static %}
+
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_admin.css' %}">
+
+<div class='main'>
+<div class='title'>
+
+<div class='nav_links'>
+<a href="{% url 'chembase:admin' %}">Admin site</a> > Users, groups and permissions
+</div>
+
+
+<h1>System administration: users, groups and permissions</h1>
+
+
+<h2>Users</h2>
+
+<div class='admin_entries'><span>Total number of users:</span><span class='value'>{{users_total}}</span><a href="{% url 'chembase:admin_users' %}">See all users</a></div> 
+<div class='admin_entries'><span>Users active within last 30 days:</span><span class='value' >{{active_total}}</span></div>
+
+<table class='log_table' summary="Users" id='active_users' >
+<tr>
+<th>User</th>
+<th>Name</th>
+<th>Joined</th>
+<th>Last login</th>
+
+</tr>
+{% for item in users_active %}
+<tr>
+<td>{{item}}</td>
+<td>{{item.first_name}} {{item.last_name}}</td>
+<td>{{item.date_joined}}</td>
+<td>{{item.last_login}}</td>
+
+</tr>
+{% endfor %}
+
+</table>
+
+<div class='admin_entries'><span>Users not active since last 60 days:</span><span class='value'>{{inactive_total}}</span></div>
+
+
+<table class='log_table' summary="Users" id='inactive_users' >
+<tr>
+<th>User</th>
+<th>Name</th>
+<th>Joined</th>
+<th>Last login</th>
+
+</tr>
+{% for item in users_inactive %}
+<tr>
+<td>{{item}}</td>
+<td>{{item.first_name}} {{item.last_name}}</td>
+<td>{{item.date_joined}}</td>
+<td>{{item.last_login}}</td>
+
+</tr>
+{% endfor %}
+
+</table>
+
+
+<h2>Users with extra permissions</h2>
+
+<table class='log_table' summary="System logs" >
+<tr>
+<th>Username</th>
+<th>Fisrt name</th>
+<th>Last name</th>
+<th>Active</th>
+<th>Staff</th>
+<th>Superuser</th>
+{% for item in perms %}
+<th>{{item.name}}</th>
+{% endfor %}
+</tr>
+{% for item in users_perms %}
+<tr>
+<td><a href="{% url 'chembase:admin_user' item.user.id %}" >{{item.user.username}}</a></td>
+<td>{{item.user.first_name}}</td>
+<td>{{item.user.last_name}}</td>
+<td>{% if item.user.is_active %}
+<i class="fa fa-check" aria-hidden="true"></i>
+{% else %}
+<i class="fa fa-times" aria-hidden="true"></i>
+{% endif %}
+</td>
+<td>{% if item.user.is_staff %}
+<i class="fa fa-check" aria-hidden="true"></i>
+{% else %}
+<i class="fa fa-times" aria-hidden="true"></i>
+{% endif %}
+</td>
+<td>{% if item.user.is_superuser %}
+<i class="fa fa-check" aria-hidden="true"></i>
+{% else %}
+<i class="fa fa-times" aria-hidden="true"></i>
+{% endif %}</td>
+
+{% for item2 in item.perms %}
+<td>
+{% if item2 %}
+<i class="fa fa-check" aria-hidden="true"></i>
+{% else %}
+<i class="fa fa-times" aria-hidden="true"></i>
+{% endif %}</td>
+
+{% endfor %}
+</td>
+
+</tr>
+{% endfor %}
+</table>
+
+
+<h2>Groups</h2>
+
+<form action="{% url 'chembase:admin_group_edit' 0 %}" method="get" class='options_form'>
+<input class ='small' id='add_new_group' type='submit' value='Add new group' />
+</form>
+
+<table class='log_table' summary="Groups" >
+<tr>
+<th>Group</th>
+<th>Short name</th>
+<th>Group admin</th>
+<th>Number of members</th>
+<th>Number of items</th>
+
+</tr>
+{% for item in groups %}
+<tr>
+<td><a href="{% url 'chembase:admin_group' item.id %}" >{{item.name}}</a></td>
+<td>{{item.short_name}}</td>
+<td>{{item.admin.get_full_name}} ({{item.admin}})</td>
+<td>{{item.userprofile_set.all.count}}</td>
+<td>{{item.item_set.all.count}}</td>
+
+</tr>
+{% endfor %}
+
+</table>
+
+
+
+
+</div>
+</div>
+
+
+</div>
+{% endblock %}

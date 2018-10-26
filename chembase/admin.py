@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .models import (Compound,Pictogram,GHSClass,Cmpd_Class,SystemLog,Item,
                     Annotation,Group,History,OwnershipGroup,UserProfile, 
-                    ExtraPermissions, ORZForm)
+                    ExtraPermissions, ORZForm, MailTemplates, ORZExtraFields)
 
 # Register your models here.
 admin.site.register(Permission)
@@ -20,6 +20,9 @@ admin.site.register(Annotation)
 admin.site.register(Group)
 admin.site.register(History)
 admin.site.register(ORZForm)
+admin.site.register(ORZExtraFields)
+admin.site.register(MailTemplates)
+
 
 # Define an inline admin descriptor for Employee model
 # which acts a bit like a singleton

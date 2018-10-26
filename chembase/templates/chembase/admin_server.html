@@ -1,0 +1,48 @@
+{% extends "chembase/base.html" %}
+
+{% block title %} Server status {% endblock %}
+
+{% block content %}
+{% load static %}
+
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_admin.css' %}">
+
+<div class='main'>
+
+
+<div class='nav_links'>
+<a href="{% url 'chembase:admin' %}">Admin site</a> > Server status
+</div>
+
+
+<div class='title'>
+
+<h1>System administration: server options</h1>
+
+<h2>Server status</h2>
+<a href='/server-status/'>Go to Apache2 status page</a>
+<br>
+<h2>Access log file:</h2>
+
+{% for item in access_log %}
+
+<p class='server_log_entry'>{{item}}</p>
+
+{% endfor %}
+<a href="{% url 'chembase:log_files' 'access' %}">Show entire file</a>
+<br>
+<h2>Error log file:</h2>
+{% for item in error_log %}
+
+<p class='server_log_entry'>{{item}}</p>
+
+{% endfor %}
+<a href="{% url 'chembase:log_files' 'error' %}">Show entire file</a>
+<br>
+
+</div>
+</div>
+
+
+</div>
+{% endblock %}

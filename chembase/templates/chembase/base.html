@@ -64,6 +64,9 @@
 
 <div class='main_content'>
 
+{% if user.userprofile.is_password_old %}
+<p id='password_warning'>Your password will expire on {{user.userprofile.password_expiry_date}} </p>
+{% endif %}
 
 {% block content %}
 

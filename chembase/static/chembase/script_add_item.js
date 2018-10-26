@@ -7,6 +7,11 @@ $(document).ready(function(){
 	var place_num_in=$('#place_num_in').val()
 	$('#id_place_num').append($('<option></option>').attr("value",place_num_in).text(place_num_in));	
 	print_local()
+	
+	
+	var cmpd_id=$('#cmpd_id_input').val();
+	var owner=$('#id_owner').val();
+	fetch_orz(cmpd_id,owner);
 		
 	$('#id_local').attr('disabled','true');
 	
@@ -31,6 +36,13 @@ $(document).ready(function(){
 			
 			});
 			
+	$('#id_owner').on('change',function () {
+			var cmpd_id=$('#cmpd_id_input').val();
+			var owner=$('#id_owner').val();
+			fetch_orz(cmpd_id,owner)
+			
+			});
+			
 	$('#suggestions').on('click', function(event) {
 			event.preventDefault();
 			var cmpd_id=$('#cmpd_id_input').val()
@@ -49,6 +61,33 @@ $(document).ready(function(){
 			
 	
 	}
+	
+	function fetch_orz(cmpd_id,owner_id) {
+		$.ajax({
+			url :'/item_orz/',
+			type : "GET",
+			data : {"cmpd_id":cmpd_id,"owner_id":owner_id},
+			
+			success : function(json) {
+				console.log(json);
+				$('#id_dailyused').val(json['du']);
+				if (json['ewid']==true) {$('#id_ewid').prop("checked",true);console.log('true')}
+				else  {$('#id_ewid').prop("checked",false)};
+				if (json['resp']==true) {$('#id_resp').prop("checked",true)}
+				else {$('#id_resp').prop("checked",false)};
+				
+				},
+					
+			error : function(xhr,errmsg,err) {
+            console.log(xhr.status + ": " + xhr.responseText)
+            
+            },
+				
+			
+		});
+		
+		
+	};	
 	
 	function fetch_suggestions(cmpd_id,ignore_temp) {
 		var owner=$('#id_owner option:selected').text();

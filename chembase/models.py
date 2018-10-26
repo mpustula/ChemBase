@@ -2,8 +2,11 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from django.contrib.auth.models import User, Permission
+from django.core.mail import send_mail, EmailMessage
 import re
 import sys, os
+import random
+import string
 import datetime
 from subprocess import call, getoutput, run
 import pandas as pd
@@ -26,6 +29,8 @@ from .functions import transform_sds
 
 class OwnershipGroup(models.Model):
     name=models.CharField(max_length=500)
+    short_name=models.CharField(max_length=20,blank=True)
+    admin=models.ForeignKey(User,on_delete=models.PROTECT,default=6)
     
     def __str__(self):
         return self.name
@@ -33,10 +38,74 @@ class OwnershipGroup(models.Model):
 class UserProfile(models.Model):
     user=models.OneToOneField(User, on_delete=models.CASCADE)
     own_groups=models.ManyToManyField(OwnershipGroup,blank=True)
+    password_expiry_date=models.DateTimeField(blank=True,null=True)
     
     def __str__(self):
         return str(self.user.username)+': '+str(self.own_groups.all())
         
+    def set_password_expiry(self,days):
+
+        now=datetime.datetime.now() 
+        new_expiry=now+datetime.timedelta(days=days)
+        self.password_expiry_date=new_expiry
+        self.save()
+        
+    def set_random_password(self,mail_type="New"):
+        if not self.user.email:
+            return [0,'User e-mail address incorrect']
+        random_pass = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(16)])
+        self.user.set_password(random_pass)
+        self.set_password_expiry(4)
+        self.user.is_active=True
+        self.user.save()
+        
+        
+        template=MailTemplates.objects.filter(code_name__exact='new_account')[0]
+        #print(template)
+        topic=template.topic
+        message=template.message%({'login':self.user.username,'password':random_pass,'expire':self.password_expiry_date.strftime('%Y-%m-%d')})
+        msg=EmailMessage(topic,message,'chembase@chemia.uj.edu.pl',[self.user.email])
+        msg.content_subtype = "html" 
+        mail_ans=msg.send()
+        #mail_ans=send_mail(topic,message,'chembase@chemia.uj.edu.pl',[self.user.email])
+        if mail_ans:
+            return [1,'New password has been sent to the user']
+        else:
+            return [0,'Sending error']
+            
+    def sent_expiry_mail(self):
+        template=MailTemplates.objects.filter(code_name__exact='expire_pass')[0]
+        #print(template)
+        topic=template.topic
+        message=template.message%({'user':self.user.get_full_name(),'date':self.password_expiry_date.strftime('%Y-%m-%d')})
+        #mail_ans=send_mail(topic,message,'chembase@chemia.uj.edu.pl',[self.user.email])
+        msg=EmailMessage(topic,message,'chembase@chemia.uj.edu.pl',[self.user.email])
+        msg.content_subtype = "html" 
+        mail_ans=msg.send()
+        if mail_ans:
+            return [1,'New password has been sent to the user']
+        else:
+            return [0,'Sending error']
+            
+
+    def is_password_old(self):
+        now=timezone.now()
+        if self.password_expiry_date:
+            if now+datetime.timedelta(days=3)>self.password_expiry_date:
+                return 1
+            else:
+                return 0
+        
+class MailTemplates(models.Model):
+    code_name=models.CharField(max_length=20)
+    topic=models.CharField(max_length=500)
+    message=models.TextField()
+    
+    def __str__(self):
+        return self.code_name
+    
+   # def send(self):
+   #     send_mail(self.topic,self.message,)
         
 class ExtraPermissions(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
@@ -47,6 +116,9 @@ class ExtraPermissions(models.Model):
         return str(self.user.username)+': '+str(self.group.name)+', '+str(self.permission)
         
     def check_perm(user,perm,group=None):
+        
+        if user.is_superuser:
+            return True
         
         q=Q(user__exact=user,permission__codename__exact=perm.split('.')[1])
         
@@ -59,6 +131,20 @@ class ExtraPermissions(models.Model):
             return True
         else:
             return False
+            
+    def permitted_groups(user,perm):
+        
+        if user.is_superuser:
+            return OwnershipGroup.objects.all()
+        
+        q=Q(user__exact=user,permission__codename__exact=perm.split('.')[1])
+        user_extra_perms=ExtraPermissions.objects.filter(q)
+        
+        groups=[item.group for item in user_extra_perms]
+        
+        return groups
+        
+        
             
 
 class Pictogram(models.Model):
@@ -133,20 +219,20 @@ class ExtraCompoundsManager(models.Manager):
         
 
 class Compound(models.Model):
-    name=models.CharField('Name (english)',max_length=2000)
-    all_names=models.CharField(max_length=5000,blank=True)
-    subtitle=models.CharField(max_length=1000,blank=True)
-    pl_name=models.CharField('Name (polish)',max_length=2000,blank=True)
-    pl_subtitle=models.CharField('Subtitle (polish)',max_length=1000,blank=True)
-    cas=models.CharField('CAS',max_length=100,blank=True)
-    csid=models.CharField('ChemSpider Id',max_length=15,blank=True)
+    name=models.CharField('Name (english)', max_length=2000)
+    all_names=models.CharField(max_length=5000, blank=True)
+    subtitle=models.CharField(max_length=1000, blank=True)
+    pl_name=models.CharField('Name (polish)', max_length=2000, blank=True)
+    pl_subtitle=models.CharField('Subtitle (polish)', max_length=1000, blank=True)
+    cas=models.CharField('CAS',max_length=100, blank=True)
+    csid=models.CharField('ChemSpider Id', max_length=15, blank=True)
     
-    formula=models.CharField(max_length=100,blank=True)
-    weight=models.DecimalField("Molecular weight",max_digits=10,decimal_places=4,null=True,blank=True)
-    density=models.CharField(max_length=100,blank=True)
+    formula=models.CharField(max_length=100, blank=True)
+    weight=models.DecimalField("Molecular weight", max_digits=12, decimal_places=4, null=True, blank=True)
+    density=models.CharField(max_length=100, blank=True)
     
-    group=models.ForeignKey(Group,on_delete=models.PROTECT,blank=True,null=True,default=23)
-    storage_temp=models.CharField(max_length=10,blank=True,default=None)
+    group=models.ForeignKey(Group,on_delete=models.PROTECT, blank=True, null=True, default=23)
+    storage_temp=models.CharField(choices=[('RT','RT'),('28','2-8'),('20','-20'),('80','-80')], max_length=10, blank=True, default=None)
     
     image=models.CharField(max_length=300,blank=True)
     
@@ -175,6 +261,7 @@ class Compound(models.Model):
     adr_num=models.CharField(max_length=15,blank=True)
     adr_class=models.CharField(max_length=15,blank=True)
     adr_group=models.CharField(max_length=15,blank=True)
+    
     
     dailyused=models.CharField("Daily usage",max_length=15,blank=True)
     
@@ -271,16 +358,21 @@ class Compound(models.Model):
         return ans
         
     def set_resp(self,true_or_false):
-        current_state=self.inRespZone()
-        if current_state!=true_or_false:
-            if current_state:
-                query_set=RespZone.objects.filter(compound=self)
-                query_set.delete()
-            if true_or_false:
-                RespZone.objects.create(compound=self)
+        pass
         
-    def inRespZone(self):
-        query_set=RespZone.objects.filter(compound=self)
+#        current_state=self.inRespZone()
+#        if current_state!=true_or_false:
+#            if current_state:
+#                query_set=RespZone.objects.filter(compound=self)
+#                query_set.delete()
+#            if true_or_false:
+#                RespZone.objects.create(compound=self)
+        
+    def inRespZone(self,owner):
+        
+        query_set=ORZExtraFields.objects.filter(compound__exact=self,owner__exact=owner,respzone__exact=True)
+        
+        #query_set=RespZone.objects.filter(compound=self)
         ans=bool(query_set)
         
         return ans
@@ -338,6 +430,39 @@ class Compound(models.Model):
 
         image_path='/static/chembase/temp/temp'+image_id+'.png?timestamp=' + str(timezone.now())
         return image_path
+
+
+    def calculate_properties(molfile):
+
+        if molfile:
+            indigo=Indigo()
+            mol=indigo.loadMolecule(molfile)
+            formula=mol.grossFormula()
+            mw=mol.molecularWeight()
+            smile=mol.canonicalSmiles()
+
+            indigoinchi=IndigoInchi(indigo)
+
+            inChi=indigoinchi.getInchi(mol)
+            
+            return {'formula':formula,'mass':'%0.4f'%mw,'smiles':smile,'inchi':inChi}
+
+        else:
+            return None
+            
+    def clean_structure(molfile):
+        
+        if molfile:
+            indigo=Indigo()
+            mol=indigo.loadMolecule(molfile)
+            
+            mol.layout()
+            
+            new_mol=mol.molfile()
+            
+            return {'new_mol':new_mol}
+        else:
+            return None
         
     def save_sds(sdsfile):
         file_base='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp'
@@ -505,6 +630,15 @@ class Item(models.Model):
             
         return ExtraPermissions.check_perm(user,perm,item_owner)
         
+    def is_registered(self):
+        cmpd=self.compound
+        owner=self.owner
+        orz_fields=ORZExtraFields.objects.filter(compound=cmpd,owner=owner)
+        if orz_fields:
+            return orz_fields[0].ewidencja
+        else:
+            return False
+        
     def suggest_loc(cmpd_id,user,owner_group,ignore_temp="false"):
         
         compound=Compound.objects.get(pk=cmpd_id)
@@ -566,6 +700,17 @@ class Annotation(models.Model):
     def __str__(self):
         
         return self.item.__str__()+' - '+self.annotation
+        
+class ORZExtraFields(models.Model):
+    compound=models.ForeignKey(Compound,on_delete=models.CASCADE)
+    owner=models.ForeignKey(OwnershipGroup,on_delete=models.CASCADE)
+    dailyused=models.CharField("Daily usage",max_length=15,blank=True)
+    ewidencja=models.BooleanField(blank=True)
+    respzone=models.BooleanField(blank=True)
+    
+    def __str__(self):
+        return self.owner.name+', '+self.compound.name+': '+self.dailyused
+    
     
 class Ewidencja(models.Model):
     compound=models.ForeignKey(Compound,on_delete=models.CASCADE)
@@ -669,9 +814,6 @@ class ORZForm(models.Model):
         
         return compounds_final
         
-        
-        
-        
     def latex_text(self,text):
         chars=[("\\",r"\textbackslash{}"),(r"{",r"\{"),("}",r"\}"),("%",r'\%'),
                ("#",r"\#"),("$",r"\$"),("^",r"\^{}"),("&",r"\&"),("_",r"\_"),
@@ -727,13 +869,20 @@ class ORZForm(models.Model):
             orz_df.loc[i,'Name']=full_name
             orz_df.loc[i,'Name_tex']=self.latex_text(full_name)
             orz_df.loc[i,'CAS']=cmpd.cas
-            orz_df.loc[i,'amount']=cmpd.dailyused
+            
+            
 
             for item in Cmpd_Class.objects.filter(compound__exact=cmpd):
                 ghs=item.ghs_class.class_text
                 num=item.number
                 orz_df.loc[i,ghs]=num
-            if cmpd.inRespZone():
+                
+                
+            cmpd_orz=ORZExtraFields.objects.filter(compound__exact=cmpd,owner__exact=self.owner)
+            
+            if cmpd_orz:
+                orz_df.loc[i,'amount']=cmpd_orz[0].dailyused
+            if cmpd_orz[0].respzone:
                 orz_df.loc[i,'breathing_zone']='TAK'
             else:
                 orz_df.loc[i,'breathing_zone']='NIE'
@@ -758,7 +907,7 @@ class ORZForm(models.Model):
         
         
     def create_tex(self,current_dir,stanowisko,kod):
-        
+        print(kod)
         templ=open('/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/data/ORZ_templ.tex','r').read()
         
         contents=open(current_dir+'orz_tex.csv','r').read()
