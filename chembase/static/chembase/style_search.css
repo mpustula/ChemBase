@@ -165,6 +165,7 @@ div.image {
   width: 80px;
   padding: 6px 2px;
   background-color: white;
+  margin-right: 10px;
 }
 
 img.structure {
@@ -180,12 +181,14 @@ img.structure {
 }
 */
 
+
+
 div.res_field {
-  float: left;
-  width: 80%;
+  clear: right;
   margin: 0px;
   padding: 2px 10px;
 }
+
 
 div.other_names {
   width: 25%;
@@ -223,17 +226,18 @@ img.pictogram {
 
 #formula {
   width: 12%;
+  float: left;
 }
 
 #cas {
   width: 12%;
+  float: left;
 }
 
 #group {
   width:30%;
+  display: inline-block;
 }
-
-
 
 .name, .name:visited {
   padding: 0px;

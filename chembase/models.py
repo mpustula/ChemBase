@@ -19,13 +19,14 @@ from indigo_inchi import *
 from indigo_renderer import *
 from bingo import *
 
-from .functions import transform_sds
+from .utils.functions import transform_sds
 
 #from rdkit import Chem
 #from rdkit import DataStructs
 #from rdkit.Chem.Fingerprints import FingerprintMols
 #from rdkit.Chem import rdqueries
 # Create your models here.
+
 
 class OwnershipGroup(models.Model):
     name=models.CharField(max_length=500)
@@ -34,7 +35,8 @@ class OwnershipGroup(models.Model):
     
     def __str__(self):
         return self.name
-        
+
+
 class UserProfile(models.Model):
     user=models.OneToOneField(User, on_delete=models.CASCADE)
     own_groups=models.ManyToManyField(OwnershipGroup,blank=True)
@@ -95,7 +97,8 @@ class UserProfile(models.Model):
                 return 1
             else:
                 return 0
-        
+
+
 class MailTemplates(models.Model):
     code_name=models.CharField(max_length=20)
     topic=models.CharField(max_length=500)
@@ -106,7 +109,8 @@ class MailTemplates(models.Model):
     
    # def send(self):
    #     send_mail(self.topic,self.message,)
-        
+
+
 class ExtraPermissions(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
     group=models.ForeignKey(OwnershipGroup, on_delete=models.CASCADE,blank=True)
@@ -144,8 +148,6 @@ class ExtraPermissions(models.Model):
         
         return groups
         
-        
-            
 
 class Pictogram(models.Model):
     code=models.CharField(max_length=10)
@@ -185,7 +187,7 @@ class ExtraCompoundsManager(models.Manager):
     def allowed_cmpds(self,user,qset):
         final_set=[]
         for compound in qset:
-            if compound.how_many_allowed(user)!=0:
+            if compound.how_many_allowed(user) != 0:
                 final_set.append(compound)
         return final_set
         
@@ -418,7 +420,7 @@ class Compound(models.Model):
             #mol.aromatize()
             renderer = IndigoRenderer(indigo)
             
-            indigo.setOption("render-output-format", "png");
+            indigo.setOption("render-output-format", "png")
             indigo.setOption("render-margins", 50, 50)
             indigo.setOption("render-coloring", True)
             indigo.setOption("render-relative-thickness", 1.2)
@@ -700,7 +702,8 @@ class Annotation(models.Model):
     def __str__(self):
         
         return self.item.__str__()+' - '+self.annotation
-        
+
+
 class ORZExtraFields(models.Model):
     compound=models.ForeignKey(Compound,on_delete=models.CASCADE)
     owner=models.ForeignKey(OwnershipGroup,on_delete=models.CASCADE)
@@ -715,9 +718,11 @@ class ORZExtraFields(models.Model):
 class Ewidencja(models.Model):
     compound=models.ForeignKey(Compound,on_delete=models.CASCADE)
     text=models.CharField(max_length=50)
-    
+
+
 class RespZone(models.Model):
     compound=models.ForeignKey(Compound,on_delete=models.CASCADE)
+
 
 class PaperSDS(models.Model):
     compound=models.ForeignKey(Compound,on_delete=models.CASCADE)
@@ -730,7 +735,8 @@ class History(models.Model):
     
     class Meta:
         get_latest_by = 'date'
-        
+
+
 class SystemLog(models.Model):
     model_name=models.CharField(max_length=50)
     model_instance_id=models.IntegerField()
@@ -744,7 +750,8 @@ class SystemLog(models.Model):
         
     class Meta:
         get_latest_by = 'date'
-        
+
+
 class ORZForm(models.Model):
     code_name=models.CharField(max_length=20)
     author=models.ForeignKey(User,on_delete=models.PROTECT)

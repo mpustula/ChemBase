@@ -1,10 +1,17 @@
 div.side_band {
-  max-width: 12%;
+  max-width: 20%;
   float: left;
   margin: 20px 20px;
   height: 100%;
   min-height: 100%;
 }
+
+div.main_details {
+  width: 73%;
+  float: right;
+}
+
+
 
 div.box {
   height: 100%;

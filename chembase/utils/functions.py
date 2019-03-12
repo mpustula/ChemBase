@@ -6,7 +6,130 @@ Created on Fri Aug  4 08:59:29 2017
 """
 import re
 import pandas as pd
-#from .models import H_Pict_Class
+import sys
+import datetime
+sys.path.append('/home/marcin/Dokumenty/programy/indigo-python-1.2.3.r0-linux/')
+from indigo import *
+from indigo_inchi import *
+from indigo_renderer import *
+from bingo import *
+
+
+class Molecule(object):
+
+    def __init__(self, molfile = None, smiles = None, inchi = None):
+        self.indigo=Indigo()
+
+        structure_id = molfile or smiles or inchi
+
+        self.mol = self.indigo.loadMolecule(structure_id)
+        self.mol.aromatize()
+        self.mol_fp = self.mol.fingerprint('sim')
+
+    def build_query(self, query_id):
+        query_mol = self.indigo.loadQueryMolecule(query_id)
+        query_mol.aromatize()
+
+        return query_mol
+
+    def structure_similarity(self, molfile = None, smiles = None, inchi = None):
+        query_mol = self.build_query(molfile or smiles or inchi)
+
+        query_fp = query_mol.fingerprint('sim')
+        similarity = self.indigo.similarity(query_fp, self.mol_fp, 'tanimoto')
+
+        return similarity
+
+    def is_substructure(self, molfile = None, smiles = None, inchi = None):
+        query_mol=self.build_query(molfile or smiles or inchi)
+
+        matcher = self.indigo.substructureMatcher(self.mol)
+        match = matcher.match(query_mol)
+
+        return bool(match)
+
+    def properties(self):
+        formula = self.mol.grossFormula()
+        mw = self.mol.molecularWeight()
+        smile = self.mol.canonicalSmiles()
+        indigoinchi = IndigoInchi(self.indigo)
+        inChi = indigoinchi.getInchi(self.mol)
+
+        return {'formula': formula, 'mass': '%0.4f' % mw, 'smiles': smile, 'inchi': inChi}
+
+    def clean_structure(self):
+        self.mol.layout()
+        new_mol = self.mol.molfile()
+
+        return {'new_mol': new_mol}
+
+    def render_image(self, png_data, image_id):
+
+        if png_data:
+            image_png = png_data
+            temp_image = '/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp' + image_id + '.png'
+            with open(temp_image, 'wb+') as destination:
+                destination.write(image_png)
+        else:
+            renderer = IndigoRenderer(self.indigo)
+
+            self.indigo.setOption("render-output-format", "png")
+            self.indigo.setOption("render-margins", 50, 50)
+            self.indigo.setOption("render-coloring", True)
+            self.indigo.setOption("render-relative-thickness", 1.2)
+            self.indigo.setOption("render-bond-line-width", 1.5)
+
+            file_name = '/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp' + image_id + '.png'
+            # file_name='temp.png'
+            renderer.renderToFile(self.mol, file_name)
+
+        image_path = '/static/chembase/temp/temp' + image_id + '.png?timestamp=' + str(datetime.datetime.now())
+        return image_path
+
+    def clean_formula(formula):
+        i = 0
+        j = 0
+        el_data = pd.read_csv(
+            "/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/data/elementlist.csv")
+        new_df = pd.DataFrame(columns=['Sym', 'Num', 'Order'])
+
+        par = True
+        while par == True:
+            try:
+                char = formula[i]
+            except:
+                par = False
+                break
+            if char.isupper():
+                j = j + 1
+                new_df.loc[j, 'Sym'] = char
+                new_df.loc[j, 'Num'] = ''
+            if char.islower():
+                new_df.loc[j, 'Sym'] = new_df.loc[j, 'Sym'] + char
+            if char.isdigit():
+                new_df.loc[j, 'Num'] = new_df.loc[j, 'Num'] + char
+            i = i + 1
+
+        for item in new_df.index.tolist():
+            symb = new_df.loc[item, 'Sym']
+            order = el_data.loc[el_data['Sym'] == symb]['Order']
+            order = order.iloc[0]
+            new_df.loc[item, 'Order'] = order
+
+        new_df = new_df.sort_values(['Order'])
+
+        new_formula = ''
+        for item in new_df.index.tolist():
+            symb = new_df.loc[item, 'Sym']
+            num = new_df.loc[item, 'Num']
+            new_formula = new_formula + symb
+            if num != "":
+                new_formula = new_formula + '_{' + num + '}'
+
+        return new_formula
+
+
+
 
 def transform_sds(txt_file):
     ghs_codes=pd.read_csv('/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/data/GHSCodes.csv',sep=';',index_col='Code')
@@ -53,7 +176,10 @@ def transform_sds(txt_file):
             if (clas_start==1 and not ('Strona' in item)):
                 clas_text=clas_text+item_+'. '
             if 'Hasło ostrzegawcze' in item:
-                signal_word=item.split()[2]
+                try:
+                    signal_word=item.split()[2]
+                except:
+                    pass
             if 'rodzaj zagrożenia' in item:
                 H_start=1
                 continue

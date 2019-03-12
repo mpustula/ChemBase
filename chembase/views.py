@@ -44,7 +44,7 @@ def check_password_valid(request):
         #print('expired')
         #return HttpResponse('chembase/password_expired.html')
         #return TemplateResponse(request,'chembase/password_expired.html')
-        request.user.logout()
+        #request.user.logout()
 
 def index(request):
     return redirect('chembase:search')
@@ -591,7 +591,7 @@ def add_cmpd(request):
             cmpd_id=request.POST.get('cmpd_id')
             cas=request.POST.get('cas')
             
-            cs=ChemSpider('c36756c7-401d-4097-9496-32ccbe7d876d')
+            cs=ChemSpider('Aat9Dp8QIdEY0nN12R58GdyzXGezl1MM', api_url='https://api.rsc.org')
             compound=cs.get_compound(cmpd_id)
             
             formula=str(compound.molecular_formula)
@@ -700,7 +700,7 @@ def search_view(request):
     return render(request,'chembase/search.html',{'form':form,'pr_form':pr_form,'results':cmpds_list,'str':structure,'found':found,'ghs_classes':ghs_classes})
 
 def search_qt(request):
-    check_password_valid(request.user)
+    check_password_valid(request)
     if request.user.is_authenticated:
        
         query=request.GET.get('text')
@@ -874,7 +874,7 @@ def chemspy_ajax(request):
       
     
 def search_chemspy(query=''):
-    cs=ChemSpider('c36756c7-401d-4097-9496-32ccbe7d876d')
+    cs=ChemSpider('Aat9Dp8QIdEY0nN12R58GdyzXGezl1MM', api_url='https://api.rsc.org')
     print('Connected to ChemSpider API')
     print("Searching started")
     print("Searching for: "+query)
@@ -913,7 +913,7 @@ def search_chemspy(query=''):
 def structure_ajax(request):
     if request.method=='POST':
         query_csid=request.POST.get('csid')
-        cs=ChemSpider('c36756c7-401d-4097-9496-32ccbe7d876d')
+        cs=ChemSpider('Aat9Dp8QIdEY0nN12R58GdyzXGezl1MM', api_url='https://api.rsc.org')
         compound=cs.get_compound(query_csid)
         molfile=compound.mol_2d
         
@@ -926,7 +926,7 @@ def image_ajax(request):
         print(mol_file)
         image_id=request.session.session_key
         if query_csid:
-            cs=ChemSpider('c36756c7-401d-4097-9496-32ccbe7d876d')
+            cs=ChemSpider('Aat9Dp8QIdEY0nN12R58GdyzXGezl1MM', api_url='https://api.rsc.org')
             compound=cs.get_compound(query_csid)
             #image_path=compound.image_url
             image_path=Compound.render_image('',compound.image,image_id)

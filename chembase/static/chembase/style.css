@@ -29,6 +29,7 @@ hr {
   height: 1px;
   margin-top: 20px;
   margin-bottom: 10px;
+  clear: left;
 }
 
 hr.block_sep {
@@ -132,13 +133,10 @@ div.main_content {
 }
 
 div.main {
-  padding-left: 50px;
-  padding-right: 50px;
-  max-width: 1400px;
-  width: 70%;
+  padding-left: 100px;
+  padding-right: 100px;
+  max-width: 1800px;
   margin: auto;
-
-
 }
 
 
@@ -277,6 +275,7 @@ h2, h3 {
   margin-bottom: 5px;
   padding-bottom: 5px;
   font-size:20px;
+  clear: left;
   
 }
 
@@ -312,9 +311,11 @@ p.other {
 
 div.label {
   float:left;
-  width: 12%;
+  width: 160px;
   margin-right: 10px;
   font-weight: unset;
+  clear: left;
+  margin-bottom: 5px;
 }
 
 div.value {
