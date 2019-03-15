@@ -11,21 +11,8 @@ import datetime
 from subprocess import call, getoutput, run
 import pandas as pd
 from difflib import SequenceMatcher
-sys.path.append('/home/marcin/Dokumenty/programy/indigo-python-1.2.3.r0-linux/')
 
-#import indigo
-from indigo import *
-from indigo_inchi import *
-from indigo_renderer import *
-from bingo import *
-
-from .utils.functions import transform_sds
-
-#from rdkit import Chem
-#from rdkit import DataStructs
-#from rdkit.Chem.Fingerprints import FingerprintMols
-#from rdkit.Chem import rdqueries
-# Create your models here.
+from .utils.functions import Molecule, Sds
 
 
 class OwnershipGroup(models.Model):
@@ -292,32 +279,21 @@ class Compound(models.Model):
     
     def smiles_similarity(self,smiles):
 
-        indigo=Indigo()
-
-        query_mol=indigo.loadQueryMolecule(smiles)
-        query_mol.aromatize()
-
-        mol=indigo.loadMolecule(self.smiles)
-        mol.aromatize()
-        query_fp=query_mol.fingerprint('sim')
-        mol_fp=mol.fingerprint('sim')
-        
-        similarity=indigo.similarity(query_fp,mol_fp,'tanimoto')
+        try:
+            molecule = Molecule(self.molfile,self.smiles)
+        except:
+            return 0
+        similarity = molecule.structure_similarity(smiles)
         
         return similarity
     
     def is_substructure(self,smiles):
-        indigo=Indigo()
-        mol=indigo.loadMolecule(self.smiles)
-        mol.aromatize()
+        try:
+            molecule = Molecule(self.molfile,self.smiles)
+        except:
+            return 0
         
-        matcher=indigo.substructureMatcher(mol)
-        
-        query_mol=indigo.loadQueryMolecule(smiles)
-        query_mol.aromatize()
-        
-        match=matcher.match(query_mol)
-        #print(match)
+        match=molecule.is_substructure(smiles)
         if match:
             return self.smiles_similarity(smiles)
         else:
@@ -405,124 +381,41 @@ class Compound(models.Model):
         
         return active
         
-    def render_image(molfile,png_data,image_id):
-        
-        if png_data:
-            image_png=png_data
-            temp_image='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp'+image_id+'.png'
-            with open(temp_image, 'wb+') as destination:
-                destination.write(image_png)
-                #for chunk in image_png.chunks():
-                #   destination.write(chunk)
-        elif molfile:
-            indigo=Indigo()
-            mol=indigo.loadMolecule(molfile)
-            #mol.aromatize()
-            renderer = IndigoRenderer(indigo)
-            
-            indigo.setOption("render-output-format", "png")
-            indigo.setOption("render-margins", 50, 50)
-            indigo.setOption("render-coloring", True)
-            indigo.setOption("render-relative-thickness", 1.2)
-            indigo.setOption("render-bond-line-width", 1.5)
-            
-            file_name='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp'+image_id+'.png'
-            #file_name='temp.png'
-            renderer.renderToFile(mol, file_name)
+    def render_image(molfile,image_id):
 
-        image_path='/static/chembase/temp/temp'+image_id+'.png?timestamp=' + str(timezone.now())
-        return image_path
-
+        if molfile:
+            molecule=Molecule(molfile)
+            return molecule.render_image(image_id)
+        else:
+            return None
 
     def calculate_properties(molfile):
 
         if molfile:
-            indigo=Indigo()
-            mol=indigo.loadMolecule(molfile)
-            formula=mol.grossFormula()
-            mw=mol.molecularWeight()
-            smile=mol.canonicalSmiles()
-
-            indigoinchi=IndigoInchi(indigo)
-
-            inChi=indigoinchi.getInchi(mol)
-            
-            return {'formula':formula,'mass':'%0.4f'%mw,'smiles':smile,'inchi':inChi}
-
+            molecule = Molecule(molfile)
+            return molecule.properties()
         else:
             return None
             
     def clean_structure(molfile):
         
         if molfile:
-            indigo=Indigo()
-            mol=indigo.loadMolecule(molfile)
-            
-            mol.layout()
-            
-            new_mol=mol.molfile()
-            
-            return {'new_mol':new_mol}
+            molecule = Molecule(molfile)
+            return molecule.clean_structure()
         else:
             return None
         
     def save_sds(sdsfile):
-        file_base='/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp'
-        file_name=file_base+'.pdf'
-        file_txt=file_base+'.txt'
-        with open(file_name, 'wb+') as destination:
-            for chunk in sdsfile.chunks():
-                destination.write(chunk)
-        command='pdftotext -layout '+file_name+' '+file_txt
-                #print command
-        call(command,shell=True)
-        output=transform_sds(file_txt)
-        delete_files='rm '+file_name
-        getoutput(delete_files)
-        delete_files_txt='rm '+file_txt
-        getoutput(delete_files_txt)
+        sds = Sds(sdsfile)
+        sds.save_temp()
+        sds.transform_temp()
+        output=sds.read_contents()
+        sds.delete_temp()
         return output
     
     def clean_formula(formula):
-        i=0
-        j=0
-        el_data=pd.read_csv("/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/data/elementlist.csv")
-        new_df=pd.DataFrame(columns=['Sym','Num','Order'])
-        
-        par=True
-        while par==True:
-        	try:
-        		char=formula[i]
-        	except:
-        		par=False
-        		break
-        	if char.isupper():
-        		j=j+1
-        		new_df.loc[j,'Sym']=char
-        		new_df.loc[j,'Num']=''
-        	if char.islower():
-        		new_df.loc[j,'Sym']=new_df.loc[j,'Sym']+char
-        	if char.isdigit():
-        		new_df.loc[j,'Num']=new_df.loc[j,'Num']+char
-        	i=i+1
-        
-        for item in new_df.index.tolist():
-            symb=new_df.loc[item,'Sym']
-            order=el_data.loc[el_data['Sym']==symb]['Order']
-            order=order.iloc[0]
-            new_df.loc[item,'Order']=order
-        	
-        new_df=new_df.sort_values(['Order'])
-        
-        new_formula=''
-        for item in new_df.index.tolist():
-            symb=new_df.loc[item,'Sym']
-            num=new_df.loc[item,'Num']
-            new_formula=new_formula+symb
-            if num!="":
-                new_formula=new_formula+'_{'+num+'}'
                 
-        return new_formula
+        return Molecule.clean_formula(formula)
 
     
 class Cmpd_Class(models.Model):
@@ -691,10 +584,7 @@ class Item(models.Model):
         
         return values_dict
 
-        
 
-            
-                    
 class Annotation(models.Model):
     item=models.ForeignKey(Item,on_delete=models.CASCADE)
     annotation=models.TextField(blank=True)

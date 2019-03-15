@@ -16,9 +16,7 @@ import json
 from django.utils import timezone
 
 
-from chemspipy import ChemSpider
 import cirpy
-import difflib
 import re
 import os
 import datetime
@@ -28,7 +26,7 @@ from django.contrib.auth.models import User, Permission
 from .models import Compound, GHSClass, Cmpd_Class, SystemLog,Item,Group, Annotation,History, ExtraPermissions, UserProfile,OwnershipGroup, ORZForm, ORZExtraFields
 from .forms import (SearchForm, CompoundForm, ItemForm, UserForm, UserProfileForm, 
                     ExtraPermForm,GroupForm,GHSClassForm, ORZ_Form, ExpirePasswords, OwnershipGroupForm)
-
+from .utils.functions import ChemSp
 
 
 def can_add_item(user):
@@ -590,17 +588,15 @@ def add_cmpd(request):
                 return redirect('/login/?next=%s' % request.path)
             cmpd_id=request.POST.get('cmpd_id')
             cas=request.POST.get('cas')
-            
-            cs=ChemSpider('Aat9Dp8QIdEY0nN12R58GdyzXGezl1MM', api_url='https://api.rsc.org')
-            compound=cs.get_compound(cmpd_id)
-            
+
+            compound=ChemSp().get_compound(cmpd_id)
             formula=str(compound.molecular_formula)
             inchi=compound.inchi
             smiles=compound.smiles
             molfile=compound.mol_2d
             #str_image=compound.image_url
             image_id=request.session.session_key
-            str_image=Compound.render_image('',compound.image,image_id)
+            str_image=ChemSp().render_image(cmpd_id,image_id)
             name=compound.common_name
             mw=compound.molecular_weight or 0
             iupac_name=cirpy.resolve(inchi,'iupac_name')
@@ -870,51 +866,16 @@ def chemspy_ajax(request):
         query=request.POST.get('query')
         
         return JsonResponse({item['csid']:item for item in search_chemspy(query)})
-        
-      
-    
-def search_chemspy(query=''):
-    cs=ChemSpider('Aat9Dp8QIdEY0nN12R58GdyzXGezl1MM', api_url='https://api.rsc.org')
-    print('Connected to ChemSpider API')
-    print("Searching started")
-    print("Searching for: "+query)
-    i=0
-    results=[]
-    for result in cs.search(query):
-        if i>5:
-            break
-        print("Compound "+str(i))
-        formula=str(result.molecular_formula)
-        csid=str(result.csid)
-        inchi=result.inchi
-        name=result.common_name
-        cas=cirpy.resolve(inchi,'cas')
-        iupac_name=cirpy.resolve(inchi,'iupac_name')
 
-        if type(cas) is list:
-            c_cas=query
-            sim_cas=difflib.get_close_matches(str(c_cas),cas,3,0)
-            print(sim_cas)
-            cas_=sim_cas[0]
-        else:
-            cas_=cas
-        image=result.image_url
-        print(image)
-        i=i+1
-        result_line={'csid':csid,'name':name,'iupac_name':iupac_name,'cas':cas_,'inchi':inchi,\
-            'formula':formula,'image':image}
-        results.append(result_line)
-        
-    print("Searching finished")
-    print(results)
-    
-    return results
+
+def search_chemspy(query=''):
+
+    return ChemSp().search(query)
     
 def structure_ajax(request):
     if request.method=='POST':
         query_csid=request.POST.get('csid')
-        cs=ChemSpider('Aat9Dp8QIdEY0nN12R58GdyzXGezl1MM', api_url='https://api.rsc.org')
-        compound=cs.get_compound(query_csid)
+        compound=ChemSp().get_cmpd(query_csid)
         molfile=compound.mol_2d
         
         return JsonResponse({'molfile':molfile})
@@ -926,16 +887,12 @@ def image_ajax(request):
         print(mol_file)
         image_id=request.session.session_key
         if query_csid:
-            cs=ChemSpider('Aat9Dp8QIdEY0nN12R58GdyzXGezl1MM', api_url='https://api.rsc.org')
-            compound=cs.get_compound(query_csid)
-            #image_path=compound.image_url
-            image_path=Compound.render_image('',compound.image,image_id)
-
+            image_path = ChemSp().render_image(query_csid, image_id)
         elif mol_file:
-            image_path=Compound.render_image(mol_file,'',image_id)
+            image_path = Compound.render_image(mol_file, image_id)
         else:
-            image_path=''
-                
+            image_path = ''
+
         return JsonResponse({'image':image_path})
 
         
@@ -971,7 +928,6 @@ def sds_ajax(request):
     if request.method=='POST':
         sds=request.FILES['sds_file']
         ans=Compound.save_sds(sds)
-        print(ans)
         return JsonResponse(ans)
         
 def item_loc_filter(request):
