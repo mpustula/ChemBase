@@ -250,8 +250,7 @@ class Compound(models.Model):
     adr_num=models.CharField(max_length=15,blank=True)
     adr_class=models.CharField(max_length=15,blank=True)
     adr_group=models.CharField(max_length=15,blank=True)
-    
-    
+
     dailyused=models.CharField("Daily usage",max_length=15,blank=True)
     
     author=models.ForeignKey(User,on_delete=models.PROTECT,default=1)
@@ -583,6 +582,72 @@ class Item(models.Model):
         values_dict={'compound':compound.name,'group_name':compound.group.group_name,"st_temp":compound.storage_temp,'existing':existing_loc,'deleted':deleted_loc,'group':group_loc}
         
         return values_dict
+
+
+class CompoundForExperiments(models.Model):
+    name = models.CharField('Name (english)', max_length=2000)
+    all_names = models.CharField(max_length=5000, blank=True)
+    code_name = models.CharField(max_length=1000, blank=True)
+
+    author = models.ForeignKey(User, on_delete=models.PROTECT, default=1)
+
+    molfile = models.TextField()
+    formula = models.CharField(max_length=100, blank=True)
+    weight = models.DecimalField("Molecular weight", max_digits=12, decimal_places=4, null=True, blank=True)
+
+    cas = models.CharField('CAS', max_length=100, blank=True)
+
+    image = models.CharField(max_length=300, blank=True)
+
+    inchi = models.CharField('InChi', max_length=1000, blank=True)
+    smiles = models.CharField('SMILES', max_length=1000, blank=True)
+
+    def __str__(self):
+        return self.code_name
+
+    def formulaHTML(self):
+        html_form = re.sub(r'_{(?P<num>.*?)}', r'<sub>\g<num></sub>', self.formula)
+        html_form = re.sub(r'\cdot', r'&middot;', html_form)
+        html_form = re.sub(r'\.', r'&middot;', html_form)
+        return html_form
+
+    def name_similarity(self, text):
+
+        main = SequenceMatcher(None, text, self.name).ratio()
+        pl = SequenceMatcher(None, text, self.pl_name).ratio()
+        all_n = SequenceMatcher(None, text, self.all_names).ratio()
+        cas_n = SequenceMatcher(None, text, self.cas).ratio()
+
+        return max([main, pl, all_n, cas_n])
+
+    def smiles_similarity(self, smiles):
+
+        try:
+            molecule = Molecule(self.molfile, self.smiles)
+        except:
+            return 0
+        similarity = molecule.structure_similarity(smiles)
+
+        return similarity
+
+    def is_substructure(self, smiles):
+        try:
+            molecule = Molecule(self.molfile, self.smiles)
+        except:
+            return 0
+
+        match = molecule.is_substructure(smiles)
+        if match:
+            return self.smiles_similarity(smiles)
+        else:
+            return 0
+
+
+class CompoundExternalSources(models.Model):
+    cmpd = models.ForeignKey(CompoundForExperiments, on_delete=models.CASCADE)
+    source_type=models.CharField(max_length=500,blank=True)
+    external_id=models.CharField(max_length=100,blank=True)
+    external_url=models.CharField(max_length=100,blank=True)
 
 
 class Annotation(models.Model):

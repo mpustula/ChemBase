@@ -7,7 +7,7 @@ Created on Thu Aug  3 14:31:32 2017
 
 from django import forms
 from django_select2.forms import (Select2Widget,ModelSelect2Widget,Select2MultipleWidget,ModelSelect2MultipleWidget,Select2TagWidget)
-from .models import Group,Compound,GHSClass,Item,OwnershipGroup, ExtraPermissions, UserProfile, ORZForm
+from .models import Group,Compound,GHSClass,Item,OwnershipGroup, ExtraPermissions, UserProfile, ORZForm, CompoundForExperiments
 from django.contrib.auth.models import User, Permission
 
 class SearchForm(forms.Form):
@@ -67,7 +67,15 @@ class ItemForm(forms.ModelForm):
         widgets={'place':Select2Widget(attrs={'data-tags':'true','required':'true'}),
                  'place_num':Select2Widget(attrs={'data-tags':'true','required':'true'}),
                  'owner':Select2Widget}
-                 
+
+
+class CompoundForExperimentsForm(forms.ModelForm):
+
+    class Meta:
+        model=CompoundForExperiments
+        #fields=['name','all_names','subtitle']
+        exclude=['image','author']
+
                  
 class UserForm(forms.ModelForm):
     password = forms.CharField(required=False,widget=forms.PasswordInput)

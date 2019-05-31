@@ -17,6 +17,7 @@ from bingo import *
 from chemspipy import ChemSpider
 import cirpy
 import difflib
+import pubchempy as pcp
 
 class Molecule(object):
 
@@ -28,7 +29,7 @@ class Molecule(object):
             raise Exception('No structure data given!')
 
         self.mol = self.indigo.loadMolecule(structure_id)
-        self.mol.aromatize()
+        #self.mol.aromatize()
         self.mol_fp = self.mol.fingerprint('sim')
 
     def build_query(self, query_id):
@@ -179,6 +180,8 @@ class ChemSp(object):
             destination.write(image_png)
         image_path = '/static/chembase/temp/temp' + image_id + '.png?timestamp=' + str(datetime.datetime.now())
         return image_path
+
+
 
 
 class Sds(object):

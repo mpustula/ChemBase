@@ -535,7 +535,8 @@ def cmpd_save(request):
                                                     'classes_dict':{},
                                                     'classes_names_dict':{},
                                                     'sds_name':'','save_as':save_as,'redirect':redir_url})
-    
+
+
 @login_required()
 def add_cmpd(request):
     check_password_valid(request)
@@ -911,7 +912,7 @@ def properties_ajax(request):
         if properties:
             return JsonResponse(properties)
         else:
-            return HttpResponse('Invalid structure!',code=409)
+            return HttpResponse('Invalid structure!', status=409)
             
 def clean_str_ajax(request):
     if request.method=='POST':
@@ -921,7 +922,7 @@ def clean_str_ajax(request):
         if properties:
             return JsonResponse(properties)
         else:
-            return HttpResponse('Invalid structure!',code=409)
+            return HttpResponse('Invalid structure!', status=409)
         
 def sds_ajax(request):
     

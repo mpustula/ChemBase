@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 
-from . import views
+from . import views, experiments_views
 
 app_name='chembase'
 urlpatterns= [
@@ -54,5 +54,6 @@ urlpatterns= [
     url(r'^admin/reset_password$',views.reset_password,name='admin_users_reset_pass'),
     url(r'^admin/group/(?P<group_id>[0-9]+)/edit$',views.edit_group,name='admin_group_edit'),
     url(r'^admin/group/save$',views.save_group,name='admin_group_save'),
+    url(r'^experiments/cmpd/add$',experiments_views.add_exp_cmpd,name='add_exp_cmpd'),
 
 ] 

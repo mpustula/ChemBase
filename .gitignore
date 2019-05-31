@@ -5,3 +5,7 @@ chembase/static/chembase/data/sds/*
 Chem/settings.py
 chembase/migrations/*
 chembase/__pycache__/*
+#ignore temporary files
+*~
+#ignore .pyc files
+*.pyc
