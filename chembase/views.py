@@ -437,7 +437,7 @@ def cmpd_save(request):
             c=CompoundForm(request.POST,request.FILES,instance=cmpd)
             cmpd_action='edit'
         if c.is_valid():
-            new_cmpd=c.save(commit=False)           
+            new_cmpd=c.save(commit=False)
             new_cmpd.save()
             data_dict=c.cleaned_data
             #####class_extr field
@@ -450,9 +450,7 @@ def cmpd_save(request):
                 if matchObj:
                     ghs_class_id=matchObj.group(1)
                     ghs_class=GHSClass.objects.get(pk=ghs_class_id)
-                    
                     ghs_class_num=request.POST[item]
-                    
                     cc=Cmpd_Class(compound=new_cmpd,ghs_class=ghs_class,number=ghs_class_num)
                     
                     cc.save()

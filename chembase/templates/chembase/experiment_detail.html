@@ -1,0 +1,88 @@
+{% extends "chembase/base.html" %}
+
+{% block title %} {{compound.name}} {% endblock %}
+
+{% block content %}
+{% load static %}
+<script src="{% static 'chembase/script_detail.js' %}"></script>
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_side_box.css' %}">
+
+<div class='main'>
+
+
+<div class='side_band'>
+<div class='block_head'>Control panel</div>
+<div class='box'>
+<p class='title'>Options:</p>
+
+<form action="{% url 'chembase:add_item' compound.id %}" method="post" class='options_form'>
+{% csrf_token %}
+<input type='hidden' name='type' value='new' />
+<input type='hidden' name='item_id' value='' />
+<input class ='small' type='submit' value='Add new item' {% if not can_add %} disabled='true' {% endif %} />
+</form>
+
+<form action="{% url 'chembase:add_exp_cmpd' %}" method="post" class='options_form'>
+{% csrf_token %}
+<input type='hidden' name='type' value='edit' />
+<input type='hidden' name='cmpd_id' value={{compound.id}} />
+<input type='hidden' name='output' value='update' />
+<input type='hidden' name='redirect' value="{% url 'chembase:detail' compound.id %}" />
+<input class ='small' type='submit' value='Edit compound' {% if not can_edit %} disabled='true' {% endif %} />
+</form>
+
+<form action="{% url 'chembase:add_exp_cmpd' %}" method="post" class='options_form'>
+{% csrf_token %}
+<input type='hidden' name='type' value='edit' />
+<input type='hidden' name='cmpd_id' value={{compound.id}} />
+<input type='hidden' name='output' value='new' />
+<input type='hidden' name='redirect' value="" />
+<input class ='small' type='submit' value='Add new compound from this data' {% if not can_add_cmpd %} disabled='true' {% endif %} />
+</form>
+
+
+</div>
+
+</div>
+
+<div class="main_details">
+<div class='title'>
+
+<div class='names'>
+<h1>{{compound.name}}</h1>
+
+<p class='other'>Other names: {{compound.all_names}}</p>
+
+</div>
+<div class='image'>
+<img class='structure' src='{% static "/chembase/" %}{{compound.image }}' alt='structure'/>
+</div>
+
+</div>
+
+
+<hr>
+<h2>Identification:</h2>
+<div class='one-col'>
+
+<div class='label'>Formula: </div><div class='value'>{{compound.formulaHTML|safe}} </div>
+<div class='label'>Molecular weight: </div><div class='value'>{{compound.weight}} g/mol </div>
+
+<div class='label'>CAS: </div><div class='value'>{{compound.cas}} </div>
+
+<div class='label'>SMILES: </div><div class='value'>{{compound.smiles}} </div>
+<div class='label'>InChI: </div><div class='value'>{{compound.inchi}} </div>
+<div class='label'>Compound Id: </div><div class='value'>{{compound.id}} </div>
+
+
+</div>
+
+
+<hr>
+<h2>Safety</h2>
+
+
+
+</div>
+</div>
+{% endblock %}

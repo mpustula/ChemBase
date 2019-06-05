@@ -38,7 +38,7 @@
           <a id='admin_link'href='{% url "chembase:admin" %}'>Admin site</a>
         </li>
         <li>
-          <a href="">Help</a>
+          <a href='{% url "chembase:admin_orz" %}'>ORZ</a>
         </li>
         <li>
         {% if user.is_authenticated %}

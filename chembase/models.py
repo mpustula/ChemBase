@@ -587,7 +587,6 @@ class Item(models.Model):
 class CompoundForExperiments(models.Model):
     name = models.CharField('Name (english)', max_length=2000)
     all_names = models.CharField(max_length=5000, blank=True)
-    code_name = models.CharField(max_length=1000, blank=True)
 
     author = models.ForeignKey(User, on_delete=models.PROTECT, default=1)
 

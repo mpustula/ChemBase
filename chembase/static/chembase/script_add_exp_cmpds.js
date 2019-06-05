@@ -26,7 +26,6 @@ $(document).ready(function(){
 		fetch_image(mol_text);
 	});
 
-
 	$('#save_form').on('click', function(event){
 		event.preventDefault();
 		var cmpd_name=$('#id_name').val();
@@ -66,7 +65,6 @@ $(document).ready(function(){
 		);
 
 	});
-
 
 	function fetch_image(molfile_text) {
 		console.log('finding started');

@@ -79,7 +79,7 @@ class Molecule(object):
         self.indigo.setOption("render-relative-thickness", 1.3)
         self.indigo.setOption("render-bond-line-width", 1.5)
 
-        file_name = '/home/marcin/Dokumenty/projekty/django_projects/Chem/chembase/static/chembase/temp/temp' + image_id + '.png'
+        file_name = '/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/temp/temp' + image_id + '.png'
         # file_name='temp.png'
         renderer.renderToFile(self.mol, file_name)
 

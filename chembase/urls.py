@@ -54,6 +54,8 @@ urlpatterns= [
     url(r'^admin/reset_password$',views.reset_password,name='admin_users_reset_pass'),
     url(r'^admin/group/(?P<group_id>[0-9]+)/edit$',views.edit_group,name='admin_group_edit'),
     url(r'^admin/group/save$',views.save_group,name='admin_group_save'),
+    url(r'^experiments/cmpd/(?P<cmpd_id>[0-9]+)/$',experiments_views.cmpd_detail,name='exp_cmpd_detail'),
     url(r'^experiments/cmpd/add$',experiments_views.add_exp_cmpd,name='add_exp_cmpd'),
+    url(r'^experiments/cmpd/add/done$',experiments_views.save_exp_cmpd,name='save_exp_cmpd'),
 
 ] 

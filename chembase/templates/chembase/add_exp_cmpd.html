@@ -14,7 +14,7 @@
 
 <div id='main_form'>
 <h3>Add new compound:</h3>
-<form enctype="multipart/form-data" action="{% url 'chembase:add_exp_cmpd' %}" method="post" novalidate id="cmpd_exp_form">
+<form enctype="multipart/form-data" action="{% url 'chembase:save_exp_cmpd' %}" method="post" novalidate id="cmpd_exp_form">
 {% csrf_token %}
 <div class='cmpd_form' id='cmpd_form'>
  <p class='control' id='str_ctrl'>Structure</p>
@@ -22,7 +22,7 @@
 
 
         <div class='field' id='field_image'>
-
+            <input name="save_as" id="id_save_as" type="hidden" value='{{save_as}}'>
             <input name="image" id="id_image" type="hidden" value='{{structure_im}}'>
 
         </div>
