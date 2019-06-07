@@ -9,7 +9,9 @@ $('div.item').each(function () {
 	
 	});
 	
-	
+
+$('#id_owner').val('')
+
 $('#id_owner').on('change', function() {
 		console.log($(this).val());
 		var owner=$(this).val();
@@ -24,9 +26,6 @@ $('#new_form').on('click',function () {
 	$('#orz_form').slideToggle(500);
 
 })
-	
-	
-
 
 $('#orz_submit_form').on('submit', function(event) {
 		event.preventDefault();

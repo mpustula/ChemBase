@@ -86,6 +86,7 @@ class Molecule(object):
         image_path = '/static/chembase/temp/temp' + image_id + '.png?timestamp=' + str(datetime.datetime.now())
         return image_path
 
+    @staticmethod
     def clean_formula(formula):
         i = 0
         j = 0
