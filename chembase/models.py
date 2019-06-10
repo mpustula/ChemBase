@@ -648,6 +648,23 @@ class CompoundExternalSources(models.Model):
     external_id=models.CharField(max_length=100,blank=True)
     external_url=models.CharField(max_length=100,blank=True)
 
+class ProteinTarget(models.Model):
+    target = models.CharField(max_length=1000)
+
+class ExperimentType(models.Model):
+    exp_type = models.CharField(max_length=1000)
+
+class Experiment(models.Model):
+    cmpd = models.ForeignKey(CompoundForExperiments, on_delete=models.PROTECT)
+    target = models.ForeignKey(ProteinTarget, on_delete=models.PROTECT)
+    exp_type = models.ForeignKey(ExperimentType, on_delete=models.PROTECT)
+    exp_details = models.TextField(blank=True)
+    active = models.NullBooleanField()
+    binding_const = models.DecimalField(decimal_places=6, max_digits=10, null=True, blank=True)
+    comment = models.TextField(blank=True)
+    author = models.ForeignKey(User, on_delete=models.PROTECT, default=1)
+
+
 
 class Annotation(models.Model):
     item=models.ForeignKey(Item,on_delete=models.CASCADE)

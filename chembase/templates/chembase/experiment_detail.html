@@ -15,11 +15,11 @@
 <div class='box'>
 <p class='title'>Options:</p>
 
-<form action="{% url 'chembase:add_item' compound.id %}" method="post" class='options_form'>
+<form action="{% url 'chembase:add_experiment' compound.id %}" method="post" class='options_form'>
 {% csrf_token %}
 <input type='hidden' name='type' value='new' />
 <input type='hidden' name='item_id' value='' />
-<input class ='small' type='submit' value='Add new item' {% if not can_add %} disabled='true' {% endif %} />
+<input class ='small' type='submit' value='Add new experiment' {% if not can_add %} disabled='true' {% endif %} />
 </form>
 
 <form action="{% url 'chembase:add_exp_cmpd' %}" method="post" class='options_form'>

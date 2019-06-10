@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404,render,redirect
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 
-from .models import CompoundForExperiments
-from .forms import CompoundForExperimentsForm
+from .models import CompoundForExperiments, Experiment, ProteinTarget, ExperimentType
+from .forms import CompoundForExperimentsForm, ExperimentForm, ProteinTargetForm, ExperimentTypeForm
 from .views import check_password_valid
 
 
@@ -10,10 +10,11 @@ from .views import check_password_valid
 def cmpd_detail(request, cmpd_id):
     check_password_valid(request)
     can_edit = True
+    can_add = True
 
     compound = get_object_or_404(CompoundForExperiments, pk=cmpd_id)
 
-    return render(request, 'chembase/experiment_detail.html', {'compound': compound, 'can_edit':can_edit})
+    return render(request, 'chembase/experiment_detail.html', {'compound': compound, 'can_edit':can_edit, 'can_add': can_add})
 
 
 @login_required()
@@ -87,6 +88,57 @@ def save_exp_cmpd(request):
     else:
         form = CompoundForExperimentsForm()
         return render(request, 'chembase/add_exp_cmpd.html', {'form': form})
+
+
+@login_required()
+def add_experiment(request, cmpd_id):
+    check_password_valid(request)
+    cmpd = CompoundForExperiments.objects.get(pk=cmpd_id)
+    rtype = request.POST.get('type')
+    if rtype == 'edit':
+        item_id = request.POST.get('item_id')
+        item = Experiment.objects.get(pk=item_id)
+
+        #if not item.is_allowed(request.user, 'chembase.change_item'):
+        #    return redirect('/login/?next=%s' % request.path)
+
+        #comment_list = item.annotation_set.all()
+        #if comment_list:
+        #    comment = comment_list[0].annotation
+        #else:
+        #    comment = ''
+        item_form = ExperimentForm(instance=item)
+        #item_form.fields['comment'].initial = comment
+        #room_init = item.room
+        #place_init = item.place
+        #place_num_init = item.place_num
+        # owner_group_choices=ExtraPermissions.objects.filter(user__exact=request.user,permission__codename__exact='add_item')
+        #owner_group_choices = ExtraPermissions.permitted_groups(request.user, 'chembase.add_item')
+        # print(owner_group_choices)
+        # choices=((item.owner.id,item.owner.name),((item.group.id,item.group.name) for item in owner_group_choices))
+        # choices.append(((item.group.id,item.group.name) for item in owner_group_choices))
+        #item_form.fields['owner'].choices = ((item.id, item.name) for item in owner_group_choices)
+        #if not ExtraPermissions.check_perm(request.user, 'chembase.add_item', item.owner):
+        #    item_form.fields['owner'].choices.append((item.owner.id, item.owner.name))
+
+
+    else:
+        #if not can_add_item(request.user):
+        #    return redirect('/login/?next=%s' % request.path)
+
+        item_form = ExperimentForm()
+        item_id = 'new'
+        #room_init = ''
+        #place_init = ''
+        #place_num_init = ''
+        # owner_group_choices=ExtraPermissions.objects.filter(user__exact=request.user,permission__codename__exact='add_item')
+        #owner_group_choices = ExtraPermissions.permitted_groups(request.user, 'chembase.add_item')
+        # print(owner_group_choices)
+        #item_form.fields['owner'].choices = ((item.id, item.name) for item in owner_group_choices)
+
+
+    return render(request, 'chembase/add_experiment.html', {'compound': cmpd, 'form': item_form, 'item_id': item_id})
+
 
 
 

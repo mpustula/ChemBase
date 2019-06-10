@@ -7,7 +7,7 @@ Created on Thu Aug  3 14:31:32 2017
 
 from django import forms
 from django_select2.forms import (Select2Widget,ModelSelect2Widget,Select2MultipleWidget,ModelSelect2MultipleWidget,Select2TagWidget)
-from .models import Group,Compound,GHSClass,Item,OwnershipGroup, ExtraPermissions, UserProfile, ORZForm, CompoundForExperiments
+from .models import Group,Compound,GHSClass,Item,OwnershipGroup, ExtraPermissions, UserProfile, ORZForm, CompoundForExperiments, ProteinTarget, ExperimentType, Experiment
 from django.contrib.auth.models import User, Permission
 
 class SearchForm(forms.Form):
@@ -76,7 +76,31 @@ class CompoundForExperimentsForm(forms.ModelForm):
         #fields=['name','all_names','subtitle']
         exclude=['image','author']
 
-                 
+class ProteinTargetForm(forms.ModelForm):
+
+    class Meta:
+        model = ProteinTarget
+        fields=['target']
+
+class ExperimentTypeForm(forms.ModelForm):
+
+    class Meta:
+        model = ExperimentType
+        fields = ['exp_type']
+
+class ExperimentForm(forms.ModelForm):
+    unit_choices = ['mol', 'mmol', 'µmol', 'nmol', 'pmol']
+    binding_unit = forms.ChoiceField(widget=Select2Widget(attrs={'data-tags':'true','required':'true'}),
+                                     choices=((x, x) for x in unit_choices), initial=2)
+    class Meta:
+        model = Experiment
+        exclude = ['author', 'cmpd']
+        widgets = {'target': Select2Widget(attrs={'data-tags': 'true', 'required': 'true'}),
+                   'exp_type': Select2Widget(attrs={'data-tags': 'true', 'required': 'true'}),
+                   }
+
+
+
 class UserForm(forms.ModelForm):
     password = forms.CharField(required=False,widget=forms.PasswordInput)
     password_commit = forms.CharField(required=False,widget=forms.PasswordInput)
