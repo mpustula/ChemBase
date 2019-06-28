@@ -49,6 +49,7 @@ div.admin_entries span {
   height: 50px;
   color: white;
   background-color: var(--box-head-col);
+  font-size: 9pt;
   
 }
 
@@ -488,4 +489,19 @@ p.intro {
   margin-top: -10px;
   margin-bottom: 5px;
   color: var(--text-extra-col);
+}
+
+div.system-output {
+  white-space: pre-wrap;
+  font-family: var(--aux-font-fam);
+  color: var(--text-extra-col);
+  font-size: 11pt;
+  padding: 0px 15px;
+}
+
+div.pagination {
+  margin: auto;
+  display: block;
+  text-align: center;
+  font-family: var(--aux-font-fam);
 }

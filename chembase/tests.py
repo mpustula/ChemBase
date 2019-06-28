@@ -1,6 +1,6 @@
 from django.test import TestCase
 from .models import Compound
-from .utils.functions import Molecule, Sds, ChemSp
+from .utils.functions import Molecule, Sds, ChemSp, Numerical
 import os
 # Create your tests here.
 
@@ -78,27 +78,35 @@ class MoleculeTestCase(TestCase):
         self.assertEqual(Molecule.clean_formula('H6C6'), 'C_{6}H_{6}')
         self.assertEqual(Molecule.clean_formula('C6O2H6'), 'C_{6}H_{6}O_{2}')
 
-class ChemspiderTestCase(TestCase):
+# class ChemspiderTestCase(TestCase):
+#
+#     def test_chemspider_search(self):
+#
+#         chemsp=ChemSp()
+#         print(chemsp.search('101-11-1'))
+#
+#
+# class SdsTestCase(TestCase):
+#
+#     global test_dir
+#     test_dir = 'chembase/static/chembase/tests/'
+#
+#     def test_transform_sds(self):
+#         sdsfile=open(os.path.join(test_dir, 'Iodine.pdf'), 'rb+')
+#         sds=Sds(sdsfile)
+#         sds.save_temp()
+#         sds.transform_temp()
+#         result = sds.read_contents()
+#         sds.delete_temp()
+#         print(result)
+#         self.assertEqual(result['name'], 'Jod')
 
-    def test_chemspider_search(self):
+class NumericalTestCase(TestCase):
 
-        chemsp=ChemSp()
-        print(chemsp.search('101-11-1'))
-
-
-class SdsTestCase(TestCase):
-
-    global test_dir
-    test_dir = 'chembase/static/chembase/tests/'
-
-    def test_transform_sds(self):
-        sdsfile=open(os.path.join(test_dir, 'Iodine.pdf'), 'rb+')
-        sds=Sds(sdsfile)
-        sds.save_temp()
-        sds.transform_temp()
-        result = sds.read_contents()
-        sds.delete_temp()
-        print(result)
-        self.assertEqual(result['name'], 'Jod')
-
+    def test_binding_constant_printing(self):
+        self.assertEqual(Numerical.print_binding_const(1), '1.000 mol')
+        self.assertEqual(Numerical.print_binding_const(0.2), '200.000 mmol')
+        self.assertEqual(Numerical.print_binding_const(0.05), '50.000 mmol')
+        self.assertEqual(Numerical.print_binding_const(0.008), '8.000 mmol')
+        self.assertEqual(Numerical.print_binding_const(0.0006), '600.000 µmol')
 

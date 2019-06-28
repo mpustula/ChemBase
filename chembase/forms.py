@@ -76,30 +76,68 @@ class CompoundForExperimentsForm(forms.ModelForm):
         #fields=['name','all_names','subtitle']
         exclude=['image','author']
 
-class ProteinTargetForm(forms.ModelForm):
+class ProteinTargetForm(forms.Form):
+    target = forms.ModelChoiceField(widget=ModelSelect2Widget(queryset=ProteinTarget.objects.all(),
+                                                              search_fields=['target__icontains'],
+                                                              attrs={'data-tags':'true'}),
+                                    queryset=ProteinTarget.objects.all(), required=False)
+    #class Meta:
+    #    model = ProteinTarget
+    #    exclude = ['target']
+    #    widgets = {'target': Select2Widget(attrs={'data-tags': 'true', 'required': 'true'})}
 
-    class Meta:
-        model = ProteinTarget
-        fields=['target']
+class ExperimentTypeForm(forms.Form):
+    exp_type = forms.ModelChoiceField(widget=ModelSelect2Widget(queryset=ExperimentType.objects.all(),
+                                                                search_fields=['exp_type__icontains'],
+                                                                attrs={'data-tags':'true'}),
+                                      queryset=ExperimentType.objects.all(),required=False)
 
-class ExperimentTypeForm(forms.ModelForm):
-
-    class Meta:
-        model = ExperimentType
-        fields = ['exp_type']
+    #class Meta:
+    #    model = ExperimentType
+    #    exclude = ['exp_type']
+        #widgets = {'exp_type': Select2Widget(attrs={'data-tags': 'true', 'required': 'true'})}
 
 class ExperimentForm(forms.ModelForm):
     unit_choices = ['mol', 'mmol', 'µmol', 'nmol', 'pmol']
     binding_unit = forms.ChoiceField(widget=Select2Widget(attrs={'data-tags':'true','required':'true'}),
-                                     choices=((x, x) for x in unit_choices), initial=2)
+                                     choices=((i*3, x) for i, x in enumerate(unit_choices)), initial=6)
+    # target = forms.ModelChoiceField(widget=ModelSelect2Widget(queryset=ProteinTarget.objects.all(),
+    #                                                           search_fields=['target__icontains'],
+    #                                                           attrs={'data-tags':'true'}),
+    #                                 queryset=ProteinTarget.objects.all(), required=False)
+    # exp_type = forms.ModelChoiceField(widget=ModelSelect2Widget(queryset=ExperimentType.objects.all(),
+    #                                                             search_fields=['exp_type__icontains'],
+    #                                                             attrs={'data-tags':'true'}),
+    #                                   queryset=ExperimentType.objects.all(),required=False)
+
     class Meta:
         model = Experiment
-        exclude = ['author', 'cmpd']
-        widgets = {'target': Select2Widget(attrs={'data-tags': 'true', 'required': 'true'}),
-                   'exp_type': Select2Widget(attrs={'data-tags': 'true', 'required': 'true'}),
-                   }
+        fields = ['exp_details', 'active', 'binding_const', 'comment']
+        #exclude = ['author', 'cmpd']
+        #widgets = {'target': Select2Widget(attrs={'data-tags': 'true', 'required': 'true'}),
+        #           'exp_type': Select2Widget(attrs={'data-tags': 'true', 'required': 'true'}),
+        #           }
 
 
+class ExperimentSearchForm(forms.Form):
+    text = forms.CharField(required=False)
+
+    cas = forms.CharField(label='CAS', required=False)
+    exp_type = forms.ModelChoiceField(widget=ModelSelect2Widget(queryset=ExperimentType.objects.all(),
+                                                                search_fields=['exp_type__icontains'],
+                                                                attrs={'data-tags': 'false'}),
+                                      queryset=ExperimentType.objects.all(), required=False)
+    target = forms.ModelChoiceField(widget=ModelSelect2Widget(queryset=ProteinTarget.objects.all(),
+                                                              search_fields=['target__icontains'],
+                                                              attrs={'data-tags':'false'}),
+                                    queryset=ProteinTarget.objects.all(), required=False)
+
+    smiles = forms.CharField(label='smiles', required=False)
+
+    cutoff = forms.DecimalField(widget=forms.NumberInput(attrs={'value': "0.4"}), min_value=0.00, max_value=1.00,
+                                decimal_places=2, required=False, initial=0.40)
+    stype = forms.ChoiceField(widget=Select2Widget, choices=(('sim', 'Similarity'), ('sub', 'Substructure')),
+                              required=False)
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(required=False,widget=forms.PasswordInput)

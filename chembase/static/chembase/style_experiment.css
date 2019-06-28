@@ -1,0 +1,86 @@
+div.experiment div.label, div.experiment div.value {
+  display: inline-block;
+  clear: unset;
+  float: unset;
+  width: unset;
+  margin: 10px 5px;
+}
+
+div.experiment div.label {
+  width: 70px;
+}
+
+div.experiment div.value {
+  width: 150px;
+}
+
+div.hidden {
+  display: none;
+}
+
+div.hidden div.label {
+  width: 90%;
+  display: block;
+  clear: left;
+  margin: 0px 5px;
+  font-size: 14px;
+}
+
+div.hidden div.value {
+  width: 90%;
+  display: block;
+  margin-top: 0px;
+  font-weight: normal;
+  
+}
+
+div.info {
+  font-family: var(--aux-font-fam);
+  color: var(--text-extra-col);
+  font-size: 14px;
+  margin: 5px 5px;
+  
+}
+div.experiment {
+  width: 95%;
+  border: 1px solid;
+  border-radius: var(--box-border-radius);
+  border-color: var(--box-head-col);
+  margin: 10px 5px;
+  transition: box-shadow .3s;
+}
+
+div.experiment:hover {
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(33,33,33,.4);
+  
+}
+
+
+div.block_head {
+  display: block;
+  font-size: 14px;
+  padding: 5px 0px;
+  margin: 0;
+  padding-left: 5px
+}
+
+p.undef {
+  margin: 0;
+  font-family: var(--aux-font-fam);
+  font-size: 14px;
+  color: goldenrod;
+}
+
+i.fa-check {
+  color: darkgreen
+}
+
+i.fa-times {
+  color: darkred;
+}
+
+.item_form input {
+  width: 130px;
+  margin: 5px 5px;
+}

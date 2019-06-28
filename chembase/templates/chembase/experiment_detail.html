@@ -1,14 +1,13 @@
-{% extends "chembase/base.html" %}
+{% extends "chembase/base_exp.html" %}
 
 {% block title %} {{compound.name}} {% endblock %}
 
 {% block content %}
 {% load static %}
-<script src="{% static 'chembase/script_detail.js' %}"></script>
+<script src="{% static 'chembase/script_exp_detail.js' %}"></script>
 <link rel='stylesheet' type="text/css" href="{% static 'chembase/style_side_box.css' %}">
-
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_experiment.css' %}">
 <div class='main'>
-
 
 <div class='side_band'>
 <div class='block_head'>Control panel</div>
@@ -70,8 +69,6 @@
 
 <div class='label'>CAS: </div><div class='value'>{{compound.cas}} </div>
 
-<div class='label'>SMILES: </div><div class='value'>{{compound.smiles}} </div>
-<div class='label'>InChI: </div><div class='value'>{{compound.inchi}} </div>
 <div class='label'>Compound Id: </div><div class='value'>{{compound.id}} </div>
 
 
@@ -79,7 +76,60 @@
 
 
 <hr>
-<h2>Safety</h2>
+<h2>Experiments</h2>
+
+{% for item in experiments %}
+    <h3>Target: {{item.0}}</h3>
+    {% for jtem in item.1 %}
+    <div class="experiment">
+        <div class="block_head">Experiment no. {{jtem.exp.id}}</div>
+        <div class="label">Type: </div><div class="value">{{jtem.exp.exp_type}}</div>
+        <div class="label">Active: </div><div class="value">
+            <td>{% if jtem.exp.active %}
+                <i class="fa fa-check" aria-hidden="true"></i>
+                {% else %}
+                    {% if jtem.exp.active is None %}
+                        <p class="undef">undefined</p>
+                    {% else %}
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                    {% endif %}
+                {% endif %}
+        </div>
+        <div class="label">Constant: </div><div class="value">{{jtem.bc}}</div>
+
+        <div class="hidden">
+            <div class="label">Experiment details: </div><div class="value">{{jtem.exp.exp_details}}</div>
+            <div class="label">Comment: </div><div class="value">{{jtem.exp.comment}}</div>
+            <div class="info">
+                Entry added by {{jtem.exp.author}} on {{jtem.exp.created}}
+            </div>
+
+            <form action="{% url 'chembase:add_experiment' compound.id %}" method="post" class='item_form'>
+                {% csrf_token %}
+                <input type='hidden' name='type' value='edit' />
+                <input type='hidden' name='item_id' value={{jtem.exp.id}} />
+                <input class ='small' type='submit' value='Edit experiment' {% if not jtem.can_edit == True %} disabled='true' {% endif %} />
+            </form>
+
+            <form action="{% url 'chembase:delete_experiment' %}" method="post" class='item_form'>
+                {% csrf_token %}
+                <input type='hidden' name='action' value='delete' />
+                <input type='hidden' name='item_id' value={{jtem.exp.id}} />
+                <input class ='small' type='submit' value='Delete experiment' id='del_item' {% if not jtem.can_edit == True %} disabled='true' {% endif %} />
+            </form>
+
+        </div>
+    </div>
+    {% endfor %}
+
+{% endfor %}
+
+
+
+
+
+</div>
+
 
 
 

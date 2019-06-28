@@ -9,7 +9,7 @@ import pandas as pd
 import sys
 from subprocess import call, getoutput, run
 import datetime
-sys.path.append('/home/marcin/Dokumenty/programy/indigo-python-1.2.3.r0-linux/')
+sys.path.append('/home/marcin/Dokumenty/projekty/production/Chem/chembase/utils/indigo-python-1.2.3.r0-linux/')
 from indigo import *
 from indigo_inchi import *
 from indigo_renderer import *
@@ -29,7 +29,7 @@ class Molecule(object):
             raise Exception('No structure data given!')
 
         self.mol = self.indigo.loadMolecule(structure_id)
-        #self.mol.aromatize()
+        self.mol.aromatize()
         self.mol_fp = self.mol.fingerprint('sim')
 
     def build_query(self, query_id):
@@ -43,7 +43,7 @@ class Molecule(object):
 
         query_fp = query_mol.fingerprint('sim')
         similarity = self.indigo.similarity(query_fp, self.mol_fp, 'tanimoto')
-
+        #print(similarity)
         return similarity
 
     def is_substructure(self, molfile = None, smiles = None, inchi = None):
@@ -183,6 +183,36 @@ class ChemSp(object):
         return image_path
 
 
+class Numerical(object):
+
+    @staticmethod
+    def normalize_binding_constant(value):
+        units = ['mol', 'mmol', 'µmol', 'nmol', 'pmol']
+        multiplies = [(i * 3, item) for i, item in enumerate(units)]
+
+        try:
+            initial_val = float(value)
+        except TypeError:
+            return (value or 0, 0, 'mol')
+        else:
+            for item in multiplies:
+                result_val = initial_val * 10 ** (item[0])
+                unit = item[1]
+                if result_val >= 1:
+                    break
+
+            return (result_val, item[0], unit)
+
+    @staticmethod
+    def format_bytes(size):
+        # 2**10 = 1024
+        power = 2 ** 10
+        n = 0
+        power_labels = {0: '', 1: 'k', 2: 'M', 3: 'G', 4: 'T'}
+        while size > power:
+            size /= power
+            n += 1
+        return '{0:.2f} {1}B'.format(size, power_labels[n])
 
 
 class Sds(object):

@@ -82,7 +82,7 @@ $('#ketcher-frame').on('load', function () {
 	   		//ketcher.onStructChange(function() {
             	source.val(ketcher.getSmiles());
             	var molecule=ketcher.getMolfile();
-            	//console.log(molecule);
+            	console.log(molecule);
             	localStorage.setItem('molecule',molecule);
             });
          //   }); 

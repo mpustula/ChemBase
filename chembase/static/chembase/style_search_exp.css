@@ -1,0 +1,47 @@
+.field .select2 {
+  width: 100%
+}
+
+.field label {
+  width: 150px
+}
+
+img.structure {
+  width: 150px;
+}
+
+div.image {
+  width: 150px;
+}
+
+#formula {
+  clear: right;
+  display: none;
+  float: left;
+  width: 20%;
+}
+
+div.experiment div {
+  display: inline-block;
+  float: unset;
+  width: unset;
+  font-weight: unset;
+  font-size: unset;
+}
+
+#experiments div.value {
+  font-size: 11pt
+}
+
+#experiments {
+  overflow: hidden;
+  display: block;
+  float: left;
+  font-size: 11pt
+  
+}
+
+
+
+
+

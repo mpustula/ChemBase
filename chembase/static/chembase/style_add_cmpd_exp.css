@@ -1,0 +1,204 @@
+#str_block {
+  margin: 20px auto;
+  width: 100%;
+  padding: 5px 15px
+}
+
+#ketcher_div {
+  display: inline-block;
+  float: left;
+  width: 55%;
+  height: 600px;
+  margin: 0px 15px;
+  overflow: hidden;
+  
+}
+
+#between_block {
+  display: flex;
+  overflow: hidden;
+  float: left;
+  margin: 0px 10px;
+  height: 600px;
+  align-items: center;
+ 
+}
+
+#str_controls input {
+  display: block;
+  margin: 10px auto;
+  width: 150px;
+}
+
+#saved_structure {
+  display: inline-block;
+  overflow: hidden;
+  width: 25%;
+  height: 600px;
+  margin: 0px 15px;
+  padding: 0px 15px
+}
+
+#image_div_str {
+  border: 2px solid;
+  margin: 5px 0px;
+  height: 250px;
+  overflow: hidden;
+}
+
+
+#new_str_id {
+  max-width: 220px;
+  max-height: 160px;
+  vertical-align: middle;
+  display: block;
+  margin: auto;
+  
+}
+
+#field_molfile {
+  display: block;
+  width: 100%;
+  height: 250px;
+  margin: 5px 0px;
+}
+
+#id_molfile {
+  width: 98%;
+  height: 98%;
+}
+
+#names_ctrl {
+  margin: 0px 0px;
+  margin-top: 30px;
+}
+
+hr.block_sep {
+  margin-top: 2px;
+  color: var(--text-highlight-col);
+  background-color:var(--text-highlight-col);
+  border-width: 0px;
+  height: 2px;
+}
+
+#names_block {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  clear: right;
+  margin-bottom: 25px;
+}
+
+#prop_block {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  clear: right;
+  margin-bottom: 25px;
+}
+
+.field {
+  float: left;
+  margin-left: 20px;
+}
+
+.field label {
+  width: 130px;
+  margin: 0px 0px;
+}
+
+#prop_block .left input {
+  width: 40%;
+}
+
+#prop_block .right input {
+ max-width: 68%;
+}
+
+#prop_block .left {
+  width: 35%;
+  display: block;
+  float: left;
+}
+
+#prop_block .right {
+  width: 60%;
+  display: block;
+  float: left;
+}
+
+p.info {
+  font-family: var(--aux-font-fam);
+  color: var(--text-extra-col);
+  display: inline-block;
+  overflow: hidden;
+  margin-top: 10px;
+  margin-bottom: 0px;
+}
+
+p.control {
+  margin: 0px;
+  margin-top: 10px;
+  font-family: var(--aux-font-fam);
+  color: var(--text-highlight-col);
+  font-size: 15px;
+  font-weight: bold;
+  display: block;
+}
+
+#formula_clean {
+  display: inline-block;
+  padding: 8px 8px;
+  text-align: center;
+  text-decoration: none;
+  font-family: var(--aux-font-fam);
+  font-weight: bold;
+  color: white;
+  background-color: var(--text-highlight-col);
+  border:2px solid;
+  border-color: var(--text-highlight-col);
+  border-radius: var(--box-border-radius);
+  transition-duration: 0.4s;
+  opacity: 0.9;
+}
+
+#formula_clean:hover {
+  color: var(--text-highlight-col);
+  background-color: white;
+  cursor: pointer;
+}
+
+div#molfile_buttons {
+  display: block;
+  align-content: left;
+}
+
+#properties {
+  display: block;
+  clear: right;
+  margin: 20px 30px
+}
+
+input[type=submit] {
+  padding: 15px 30px;
+  float: right;
+}
+
+.field .errorlist {
+  color: darkred;
+  font-family: var(--aux-font-fam);
+}
+
+.error_highlight {
+  border: 2px solid;
+  border-color: darkred;
+  padding: 10px 0px;
+  border-radius: var(--box-border-radius);
+}
+
+p.error {
+  display: inline-block;
+  color: darkred;
+  font-family: var(--aux-font-fam);
+}
+

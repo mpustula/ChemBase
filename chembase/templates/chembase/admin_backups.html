@@ -1,0 +1,79 @@
+{% extends "chembase/base.html" %}
+
+{% block title %} System backup {% endblock %}
+
+{% block content %}
+{% load static %}
+{% load chembase_tags %}
+
+<link rel='stylesheet' type="text/css" href="{% static 'chembase/style_admin.css' %}">
+
+<div class='main'>
+
+<div class='nav_links'>
+    <a href="{% url 'chembase:admin' %}">Admin site</a> > <a href="{% url 'chembase:admin_settings' %}">System settings</a> > System backup
+</div>
+
+<div class='title'>
+
+<h1>System backup</h1>
+
+
+<h2>Systemd timers status</h2>
+<div class="system-output">
+{{ timers_status|safe }}
+</div>
+
+<h2>Timers schedule</h2>
+<div class="system-output">
+{{ timers_list|safe }}
+</div>
+
+
+<h2>Existing backup files:</h2>
+
+<table class='log_table' summary="System logs" >
+<tr>
+<th>Date</th>
+<th>Time</th>
+<th>Size</th>
+<th>File</th>
+
+</tr>
+{% for item in files %}
+<tr>
+<td><span class='log_date'>{{item.date|date:'Y-m-d H:i'}}</span></td>
+<td>{{item.created}}</td>
+<td>{{item.size}}</td>
+<td><a  href='{% static "/chembase/data/backups/" %}{{item.file}}'>{{item.file}}</a></td>
+
+</tr>
+{% endfor %}
+
+</table>
+
+{% if files.paginator.num_pages > 1 %}
+<div class="pagination">
+    <div class="step-links">
+        {% if files.has_previous %}
+            <a href="?{% url_replace page=files.previous_page_number %}">Previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ files.number }} of {{ files.paginator.num_pages }}
+        </span>
+
+        {% if files.has_next %}
+            <a href="?{% url_replace page=files.next_page_number %}">Next</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+
+</div>
+</div>
+
+
+</div>
+{% endblock %}

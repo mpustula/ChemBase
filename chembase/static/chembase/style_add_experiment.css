@@ -1,0 +1,13 @@
+#id_binding_const {
+  max-width: 400px; 
+}
+
+#id_binding_unit {
+  width: 100px;
+}
+
+a#full_info {
+  width: 70%;
+  display: block;
+  clear: left;
+}
