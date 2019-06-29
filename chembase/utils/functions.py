@@ -201,7 +201,6 @@ class Molecule(object):
 
 class ChemSp(object):
     def __init__(self):
-        #self.key = 'Aat9Dp8QIdEY0nN12R58GdyzXGezl1MM'
         sett = SettingsConstants()
         self.key = sett.get('CHEMSPI_KEY')
         self.url = sett.get('CHEMSPI_API_URL')
