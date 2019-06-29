@@ -34,6 +34,7 @@ urlpatterns= [
     url(r'^login/', auth_views.LoginView.as_view(template_name='chembase/login.html'),name='login'),
     url(r'^logout/',views.logout_view,name='logout'),
     url(r'^accounts/profile',views.account_view,name='account'),
+    url(r'^accounts/myaccount',experiments_views.account_view,name='account_exp'),
     url(r'^change-password/$', views.password_change,name='change_password'),
     url(r'^change-password-done/$', auth_views.PasswordChangeDoneView.as_view(template_name='chembase/change_password_done.html'),name='password_change_done'),
     url(r'^admin/main$',views.admin,name='admin'),
@@ -44,6 +45,9 @@ urlpatterns= [
     url(r'^admin/user/expire$',views.expire_passwords,name='admin_user_expire'),
     url(r'^admin/server$',views.server,name='admin_server'),
     url(r'^admin/settings$',views.settings,name='admin_settings'),
+    url(r'^admin/test_mail$',views.test_mail,name='admin_test_mail'),
+    url(r'^admin/test_chemspider$',views.test_chemspider,name='admin_test_chemspider'),
+    url(r'^admin/backup$',views.backups,name='admin_backups'),
     url(r'^admin/items$',views.cmpds_items,name='admin_cmpds_items'),
     url(r'^status/$',views.status,name='server_status'),
     url(r'^items_groups/$',views.get_groups,name='get_groups'),
@@ -58,5 +62,10 @@ urlpatterns= [
     url(r'^experiments/cmpd/add$',experiments_views.add_exp_cmpd,name='add_exp_cmpd'),
     url(r'^experiments/cmpd/add/done$',experiments_views.save_exp_cmpd,name='save_exp_cmpd'),
     url(r'^experiments/add/(?P<cmpd_id>[0-9]+)/$',experiments_views.add_experiment,name='add_experiment'),
+    url(r'^experiments/add/done$', experiments_views.save_exp, name='experiment_save'),
+    url(r'^experiment_delete/$', experiments_views.delete_experiment, name='delete_experiment'),
+    url(r'^experiments/search/$', experiments_views.search_view, name='search_experiment'),
+    url(r'^experiments/$', experiments_views.search_view, name='experiment'),
+    url(r'^experiments/search/ajax$', experiments_views.autocomplete_ajax, name='search_ajax'),
 
 ] 

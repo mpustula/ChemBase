@@ -12,8 +12,13 @@ from subprocess import call, getoutput, run
 import pandas as pd
 from difflib import SequenceMatcher
 
-from .utils.functions import Molecule, Sds
+from .utils.functions import Molecule, Sds, Numerical, EmailSender
 
+
+class SettingsConstants(models.Model):
+    code=models.CharField(max_length=500)
+    value=models.CharField(max_length=2000)
+    description=models.CharField(max_length=1000)
 
 class OwnershipGroup(models.Model):
     name=models.CharField(max_length=500)
@@ -34,43 +39,50 @@ class UserProfile(models.Model):
         
     def set_password_expiry(self,days):
 
-        now=datetime.datetime.now() 
-        new_expiry=now+datetime.timedelta(days=days)
-        self.password_expiry_date=new_expiry
-        self.save()
+        if days:
+            now=datetime.datetime.now()
+            new_expiry=now+datetime.timedelta(days=days)
+            self.password_expiry_date=new_expiry
+            self.save()
+        else:
+            self.password_expiry_date = None
+            self.save()
         
     def set_random_password(self,mail_type="New"):
         if not self.user.email:
             return [0,'User e-mail address incorrect']
         random_pass = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(16)])
-        self.user.set_password(random_pass)
-        self.set_password_expiry(4)
-        self.user.is_active=True
-        self.user.save()
-        
-        
+
         template=MailTemplates.objects.filter(code_name__exact='new_account')[0]
-        #print(template)
+
         topic=template.topic
         message=template.message%({'login':self.user.username,'password':random_pass,'expire':self.password_expiry_date.strftime('%Y-%m-%d')})
-        msg=EmailMessage(topic,message,'chembase@chemia.uj.edu.pl',[self.user.email])
-        msg.content_subtype = "html" 
-        mail_ans=msg.send()
-        #mail_ans=send_mail(topic,message,'chembase@chemia.uj.edu.pl',[self.user.email])
+        sender = EmailSender()
+        sender.create_connection()
+
+        mail_ans=sender.send_mail(topic, message, [self.user.email])
+        sender.close_connection()
+
         if mail_ans:
+            self.user.set_password(random_pass)
+            self.set_password_expiry(4)
+            self.user.is_active = True
+            self.user.save()
             return [1,'New password has been sent to the user']
         else:
             return [0,'Sending error']
             
     def sent_expiry_mail(self):
         template=MailTemplates.objects.filter(code_name__exact='expire_pass')[0]
-        #print(template)
+
         topic=template.topic
         message=template.message%({'user':self.user.get_full_name(),'date':self.password_expiry_date.strftime('%Y-%m-%d')})
-        #mail_ans=send_mail(topic,message,'chembase@chemia.uj.edu.pl',[self.user.email])
-        msg=EmailMessage(topic,message,'chembase@chemia.uj.edu.pl',[self.user.email])
-        msg.content_subtype = "html" 
-        mail_ans=msg.send()
+
+        sender = EmailSender()
+        sender.create_connection()
+
+        mail_ans = sender.send_mail(topic, message, [self.user.email])
+        sender.close_connection()
         if mail_ans:
             return [1,'New password has been sent to the user']
         else:
@@ -602,7 +614,7 @@ class CompoundForExperiments(models.Model):
     smiles = models.CharField('SMILES', max_length=1000, blank=True)
 
     def __str__(self):
-        return self.code_name
+        return self.name
 
     def formulaHTML(self):
         html_form = re.sub(r'_{(?P<num>.*?)}', r'<sub>\g<num></sub>', self.formula)
@@ -613,11 +625,10 @@ class CompoundForExperiments(models.Model):
     def name_similarity(self, text):
 
         main = SequenceMatcher(None, text, self.name).ratio()
-        pl = SequenceMatcher(None, text, self.pl_name).ratio()
         all_n = SequenceMatcher(None, text, self.all_names).ratio()
         cas_n = SequenceMatcher(None, text, self.cas).ratio()
 
-        return max([main, pl, all_n, cas_n])
+        return max([main, all_n, cas_n])
 
     def smiles_similarity(self, smiles):
 
@@ -626,7 +637,7 @@ class CompoundForExperiments(models.Model):
         except:
             return 0
         similarity = molecule.structure_similarity(smiles)
-
+        #print(similarity)
         return similarity
 
     def is_substructure(self, smiles):
@@ -641,6 +652,16 @@ class CompoundForExperiments(models.Model):
         else:
             return 0
 
+    def can_edit(self, user):
+        if user == self.author:
+            user_perm = user.has_perm('chembase.add_experiment')
+            if user_perm:
+                return True
+        else:
+            admin_perm = user.has_perm('chembase.change_experiment')
+            if admin_perm:
+                return True
+
 
 class CompoundExternalSources(models.Model):
     cmpd = models.ForeignKey(CompoundForExperiments, on_delete=models.CASCADE)
@@ -648,22 +669,75 @@ class CompoundExternalSources(models.Model):
     external_id=models.CharField(max_length=100,blank=True)
     external_url=models.CharField(max_length=100,blank=True)
 
+
 class ProteinTarget(models.Model):
     target = models.CharField(max_length=1000)
+
+    def __str__(self):
+        return self.target
+
 
 class ExperimentType(models.Model):
     exp_type = models.CharField(max_length=1000)
 
+    def __str__(self):
+        return self.exp_type
+
+
 class Experiment(models.Model):
-    cmpd = models.ForeignKey(CompoundForExperiments, on_delete=models.PROTECT)
+    compoundForExperiments = models.ForeignKey(CompoundForExperiments, on_delete=models.PROTECT)
     target = models.ForeignKey(ProteinTarget, on_delete=models.PROTECT)
     exp_type = models.ForeignKey(ExperimentType, on_delete=models.PROTECT)
     exp_details = models.TextField(blank=True)
     active = models.NullBooleanField()
-    binding_const = models.DecimalField(decimal_places=6, max_digits=10, null=True, blank=True)
+    binding_const = models.DecimalField(decimal_places=16, max_digits=20, null=True, blank=True)
     comment = models.TextField(blank=True)
     author = models.ForeignKey(User, on_delete=models.PROTECT, default=1)
 
+    def __str__(self):
+        return str(self.target) + '_' + str(self.compoundForExperiments) + '_' + str(self.exp_type)
+
+    def format_binding(self):
+        return Numerical.normalize_binding_constant(self.binding_const)
+
+    def print_binding(self):
+        result_val, multiplicity, unit = self.format_binding()
+        return '{0:.3f} {1:s}'.format(result_val, unit)
+
+    def created(self):
+        log_entries = ExperimentLog.objects.filter(model_name='Experiment', model_instance_id=self.id, action='add')
+        try:
+            creation_date = log_entries[0].date
+        except IndexError:
+            creation_date = None
+
+        return creation_date
+
+    def is_deleted(self):
+        log_entries = ExperimentLog.objects.filter(model_name='Experiment', model_instance_id=self.id)
+        if log_entries:
+            latest = log_entries.latest()
+            if latest.action=='delete':
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def delete(self, user):
+        system_log_entry = ExperimentLog(model_name='Experiment', model_instance_id=self.id,
+                                         author=user, action='delete', comment='')
+        system_log_entry.save()
+
+    def can_edit(self, user):
+        if user == self.author:
+            user_perm = user.has_perm('chembase.add_experiment')
+            if user_perm:
+                return True
+        else:
+            admin_perm = user.has_perm('chembase.change_experiment')
+            if admin_perm:
+                return True
 
 
 class Annotation(models.Model):
@@ -719,6 +793,21 @@ class SystemLog(models.Model):
     def __str__(self):
         return str(self.date)+' - '+self.model_name+' '+str(self.model_instance_id)
         
+    class Meta:
+        get_latest_by = 'date'
+
+
+class ExperimentLog(models.Model):
+    model_name = models.CharField(max_length=50)
+    model_instance_id = models.IntegerField()
+    author = models.ForeignKey(User, on_delete=models.PROTECT)
+    date = models.DateTimeField(auto_now_add=True)
+    action = models.CharField(max_length=300)
+    comment = models.CharField(max_length=1000, blank=True)
+
+    def __str__(self):
+        return str(self.date) + ' - ' + self.model_name + ' ' + str(self.model_instance_id)
+
     class Meta:
         get_latest_by = 'date'
 

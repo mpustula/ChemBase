@@ -20,13 +20,16 @@ import cirpy
 import re
 import os
 import datetime
+import time
+import subprocess
 
 from django.contrib.auth.models import User, Permission
 # Create your views here.
-from .models import Compound, GHSClass, Cmpd_Class, SystemLog,Item,Group, Annotation,History, ExtraPermissions, UserProfile,OwnershipGroup, ORZForm, ORZExtraFields
+from .models import Compound, GHSClass, Cmpd_Class, SystemLog,Item,Group, Annotation,History, ExtraPermissions, \
+    UserProfile,OwnershipGroup, ORZForm, ORZExtraFields, MailTemplates
 from .forms import (SearchForm, CompoundForm, ItemForm, UserForm, UserProfileForm, 
-                    ExtraPermForm,GroupForm,GHSClassForm, ORZ_Form, ExpirePasswords, OwnershipGroupForm)
-from .utils.functions import ChemSp
+                    ExtraPermForm,GroupForm,GHSClassForm, ORZ_Form, ExpirePasswords, OwnershipGroupForm, MailSettingsForm)
+from .utils.functions import ChemSp, Numerical, SettingsConstants, EmailSender
 
 
 def can_add_item(user):
@@ -69,8 +72,6 @@ def get_groups(request):
         return HttpResponse('Login error') 
         
 
-
-
 @sensitive_post_parameters()
 @csrf_protect
 @login_required
@@ -92,7 +93,7 @@ def password_change(request,
                 # django.contrib.auth.middleware.SessionAuthenticationMiddleware
                 # is enabled.
                 update_session_auth_hash(request, form.user)
-                form.user.userprofile.set_password_expiry(365)
+                form.user.userprofile.set_password_expiry(None)
                 return HttpResponseRedirect(post_change_redirect)
     else:
         form = password_change_form(user=request.user)
@@ -1026,12 +1027,121 @@ def server(request):
                                                  
 
 @login_required()
-@user_passes_test(lambda u: u.is_staff)    
+@user_passes_test(lambda u: u.is_staff)
 def settings(request):
     check_password_valid(request)
+    sett = SettingsConstants()
 
-    
-    return render(request,'chembase/admin_settings.html')
+    if request.method=='POST':
+        mail_form = MailSettingsForm(request.POST)
+        if mail_form.is_valid():
+            new_host = mail_form.cleaned_data['host']
+            sett.set('SMTP_HOST', new_host)
+            new_port = mail_form.cleaned_data['port']
+            sett.set('SMTP_PORT', new_port)
+            new_username = mail_form.cleaned_data['username']
+            sett.set('SMTP_USERNAME', new_username)
+            new_pass = mail_form.cleaned_data['password']
+            if new_pass:
+                sett.set('SMTP_PASS', new_pass)
+            mail_from = mail_form.cleaned_data['mail_from']
+            sett.set('MAIL_FROM', mail_from)
+            chemspi_key = mail_form.cleaned_data['chemspi_key']
+            sett.set('CHEMSPI_KEY', chemspi_key)
+            chemspi_api = mail_form.cleaned_data['chemspi_api']
+            sett.set('CHEMSPI_API_URL', chemspi_api)
+            sett.save()
+        else:
+            mail_form = MailSettingsForm(request.POST)
+
+    else:
+        mail_form = MailSettingsForm()
+
+
+    mail_form.fields['host'].initial = sett.show('SMTP_HOST')
+    mail_form.fields['port'].initial = sett.show('SMTP_PORT')
+    mail_form.fields['username'].initial = sett.show('SMTP_USERNAME')
+    mail_form.fields['mail_from'].initial = sett.show('MAIL_FROM')
+    mail_form.fields['chemspi_key'].initial = sett.show('CHEMSPI_KEY')
+    mail_form.fields['chemspi_api'].initial = sett.show('CHEMSPI_API_URL')
+
+    return render(request,'chembase/admin_settings.html', {'mail_host': sett.show('SMTP_HOST'),
+                                                           'mail_port': sett.show('SMTP_PORT'),
+                                                           'mail_username': sett.show('SMTP_USERNAME'),
+                                                           'mail_password': sett.show('SMTP_PASS'),
+                                                           'mail_from': sett.show('MAIL_FROM'),
+                                                           'chemspi_key': sett.show('CHEMSPI_KEY'),
+                                                           'chemspi_api': sett.show('CHEMSPI_API_URL'),
+                                                           'mail_form': mail_form})
+
+
+@login_required
+def test_mail(request):
+    if request.method == 'POST':
+        mail_addr = request.POST.get('address')
+        template = MailTemplates.objects.filter(code_name__exact='test_message')[0]
+
+        topic = template.topic
+        message = template.message % ({'date': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
+        sender = EmailSender()
+        sender.create_connection()
+        mail_ans = sender.send_mail(topic, message, [mail_addr])
+        sender.close_connection()
+
+        if mail_ans:
+            return HttpResponse('The test message was sent correctly. Please check '
+                                'whether it was delivered to the above e-mail.')
+        else:
+            return HttpResponse('The error occured and message was not sent. The above e-mail address or '
+                                'the configuration of mail server is incorrect.', status=400)
+
+@login_required
+def test_chemspider(request):
+    if request.method == 'POST':
+        cs = ChemSp()
+        cmpd = cs.get_cmpd(2157)
+        try:
+            name = cmpd.common_name
+        except Exception as e:
+            return HttpResponse('The error occured during test. The error message: {}'.format(e), status=500)
+        else:
+            return HttpResponse('The test was completed successfully. The name of tested compound 2157 '
+                            'was retrieved to be: '+name)
+
+@login_required()
+@user_passes_test(lambda u: u.is_staff)
+def backups(request):
+    check_password_valid(request)
+
+    timers_status = subprocess.run(['systemctl', 'status', 'chembase*.*'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    timers_list = subprocess.run(['systemctl', 'list-timers', 'chembase*.*'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+
+    backup_path = '/home/marcin/Dokumenty/projekty/production/Chem/chembase/static/chembase/data/backups/'
+    backup_files = []
+    for file in sorted(os.listdir(backup_path), reverse=True):
+        stats = os.stat(os.path.join(backup_path,file))
+        size = Numerical.format_bytes(stats.st_size)
+        created = time.ctime(stats.st_mtime)
+        backup_files.append({'file':file, 'size': size, 'created':created})
+
+    if backup_files:
+        paginator = Paginator(backup_files, 10)
+
+        page = request.GET.get('page')
+        try:
+            files_list = paginator.page(page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            files_list = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            files_list = paginator.page(paginator.num_pages)
+    else:
+        files_list = None
+
+    return render(request, 'chembase/admin_backups.html', {'files': files_list, 'timers_status': timers_status,
+                                                           'timers_list': timers_list})
+
 
 @login_required()        
 def cmpds_items(request):
@@ -1221,23 +1331,33 @@ def save_user(request):
                     return render(request,'chembase/admin_edit_user.html',{'form':user_form,'pr_form':UserProfileForm(request.POST),
                                                                    'perm_form':ExtraPermForm(request.POST),'pass_err':'The passwords do not match!'})
         if user_form.is_valid():
-            set_su=user_form.cleaned_data['is_superuser']
-            set_staff=user_form.cleaned_data['is_staff']
+            #print(user_form.cleaned_data)
+            #print(is_su, is_staff)
+            #set_su=user_form.cleaned_data['is_superuser']
+            #set_staff=user_form.cleaned_data['is_staff']
             
             mail=user_form.cleaned_data['email']
             if if_random_pass and not mail:
                 return render(request,'chembase/admin_edit_user.html',{'form':user_form,'pr_form':UserProfileForm(request.POST),
                                                                    'perm_form':ExtraPermForm(request.POST),'pass_err':'E-mail address is required for random password generation!'})
 
-            if ((is_su==set_su and is_staff==set_staff) or request.user.is_superuser):
-                new_user=user_form.save()
-            else:
-                return HttpResponse("Permission denied - you cannot alter 'Staff' and 'Superuser' fields!")
-                
+            #if ((is_su==set_su and is_staff==set_staff) or request.user.is_superuser):
+            #    new_user=user_form.save()
+            #else:
+            #    return HttpResponse("Permission denied - you cannot alter 'Staff' and 'Superuser' fields!")
+
+            new_user = user_form.save(commit=False)
+
+            if not request.user.is_superuser:
+                new_user.superuser = is_su
+                new_user.staff = is_staff
             
             if password:
                 new_user.set_password(password)
-                new_user.save()
+
+            new_user.save()
+            user_form.save_m2m()
+
             try:
                 profile=new_user.userprofile
             except:
@@ -1267,17 +1387,12 @@ def save_user(request):
                 
             if if_random_pass:
                 new_user.userprofile.set_random_password()
-                            
 
         else:
             print(user_form.errors.as_data())
             
             return HttpResponse(user_form.errors.as_data())
 
-
-        
-
-    
     return redirect('chembase:admin_users')
     
 @login_required()
@@ -1401,9 +1516,7 @@ def orz_form(request):
     groups_add=ExtraPermissions.permitted_groups(request.user,'chembase.add_orzform')
     #orz_add_permissions=ExtraPermissions.objects.filter(user__exact=request.user,permission__codename__exact='add_orzform')
     #groups_add=[x.group for x in orz_add_permissions]
-    
-    
-    
+
     if request.method=='POST':
         form=ORZ_Form(request.POST)
         form.fields['owner'].choices=((item.id,item.name) for item in groups_add)

@@ -11,7 +11,7 @@
 <title> {% block title %} {% endblock %} - ChemBase 3.0 </title>
 <link rel='stylesheet' type="text/css" href="{% static 'chembase/style.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link href="https://fonts.googleapis.com/css?family=Cabin|Cabin+Condensed|Roboto+Condensed:300,400|Roboto:100,300,400" rel="stylesheet"> 
+<link href="https://fonts.googleapis.com/css?family=Cabin|Cabin+Condensed|Roboto+Condensed:300,400|Roboto:100,300,400" rel="stylesheet">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 
@@ -33,30 +33,27 @@
 	 	<div id='user_info'>Anonymous user</div>
 	 {% endif %}
       <ul class='navigation'>
-      
-      	<li>
-          <a id='admin_link'href='{% url "chembase:admin" %}'>Admin site</a>
-        </li>
-      <li>
-          <a href='{% url "chembase:experiment" %}'>Experiments</a>
-        </li>
-        <li>
-          <a href='{% url "chembase:admin_orz" %}'>ORZ</a>
+
+        <li class="active">
+     			<a href='{% url "chembase:search" %}'>Search chemicals</a>
         </li>
         <li>
         {% if user.is_authenticated %}
-    			<a href='{% url "chembase:account" %}'>Your account</a>
+    			<a href='{% url "chembase:account_exp" %}'>Your account</a>
     		{% else %}
          	<a href='{% url "chembase:login" %}'>Log in</a>
         {% endif %}
         </li>
         <li class="active">
-     			<a href='{% url "chembase:search" %}'>Search</a>
+     			<a href='{% url "chembase:search_experiment" %}'>Search</a>
         </li>
         <li>
-         	<a href='{% url "chembase:add" %}'>Add new</a>
+         	<a href='{% url "chembase:add_exp_cmpd" %}'>Add new</a>
         </li>
- 
+        <li>
+          <a href="">About</a>
+        </li>
+
       </ul>
     </div>
   </div>

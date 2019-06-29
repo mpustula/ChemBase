@@ -9,7 +9,7 @@ import pandas as pd
 import sys
 from subprocess import call, getoutput, run
 import datetime
-sys.path.append('/home/marcin/Dokumenty/programy/indigo-python-1.2.3.r0-linux/')
+sys.path.append('/home/marcin/Dokumenty/projekty/production/Chem/chembase/utils/indigo-python-1.2.3.r0-linux/')
 from indigo import *
 from indigo_inchi import *
 from indigo_renderer import *
@@ -17,7 +17,76 @@ from bingo import *
 from chemspipy import ChemSpider
 import cirpy
 import difflib
+import json
 import pubchempy as pcp
+import os
+from django.core.mail import get_connection, EmailMessage
+from django.core.mail.backends.smtp import EmailBackend
+
+
+class SettingsConstants(object):
+
+    def __init__(self):
+        try:
+            settings_file = open('/etc/chembase/settings.conf','r')
+            self.params = json.load(settings_file)
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            self.params = {'SMTP_HOST': '', 'SMTP_PORT': 0, 'SMTP_USERNAME': '', 'SMTP_PASS': '', 'MAIL_FROM': '',
+                           'CHEMSPI_KEY': '', 'CHEMSPI_API_URL': ''}
+        else:
+            settings_file.close()
+
+    def get(self, key):
+        try:
+            return self.params[key]
+        except KeyError:
+            return "No such field"
+
+    def set(self, key, val):
+        self.params[key] = val
+
+    def save(self):
+        with open('/etc/chembase/settings.conf', 'w') as output:
+            json.dump(self.params, output)
+
+    def show(self, key):
+        if 'PASS' in key:
+            return '*******'
+        else:
+            try:
+                return self.params[key]
+            except KeyError:
+                return 'No such field'
+
+
+class EmailSender(object):
+
+    def __init__(self):
+        sett = SettingsConstants()
+        self.host = sett.get('SMTP_HOST')
+        self.port = sett.get('SMTP_PORT')
+        self.username = sett.get('SMTP_USERNAME')
+        self.password = sett.get('SMTP_PASS')
+        self.mail_from = sett.get('MAIL_FROM')
+        self.connection = None
+
+    def create_connection(self):
+        self.connection = get_connection(backend='django.core.mail.backends.smtp.EmailBackend', fail_silently=True)
+        self.connection.host = self.host
+        self.connection.port = self.port
+        self.connection.username = self.username
+        self.connection.password = self.password
+        self.connection.open()
+
+    def send_mail(self, topic, message, to_list):
+        msg = EmailMessage(topic, message, self.mail_from, to_list, connection=self.connection)
+        msg.content_subtype = "html"
+        mail_ans = msg.send()
+
+        return mail_ans
+
+    def close_connection(self):
+        self.connection.close()
 
 class Molecule(object):
 
@@ -29,7 +98,7 @@ class Molecule(object):
             raise Exception('No structure data given!')
 
         self.mol = self.indigo.loadMolecule(structure_id)
-        #self.mol.aromatize()
+        self.mol.aromatize()
         self.mol_fp = self.mol.fingerprint('sim')
 
     def build_query(self, query_id):
@@ -43,7 +112,7 @@ class Molecule(object):
 
         query_fp = query_mol.fingerprint('sim')
         similarity = self.indigo.similarity(query_fp, self.mol_fp, 'tanimoto')
-
+        #print(similarity)
         return similarity
 
     def is_substructure(self, molfile = None, smiles = None, inchi = None):
@@ -132,7 +201,11 @@ class Molecule(object):
 
 class ChemSp(object):
     def __init__(self):
-        self.cs = ChemSpider('Aat9Dp8QIdEY0nN12R58GdyzXGezl1MM', api_url='https://api.rsc.org')
+        #self.key = 'Aat9Dp8QIdEY0nN12R58GdyzXGezl1MM'
+        sett = SettingsConstants()
+        self.key = sett.get('CHEMSPI_KEY')
+        self.url = sett.get('CHEMSPI_API_URL')
+        self.cs = ChemSpider(self.key, api_url=self.url)
 
     def get_cmpd(self,csid):
         return self.cs.get_compound(csid)
@@ -182,6 +255,37 @@ class ChemSp(object):
         image_path = '/static/chembase/temp/temp' + image_id + '.png?timestamp=' + str(datetime.datetime.now())
         return image_path
 
+
+class Numerical(object):
+
+    @staticmethod
+    def normalize_binding_constant(value):
+        units = ['mol', 'mmol', 'µmol', 'nmol', 'pmol']
+        multiplies = [(i * 3, item) for i, item in enumerate(units)]
+
+        try:
+            initial_val = float(value)
+        except TypeError:
+            return (value or 0, 0, 'mol')
+        else:
+            for item in multiplies:
+                result_val = initial_val * 10 ** (item[0])
+                unit = item[1]
+                if result_val >= 1:
+                    break
+
+            return (result_val, item[0], unit)
+
+    @staticmethod
+    def format_bytes(size):
+        # 2**10 = 1024
+        power = 2 ** 10
+        n = 0
+        power_labels = {0: '', 1: 'k', 2: 'M', 3: 'G', 4: 'T'}
+        while size > power:
+            size /= power
+            n += 1
+        return '{0:.2f} {1}B'.format(size, power_labels[n])
 
 
 
