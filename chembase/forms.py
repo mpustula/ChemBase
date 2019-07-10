@@ -179,6 +179,16 @@ class ExpirePasswords(forms.Form):
     if_mail=forms.BooleanField(required=False)
 
 
+class MailSettingsForm(forms.Form):
+    host = forms.CharField()
+    port = forms.IntegerField(min_value=0, max_value=65535)
+    username = forms.CharField()
+    password = forms.CharField(required=False, widget=forms.PasswordInput)
+    mail_from = forms.CharField()
+    chemspi_key = forms.CharField()
+    chemspi_api = forms.CharField()
+
+
 class OwnershipGroupForm(forms.ModelForm):
 
     class Meta:

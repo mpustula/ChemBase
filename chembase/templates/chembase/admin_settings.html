@@ -6,6 +6,7 @@
 {% load static %}
 
 <link rel='stylesheet' type="text/css" href="{% static 'chembase/style_admin.css' %}">
+<script src="{% static 'chembase/script_admin.js' %}"></script>
 
 <div class='main'>
 
@@ -16,6 +17,105 @@
 <div class='title'>
 
 <h1>System settings</h1>
+
+    <h2>Mail module settings</h2>
+    <div id="mail_settings">
+    <div class="info">
+        The settings used to connect to an external SMTP server:
+    </div>
+
+        <div id="saved_mail">
+
+            <div class="label">SMTP server host:</div><div class="value">{{mail_host}}</div>
+            <div class="label">SMTP server port:</div><div class="value">{{mail_port}}</div>
+            <div class="label">Username:</div><div class="value">{{mail_username}}</div>
+            <div class="label">Password:</div><div class="value">{{mail_password}}</div>
+            <div class="label">Sender's address:</div><div class="value">{{mail_from}}</div>
+
+            <input class ='small' id='test_mail' type='button' value='Test configuration' />
+
+            <div id="mail_testing">
+                <div class="info">Provide an e-mail address to which a test message will be sent:</div>
+                <input type="email" id="test_address" />
+                <input class ='small' id='send_test' type='button' value='Send test e-mail' />
+
+                <div id="test_result"></div>
+            </div>
+        </div>
+
+        <h2>ChemSpider settings</h2>
+        <div class="info">
+            The parameters required by ChemSpider search engine:
+        </div>
+
+        <div id="chemspi">
+            <div class="label">ChemSpider Token (API Key):</div><div class="value">{{chemspi_key}}</div>
+            <div class="label">API URL:</div><div class="value">{{chemspi_api}}</div>
+
+            <input class ='small' id='test_chemspider' type='button' value='Test ChemSpider configuration' />
+
+            <div id="test_ch_result"></div>
+
+        </div>
+
+
+
+        <p class='control' id='new_ctrl'>Change values of the parameters</p>
+
+        <div id="new_mail">
+            <form enctype="multipart/form-data" action="{% url 'chembase:admin_settings' %}" method="post">
+                {% csrf_token %}
+
+                <div class='field'>
+                {{mail_form.host.errors}}
+                <label for="{{mail_form.host.id_for_label}}">SMTP host:</label>
+                {{mail_form.host}}
+                </div>
+
+                <div class='field'>
+                {{mail_form.port.errors}}
+                <label for="{{mail_form.port.id_for_label}}">SMTP port:</label>
+                {{mail_form.port}}
+                </div>
+
+                <div class='field'>
+                {{mail_form.username.errors}}
+                <label for="{{mail_form.username.id_for_label}}">Username:</label>
+                {{mail_form.username}}
+                </div>
+
+                <div class='field'>
+                {{mail_form.password.errors}}
+                <label for="{{mail_form.password.id_for_label}}">Password:</label>
+                {{mail_form.password}}
+                </div>
+
+                <div class='field'>
+                {{mail_form.mail_from.errors}}
+                <label for="{{mail_form.mail_from.id_for_label}}">Sender's address:</label>
+                {{mail_form.mail_from}}
+                </div>
+
+
+                <div class='field'>
+                {{mail_form.chemspi_key.errors}}
+                <label for="{{mail_form.chemspi_key.id_for_label}}">ChemSpider Token:</label>
+                {{mail_form.chemspi_key}}
+                </div>
+
+                <div class='field'>
+                {{mail_form.chemspi_api.errors}}
+                <label for="{{mail_form.chemspi_api.id_for_label}}">ChemSpider API URL:</label>
+                {{mail_form.chemspi_api}}
+                </div>
+
+
+
+                <input type='Submit' value='Save' />
+            </form>
+
+        </div>
+    </div>
 
     <h2>System data backup</h2>
     <a href="{% url 'chembase:admin_backups' %}">Show backup process status and backup files</a>

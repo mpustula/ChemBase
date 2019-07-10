@@ -505,3 +505,62 @@ div.pagination {
   text-align: center;
   font-family: var(--aux-font-fam);
 }
+
+div#mail_settings {
+  margin: 5px 20px;
+}
+
+div#mail_settings div.label {
+  width: 220px;
+}
+
+div#mail_settings h2 {
+  margin-left: -20px
+}
+
+div#saved_mail {
+  margin: 15px 20px;
+}
+
+div#chemspi {
+  margin: 15px 20px;
+  display: block;
+  overflow: hidden;
+}
+
+div#chemspi div.value, div#saved_mail div.value {
+  display: block;
+  overflow: hidden;
+  height: 25px;
+}
+
+p#new_ctrl {
+  margin-left: -20px;
+  font-family: var(--aux-font-fam);
+  font-weight: bold;
+  color: var(--text-highlight-col);
+}
+
+input#id_port {
+  height: 25px;
+}
+
+input#test_mail, input#send_test, input#test_chemspider {
+  width: 190px;
+  height: 25px;
+}
+
+div#mail_testing div.info {
+  font-family: var(--aux-font-fam);
+  color: var(--text-extra-col);
+  margin: 10px 0px;
+}
+
+div#mail_testing {
+  margin: 10px 0px;
+  display: none;
+}
+
+div#new_mail {
+  display: none;
+}

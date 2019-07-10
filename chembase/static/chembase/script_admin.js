@@ -8,6 +8,17 @@ $('#perm_guide').on('click', function (event) {
 
 });
 
+
+$('#new_ctrl').on('click', function () {
+	$('#new_mail').slideToggle(500);
+})
+
+$('#test_mail').on('click', function () {
+	$('#mail_testing').slideToggle(500);
+})
+
+
+
 $('#close_modal').on('click', function () {
 	$('#perm_info').hide();
 });
@@ -18,6 +29,79 @@ $('#reset_pass').on('click', function () {
 	send_password_reset_request(user_id);
 
 })
+
+$('#send_test').on('click', function() {
+	var test_addr = $('#test_address').val()
+	console.log(test_addr)
+	if (test_addr !== '') {
+		$('#test_result').html("<p class='info'>Please wait while the test message is being prepared...</p>");
+		send_test_mail(test_addr)
+	}
+})
+
+$('#test_chemspider').on('click', function() {
+	$('#test_ch_result').html("<p class='success'>Sending chemspider request for compound id 2157...</p>");
+	test_chemspider()
+})
+
+
+function test_chemspider() {
+	console.log('testing started');
+	$.ajax({
+		url :'/admin/test_chemspider',
+		type : "POST",
+		data : {},
+
+		success : function(ans) {
+			console.log(ans);
+			console.log('success');
+
+			$('#test_ch_result').html("<p class='success'>"+ans+"</p>");
+			//$('#wait_box').fadeOut('fasf',function(){$('#orz_input').fadeIn('fast')});
+				},
+
+		error : function(xhr,errmsg,err) {
+			console.log(xhr.status + ": " + xhr.responseText);
+			var error_p="<p class='warning'> Error. Server response: "+xhr.status + ": " + xhr.responseText+"</p>"
+			//$('#wait_box').fadeOut('fasf',function(){$('#orz_input').fadeIn('fast')});
+			$('#test_ch_result').html(error_p);
+		}
+
+
+	});
+
+
+};
+
+
+
+function send_test_mail(address) {
+	console.log('sending started');
+	$.ajax({
+		url :'/admin/test_mail',
+		type : "POST",
+		data : {'address': address},
+
+		success : function(ans) {
+			console.log(ans);
+			console.log('success');
+
+			$('#test_result').html("<p class='success'>"+ans+"</p>");
+			//$('#wait_box').fadeOut('fasf',function(){$('#orz_input').fadeIn('fast')});
+				},
+
+		error : function(xhr,errmsg,err) {
+			console.log(xhr.status + ": " + xhr.responseText);
+			var error_p="<p class='warning'> Error. Server response: "+xhr.status + ": " + xhr.responseText+"</p>"
+			//$('#wait_box').fadeOut('fasf',function(){$('#orz_input').fadeIn('fast')});
+			$('#test_result').html(error_p);
+		}
+
+
+	});
+
+
+};
 
 
 function send_password_reset_request(user) {

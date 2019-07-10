@@ -160,19 +160,19 @@
 
 {% endfor %}
 
-{% if results.paginator.num_pages > 1 %}
+{% if results0.paginator.num_pages > 1 %}
     <div class="pagination">
         <div class="step-links">
-            {% if results.has_previous %}
-                <a href="?{% url_replace page=results.previous_page_number %}">Previous</a>
+            {% if results0.has_previous %}
+                <a href="?{% url_replace page=results0.previous_page_number %}">Previous</a>
             {% endif %}
 
             <span class="current">
-                Page {{ results.number }} of {{ results.paginator.num_pages }}
+                Page {{ results0.number }} of {{ results0.paginator.num_pages }}
             </span>
 
-            {% if results.has_next %}
-                <a href="?{% url_replace page=results.next_page_number %}">Next</a>
+            {% if results0.has_next %}
+                <a href="?{% url_replace page=results0.next_page_number %}">Next</a>
             {% endif %}
         </div>
     </div>

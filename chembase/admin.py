@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (Compound,Pictogram,GHSClass,Cmpd_Class,SystemLog,Item,
                     Annotation,Group,History,OwnershipGroup,UserProfile, 
                     ExtraPermissions, ORZForm, MailTemplates, ORZExtraFields,
-                     CompoundForExperiments, Experiment, ProteinTarget, ExperimentType, ExperimentLog)
+                     CompoundForExperiments, Experiment, ProteinTarget, ExperimentType, ExperimentLog, SettingsConstants)
 
 # Register your models here.
 admin.site.register(Permission)
@@ -28,6 +28,7 @@ admin.site.register(Experiment)
 admin.site.register(ProteinTarget)
 admin.site.register(ExperimentType)
 admin.site.register(ExperimentLog)
+admin.site.register(SettingsConstants)
 
 
 # Define an inline admin descriptor for Employee model

@@ -33,7 +33,7 @@ def search_view(request):
         else:
             structure = False
 
-        result = search(request.user, query, query_cas, 'and', query_type, target, smiles, stype, cut)
+        result = search(request, query, query_cas, 'and', query_type, target, smiles, stype, cut)
         #result = None
         if result:
             found = len(result)
@@ -70,7 +70,7 @@ def search_view(request):
         form.fields['stype'].initial = 'sub'
 
     return render(request, 'chembase/experiment_search.html',
-                  {'form': form, 'results': cmpd_dict_list, 'str': structure, 'found': found,
+                  {'form': form, 'results0': cmpds_list ,'results': cmpd_dict_list, 'str': structure, 'found': found,
                    })
 
 def search_ajax(request):
@@ -95,7 +95,7 @@ def autocomplete_ajax(request):
         return JsonResponse(results, safe=False)
 
 @login_required
-def search(user, query='', query_cas='', linker='and', query_type='', target='', smiles='', stype='sub', cut=0.6):
+def search(request, query='', query_cas='', linker='and', query_type='', target='', smiles='', stype='sub', cut=0.6):
     if (query != '' or query_cas != '' or query_type != '' or target != '' or smiles != ''):
         qa = Q()
         qb = Q()
@@ -155,7 +155,7 @@ def cmpd_detail(request, cmpd_id):
     user = request.user
     compound = get_object_or_404(CompoundForExperiments, pk=cmpd_id)
     can_edit = compound.can_edit(user)
-    can_add = user.has_perm('chembase.add_compoundforexperiments')
+    can_add = user.has_perm('chembase.add_experiment')
 
     experiments = compound.experiment_set.all()
     targets = set([item.target for item in experiments])
@@ -170,7 +170,7 @@ def cmpd_detail(request, cmpd_id):
 def add_exp_cmpd(request):
     check_password_valid(request)
 
-    if not request.user.has_perm('chembase.add_compoundforexperiments'):
+    if not request.user.has_perm('chembase.add_experiment'):
         return redirect('/login/?next=%s' % request.path)
 
     if request.method == 'POST':
@@ -196,7 +196,7 @@ def add_exp_cmpd(request):
 @login_required()
 def save_exp_cmpd(request):
 
-    if not request.user.has_perm('chembase.add_compoundforexperiments'):
+    if not request.user.has_perm('chembase.add_experiment'):
         return redirect('/login/?next=%s' % request.path)
 
     if request.method == 'POST':

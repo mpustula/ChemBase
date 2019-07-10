@@ -12,13 +12,13 @@ from subprocess import call, getoutput, run
 import pandas as pd
 from difflib import SequenceMatcher
 
-from .utils.functions import Molecule, Sds, Numerical
+from .utils.functions import Molecule, Sds, Numerical, EmailSender
 
 
 class SettingsConstants(models.Model):
-    type=models.CharField(max_length=500)
+    code=models.CharField(max_length=500)
     value=models.CharField(max_length=2000)
-
+    description=models.CharField(max_length=1000)
 
 class OwnershipGroup(models.Model):
     name=models.CharField(max_length=500)
@@ -53,16 +53,16 @@ class UserProfile(models.Model):
             return [0,'User e-mail address incorrect']
         random_pass = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(16)])
 
-        
-        
         template=MailTemplates.objects.filter(code_name__exact='new_account')[0]
-        #print(template)
+
         topic=template.topic
         message=template.message%({'login':self.user.username,'password':random_pass,'expire':self.password_expiry_date.strftime('%Y-%m-%d')})
-        msg=EmailMessage(topic,message,'chembase@chemia.uj.edu.pl',[self.user.email])
-        msg.content_subtype = "html" 
-        mail_ans=msg.send()
-        #mail_ans=send_mail(topic,message,'chembase@chemia.uj.edu.pl',[self.user.email])
+        sender = EmailSender()
+        sender.create_connection()
+
+        mail_ans=sender.send_mail(topic, message, [self.user.email])
+        sender.close_connection()
+
         if mail_ans:
             self.user.set_password(random_pass)
             self.set_password_expiry(4)
@@ -74,13 +74,15 @@ class UserProfile(models.Model):
             
     def sent_expiry_mail(self):
         template=MailTemplates.objects.filter(code_name__exact='expire_pass')[0]
-        #print(template)
+
         topic=template.topic
         message=template.message%({'user':self.user.get_full_name(),'date':self.password_expiry_date.strftime('%Y-%m-%d')})
-        #mail_ans=send_mail(topic,message,'chembase@chemia.uj.edu.pl',[self.user.email])
-        msg=EmailMessage(topic,message,'chembase@chemia.uj.edu.pl',[self.user.email])
-        msg.content_subtype = "html" 
-        mail_ans=msg.send()
+
+        sender = EmailSender()
+        sender.create_connection()
+
+        mail_ans = sender.send_mail(topic, message, [self.user.email])
+        sender.close_connection()
         if mail_ans:
             return [1,'New password has been sent to the user']
         else:
@@ -652,13 +654,14 @@ class CompoundForExperiments(models.Model):
 
     def can_edit(self, user):
         if user == self.author:
-            user_perm = user.has_perm('chembase.add_compoundforexperiments')
+            user_perm = user.has_perm('chembase.add_experiment')
             if user_perm:
                 return True
         else:
-            admin_perm = user.has_perm('chembase.change_compoundforexperiments')
+            admin_perm = user.has_perm('chembase.change_experiment')
             if admin_perm:
                 return True
+
 
 class CompoundExternalSources(models.Model):
     cmpd = models.ForeignKey(CompoundForExperiments, on_delete=models.CASCADE)

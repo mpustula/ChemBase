@@ -25,10 +25,11 @@ import subprocess
 
 from django.contrib.auth.models import User, Permission
 # Create your views here.
-from .models import Compound, GHSClass, Cmpd_Class, SystemLog,Item,Group, Annotation,History, ExtraPermissions, UserProfile,OwnershipGroup, ORZForm, ORZExtraFields
+from .models import Compound, GHSClass, Cmpd_Class, SystemLog,Item,Group, Annotation,History, ExtraPermissions, \
+    UserProfile,OwnershipGroup, ORZForm, ORZExtraFields, MailTemplates
 from .forms import (SearchForm, CompoundForm, ItemForm, UserForm, UserProfileForm, 
-                    ExtraPermForm,GroupForm,GHSClassForm, ORZ_Form, ExpirePasswords, OwnershipGroupForm)
-from .utils.functions import ChemSp, Numerical
+                    ExtraPermForm,GroupForm,GHSClassForm, ORZ_Form, ExpirePasswords, OwnershipGroupForm, MailSettingsForm)
+from .utils.functions import ChemSp, Numerical, SettingsConstants, EmailSender
 
 
 def can_add_item(user):
@@ -70,8 +71,6 @@ def get_groups(request):
         
         return HttpResponse('Login error') 
         
-
-
 
 @sensitive_post_parameters()
 @csrf_protect
@@ -590,7 +589,7 @@ def add_cmpd(request):
             cmpd_id=request.POST.get('cmpd_id')
             cas=request.POST.get('cas')
 
-            compound=ChemSp().get_compound(cmpd_id)
+            compound=ChemSp().get_cmpd(cmpd_id)
             formula=str(compound.molecular_formula)
             inchi=compound.inchi
             smiles=compound.smiles
@@ -1031,10 +1030,83 @@ def server(request):
 @user_passes_test(lambda u: u.is_staff)
 def settings(request):
     check_password_valid(request)
+    sett = SettingsConstants()
 
-    return render(request,'chembase/admin_settings.html')
+    if request.method=='POST':
+        mail_form = MailSettingsForm(request.POST)
+        if mail_form.is_valid():
+            new_host = mail_form.cleaned_data['host']
+            sett.set('SMTP_HOST', new_host)
+            new_port = mail_form.cleaned_data['port']
+            sett.set('SMTP_PORT', new_port)
+            new_username = mail_form.cleaned_data['username']
+            sett.set('SMTP_USERNAME', new_username)
+            new_pass = mail_form.cleaned_data['password']
+            if new_pass:
+                sett.set('SMTP_PASS', new_pass)
+            mail_from = mail_form.cleaned_data['mail_from']
+            sett.set('MAIL_FROM', mail_from)
+            chemspi_key = mail_form.cleaned_data['chemspi_key']
+            sett.set('CHEMSPI_KEY', chemspi_key)
+            chemspi_api = mail_form.cleaned_data['chemspi_api']
+            sett.set('CHEMSPI_API_URL', chemspi_api)
+            sett.save()
+        else:
+            mail_form = MailSettingsForm(request.POST)
+
+    else:
+        mail_form = MailSettingsForm()
 
 
+    mail_form.fields['host'].initial = sett.show('SMTP_HOST')
+    mail_form.fields['port'].initial = sett.show('SMTP_PORT')
+    mail_form.fields['username'].initial = sett.show('SMTP_USERNAME')
+    mail_form.fields['mail_from'].initial = sett.show('MAIL_FROM')
+    mail_form.fields['chemspi_key'].initial = sett.show('CHEMSPI_KEY')
+    mail_form.fields['chemspi_api'].initial = sett.show('CHEMSPI_API_URL')
+
+    return render(request,'chembase/admin_settings.html', {'mail_host': sett.show('SMTP_HOST'),
+                                                           'mail_port': sett.show('SMTP_PORT'),
+                                                           'mail_username': sett.show('SMTP_USERNAME'),
+                                                           'mail_password': sett.show('SMTP_PASS'),
+                                                           'mail_from': sett.show('MAIL_FROM'),
+                                                           'chemspi_key': sett.show('CHEMSPI_KEY'),
+                                                           'chemspi_api': sett.show('CHEMSPI_API_URL'),
+                                                           'mail_form': mail_form})
+
+
+@login_required
+def test_mail(request):
+    if request.method == 'POST':
+        mail_addr = request.POST.get('address')
+        template = MailTemplates.objects.filter(code_name__exact='test_message')[0]
+
+        topic = template.topic
+        message = template.message % ({'date': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
+        sender = EmailSender()
+        sender.create_connection()
+        mail_ans = sender.send_mail(topic, message, [mail_addr])
+        sender.close_connection()
+
+        if mail_ans:
+            return HttpResponse('The test message was sent correctly. Please check '
+                                'whether it was delivered to the above e-mail.')
+        else:
+            return HttpResponse('The error occured and message was not sent. The above e-mail address or '
+                                'the configuration of mail server is incorrect.', status=400)
+
+@login_required
+def test_chemspider(request):
+    if request.method == 'POST':
+        cs = ChemSp()
+        cmpd = cs.get_cmpd(2157)
+        try:
+            name = cmpd.common_name
+        except Exception as e:
+            return HttpResponse('The error occured during test. The error message: {}'.format(e), status=500)
+        else:
+            return HttpResponse('The test was completed successfully. The name of tested compound 2157 '
+                            'was retrieved to be: '+name)
 
 @login_required()
 @user_passes_test(lambda u: u.is_staff)
